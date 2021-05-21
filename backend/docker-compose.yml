@@ -1,0 +1,29 @@
+version: '3'
+
+services:
+    web:
+        image: everycache_api
+        build: .
+        command: waitress-serve --port=5000 everycache_api.wsgi:app
+        environment:
+            - FLASK_ENV=development
+            - FLASK_APP=everycache_api.app:create_app
+            - SECRET_KEY=xD
+            - HASH_SALT=1qaz2wsx
+            - DATABASE_URI=sqlite:////db/everycache_api.db
+            - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq
+            - CELERY_RESULT_BACKEND_URL=redis://redis
+        ports:
+            - "5000:5000"
+    rabbitmq:
+        image: rabbitmq:latest
+    redis:
+        image: redis:latest
+    celery:
+        image: everycache_api
+        command: "celery -A everycache_api.celery_app:app worker"
+        depends_on:
+            - rabbitmq
+        environment:
+            - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq
+            - CELERY_RESULT_BACKEND_URL:redis://redis

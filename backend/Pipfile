@@ -9,12 +9,22 @@ flake8 = "*"
 isort = "*"
 
 [packages]
+apispec = {extras = ["yaml"], version = "*"}
+apispec-webframeworks = "*"
+celery = {extras = ["redis"], version = "*"}
 flask = "*"
 flask-caching = "*"
 flask-cors = "*"
-python-dotenv = "*"
-sqlalchemy = "*"
+flask-jwt-extended = "*"
+flask-marshmallow = "*"
+flask-migrate = "*"
+flask-restful = "*"
+flask-sqlalchemy = "*"
+marshmallow = "*"
+marshmallow-sqlalchemy = "*"
 passlib = "*"
+python-dotenv = "*"
+hashids = "*"
 
 [requires]
 python_version = "3.9"
