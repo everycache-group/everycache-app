@@ -11,8 +11,8 @@ def populate():
 
     db_session: Session = DBSession()
 
-    user1 = User(id_=1, login="user1", name="John Doe")
-    user2 = User(id_=2, login="user2", name="Adam Bogdan Nowak")
+    user1 = User(id_=1, login="user1", password="", name="John Doe")
+    user2 = User(id_=2, login="user2", password="", name="Adam Bogdan Nowak")
 
     db_session.merge(user1)
     db_session.merge(user2)

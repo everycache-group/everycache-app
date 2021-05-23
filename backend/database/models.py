@@ -59,7 +59,7 @@ class User(BaseModel):
         self.__id = id_
         self.__login = login
         self.__password = generate_hash(password)
-        self.__name = name
+        self.name = name
 
     def verify_password(self, password: str):
         return verify_password(password, self.__password)
@@ -75,6 +75,7 @@ class Cache(BaseModel):
     lat = Column(Numeric(scale=4, asdecimal=True), nullable=False)
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime, nullable=False)
+    description = Column(Text, nullable=True)
 
     owner = relationship("User", uselist=False, back_populates="owned_caches")
     visits = relationship("CacheVisit", uselist=True, back_populates="cache")

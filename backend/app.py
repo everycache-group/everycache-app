@@ -65,6 +65,20 @@ def handle_datetime_parsing_error(e):
     return jsonify(error="Datetime parsing error", reason=str(e)), 400
 
 
+@app.route("/caches")
+def list_caches():
+    with DBSession() as db_session:
+        caches = db_session.query(Cache).all()
+        return {"caches": [cache.to_dict() for cache in caches]}
+
+
+@app.route("/users")
+def list_users():
+    with DBSession() as db_session:
+        users = db_session.query(User).all()
+        return {"users": [user.to_dict() for user in users]}
+
+
 @app.route("/owner-caches/<int:user_id>")
 def list_user_owned_caches(user_id: str):
     with DBSession() as db_session:
