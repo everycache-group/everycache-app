@@ -13,7 +13,9 @@ class Map extends React.Component {
   }
 
   componentDidMount() {
-    fetch("http://localhost:5000/caches")
+    var backend_url =
+      process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
+    fetch(`${backend_url}/caches`)
       .then((res) => res.json())
       .then((result) => {
         this.setState({
@@ -21,7 +23,7 @@ class Map extends React.Component {
           areCachesLoaded: true,
         });
       });
-    fetch("http://localhost:5000/users")
+    fetch(`${backend_url}/users`)
       .then((res) => res.json())
       .then((result) => {
         this.setState({
