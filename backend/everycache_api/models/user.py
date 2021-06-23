@@ -8,10 +8,10 @@ from everycache_api.extensions import db, pwd_context
 class User(db.Model):
     __tablename__ = "users"
 
-    __id = db.Column("id", db.Integer, primary_key=True)
+    id = db.Column("id", db.Integer, primary_key=True)
     username = db.Column(db.String(64), unique=True, nullable=False)
     email = db.Column(db.String(128), unique=True, nullable=False)
-    __password = db.Column("password", db.String(256), nullable=False)
+    _password = db.Column("password", db.String(256), nullable=False)
     registered_on = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     active = db.Column(db.Boolean, default=True)
 
@@ -24,11 +24,11 @@ class User(db.Model):
 
     @hybrid_property
     def password(self):
-        return self.__password
+        return self._password
 
     @password.setter
     def password(self, new_password: str):
-        self.__password = pwd_context.hash(new_password)
+        self._password = pwd_context.hash(new_password)
 
     def verify_password(self, password: str):
-        return pwd_context.verify(password, self.__password)
+        return pwd_context.verify(password, self._password)

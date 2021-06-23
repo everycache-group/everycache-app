@@ -154,6 +154,11 @@ class UserList(Resource):
         schema = UserSchema()
         user = schema.load(request.json)
 
+        existing_user = User.query.filter_by(email=user.email).first()
+
+        if existing_user:
+          return {"msg": "user already exists"}, 400
+
         db.session.add(user)
         db.session.commit()
 
