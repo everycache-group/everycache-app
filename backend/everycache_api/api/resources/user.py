@@ -88,6 +88,13 @@ class UserResource(Resource):
     def put(self, user_id):
         schema = UserSchema(partial=True)
         user = User.query.get_or_404(user_id)
+        loaded_user = schema.load(request.json)
+        loaded_user.id = user.id
+
+        existing_error = check_existing(loaded_user)
+        if existing_error:
+          return existing_error
+
         user = schema.load(request.json, instance=user)
 
         db.session.commit()
@@ -154,12 +161,25 @@ class UserList(Resource):
         schema = UserSchema()
         user = schema.load(request.json)
 
-        existing_user = User.query.filter_by(email=user.email).first()
-
-        if existing_user:
-          return {"msg": "user already exists"}, 400
+        existing_error = check_existing(user)
+        if existing_error:
+          return existing_error
 
         db.session.add(user)
         db.session.commit()
 
         return {"msg": "user created", "user": schema.dump(user)}, 201
+
+
+def check_existing(loaded_user):
+  existing_email = User.query.filter((User.email == loaded_user.email) & (User.id != loaded_user.id)).first()
+
+  if existing_email:
+    return {"msg": "user with given email already exists"}, 400
+  
+  existing_username = User.query.filter((User.username == loaded_user.username) & (User.id != loaded_user.id)).first()
+
+  if existing_username:
+    return {"msg": "user with given username already exists"}, 400
+
+  return None
