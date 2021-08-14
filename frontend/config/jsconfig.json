@@ -1,0 +1,8 @@
+//use it to enable autoimport components and paths
+{
+    "compilerOptions": {
+      "baseUrl": "./src",
+      "checkJs": true,
+      "jsx": "react"
+    }
+}

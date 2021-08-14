@@ -1,13 +1,18 @@
-import "./App.css";
-import Map from "./Map.js";
 
 import React from "react";
+import { BrowserRouter as Router, Switch, Route} from "react-router-dom";
+import Sidebar from "./components/navigation/Sidebar/Sidebar";
+
+
 
 function App() {
   return (
-    <div className="App">
-      <Map />
-    </div>
+    <Router>
+      <Sidebar />
+      
+    </Router>
+    
+
   );
 }
 

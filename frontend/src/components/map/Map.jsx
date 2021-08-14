@@ -1,3 +1,4 @@
+import mapCSS from "./Map.module.css";
 import React from "react";
 import { MapContainer, TileLayer, Marker, Tooltip } from "react-leaflet";
 
