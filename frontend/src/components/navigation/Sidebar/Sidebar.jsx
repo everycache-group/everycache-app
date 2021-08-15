@@ -1,29 +1,36 @@
+import * as Style from './style.js'
+import { SideBarData } from '../../../data/sidebarData.js'
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
 import * as FaIcons from 'react-icons/fa'
 import * as AiIcons from 'react-icons/ai'
-import * as Style from './style.js'
-
+import SubMenu from '../Submenu/Submenu.jsx'
+import { IconContext } from 'react-icons/lib'
 
 function Sidebar(props) {
-    const [sidebar, setSidebar] = useState(false);
+    const [sidebar, setSidebar] = useState(true);
 
     const showSidebar = () => setSidebar(!sidebar);
 
     return (
         <>
-            <Style.nav>
-                <Style.navIcon to='#'>
-                    <FaIcons.FaBars onClick={showSidebar} />
-                </Style.navIcon>
-            </Style.nav>
-            <Style.sidebarNav>
-                <Style.sidebarWrap>
-                    <Style.navIcon to='#' >
-                        <AiIcons.AiOutlineClose/>
-                    </Style.navIcon>
-                </Style.sidebarWrap>
-            </Style.sidebarNav>
+            <IconContext.Provider value={{ color: '#fff'}}>
+                <Style.Nav>
+                    <Style.NavIcon to='#'> 
+                        <FaIcons.FaBars onClick={showSidebar} />
+                    </Style.NavIcon>
+                </Style.Nav>
+
+                <Style.SidebarNav sidebar={sidebar}>
+                    <Style.SidebarWrap>
+                        <Style.NavIcon to='#' >
+                            <AiIcons.AiOutlineClose onClick={showSidebar}/>
+                        </Style.NavIcon>
+                        {SideBarData.map((item, index) => {
+                            return <SubMenu item={item} key={index} />
+                        })}
+                    </Style.SidebarWrap>
+                </Style.SidebarNav>
+            </IconContext.Provider>
         </>
     )
 }

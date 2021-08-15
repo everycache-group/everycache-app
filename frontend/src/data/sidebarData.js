@@ -56,5 +56,3 @@ export const SideBarData = [
         iconOpened: iconOpened
     }
 ];
-
-

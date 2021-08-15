@@ -1,32 +1,38 @@
 import { Link } from 'react-router-dom';
 import styled, {css } from 'styled-components'
 
-export const sidebarWrap = styled.div`
+export const SidebarWrap = styled.div`
     width: 100%;
 `;
 
-export const nav = styled.div`
+export const Nav = styled.div`
     background: #15171c;
     height: 80px;
     display: flex;
+    
     justify-content: flex-start;
     align-items: center;
 `;
 
-export const sidebarNav = styled.nav`
+export const SidebarNav = styled.nav`
     background: #15171c;
     width: 250px;
     height: 100vh;
+    display: flex;
+    justify-content: center;
+    position: fixed;
+    top: 0;
+    left: ${({sidebar}) => (sidebar ? '0' : '-100%')};
+    transition: 300ms;
+    z-index: 10;
 `;
 
-export const navIcon = styled(Link)`
+export const NavIcon = styled(Link)`
     margin-left: 2rem;
     font-size: 2rem;
     height: 80px;
     display: flex;
     justify-content: flex-start;
     align-items: center;
-    cursor:pointer;
+    cursor: pointer;
 `;
-
-
