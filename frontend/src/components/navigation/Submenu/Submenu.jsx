@@ -21,15 +21,21 @@ const SubMenu = ({item}) => {
                      : null}
                 </div>
             </Style.SidebarLink>
+            <Style.DropDownLinkWrapper subNav = {subNav}  >
             {
                 subNav && item.subNav.map((item, index) => {
                 return (
+                    
+
+                   
                     <Style.DropDownLink to={item.path} key={index} >
                         {item.icon} 
                         <Style.SidebarLabel>{item.title}</Style.SidebarLabel> 
                     </Style.DropDownLink>
+                   
                 )
             })}
+            </Style.DropDownLinkWrapper>
             
         </>
     );

@@ -22,7 +22,7 @@ export const SidebarNav = styled.nav`
     position: fixed;
     top: 0;
     left: ${({sidebar}) => (sidebar ? '0' : '-100%')};
-    transition: 300ms;
+    transition: 300ms ease-in-out;
     z-index: 10;
 `;
 
