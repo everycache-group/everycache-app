@@ -39,7 +39,7 @@ export const SideBarData = [
             {
                 title: 'SubMenu3',
                 path: '/another/submenu3',
-                icon: <AiIcons.AiFillIeSquare />
+                icon: <AiIcons.AiFillCamera />
             },
             {
                 title: 'SubMenu4',
@@ -52,6 +52,13 @@ export const SideBarData = [
         title: 'Next',
         path: '/next',
         icon: <AiIcons.AiFillMail />,
+        iconClosed: iconClosed,
+        iconOpened: iconOpened
+    },
+    {
+        title: 'Fook',
+        path: '/fook',
+        icon: <AiIcons.AiFillAlipaySquare />,
         iconClosed: iconClosed,
         iconOpened: iconOpened
     }

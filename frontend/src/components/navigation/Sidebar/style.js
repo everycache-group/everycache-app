@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import styled, {css } from 'styled-components'
+import styled from 'styled-components'
 
 export const SidebarWrap = styled.div`
     width: 100%;
@@ -9,7 +9,6 @@ export const Nav = styled.div`
     background: #15171c;
     height: 80px;
     display: flex;
-    
     justify-content: flex-start;
     align-items: center;
 `;

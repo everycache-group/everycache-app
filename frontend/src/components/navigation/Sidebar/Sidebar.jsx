@@ -1,5 +1,5 @@
 import * as Style from './style.js'
-import { SideBarData } from '../../../data/sidebarData.js'
+import { SideBarData } from '../../../data/SidebarData.js'
 import React, { useState } from 'react'
 import * as FaIcons from 'react-icons/fa'
 import * as AiIcons from 'react-icons/ai'
