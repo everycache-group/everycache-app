@@ -1,0 +1,34 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+black = "*"
+flake8 = "*"
+flake8-isort = "*"
+isort = "*"
+
+[packages]
+apispec = "*"
+apispec-webframeworks = "*"
+flask = "*"
+flask-jwt-extended = "*"
+flask-marshmallow = "*"
+flask-migrate = "*"
+flask-restful = "*"
+flask-script = "*"
+flask-sqlalchemy = "*"
+marshmallow = "*"
+marshmallow-sqlalchemy = "*"
+passlib = "*"
+psycopg2-binary = "*"
+python-dotenv = "*"
+waitress = "*"
+sqlalchemy-utils = "*"
+
+[requires]
+python_version = "3.9"
+
+[pipenv]
+allow_prereleases = true
