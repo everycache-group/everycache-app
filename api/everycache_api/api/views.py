@@ -16,7 +16,8 @@ blueprint = Blueprint("api", __name__, url_prefix="/api")
 api = Api(blueprint)
 
 api.add_resource(UserList, "/users", endpoint="users_list")
-api.add_resource(UserResource, "/users/<string:username>", endpoint="user_by_username")
+api.add_resource(UserResource, "/users/<string:username>",
+                 endpoint="user_by_username")
 
 api.add_resource(ProfileResource, "/profile", endpoint="profile")
 
