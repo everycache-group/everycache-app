@@ -1,10 +1,10 @@
-from flask import request
-from flask_jwt_extended import get_current_user, get_jwt_identity, jwt_required
+from everycache_api.users.helpers import add_user
+from flask_jwt_extended import current_user, jwt_required
 from flask_restful import Resource
 
 from everycache_api.api.schemas import UserSchema
+from everycache_api.api.schemas.user import UserSchemaForAdmins
 from everycache_api.common.pagination import paginate
-from everycache_api.extensions import db, ma
 from everycache_api.models import User
 
 
@@ -32,87 +32,16 @@ class UserResource(Resource):
           description: user does not exist
       security: []
     """
+    method_decorators = [jwt_required()]
 
     def get(self, username: str):
+        if not current_user or current_user.role != User.Role.admin:
+            return {}, 403
 
-        schema = UserSchema()
+        schema = UserSchemaForAdmins()
         user = User.query.filter_by(username=username).first_or_404()
 
         return {"user": schema.dump(user)}
-
-
-# class UserDetailsResource(Resource):
-#     # method_decorators = [jwt_required()]
-
-#     def get(self, username: str):
-#         schema = UserDetailsSchema()
-#         user = User.query.filter_by(username=username).first_or_404()
-
-#         return {"user": schema.dump(user)}
-
-
-# class CurrentUserDetailsResource(Resource):
-#     """Single object resource
-
-#     ---
-#     get:
-#       tags:
-#         - api
-#       responses:
-#         200:
-#           content:
-#             application/json:
-#               schema:
-#                 type: object
-#                 properties:
-#                   user: CurrentUserDetailsSchema
-#     put:
-#       tags:
-#         - api
-#       requestBody:
-#         content:
-#           application/json:
-#             schema:
-#               CurrentUserDetailsSchema
-#       responses:
-#         200:
-#           content:
-#             application/json:
-#               schema:
-#                 type: object
-#                 properties:
-#                   msg:
-#                     type: string
-#                     example: user updated
-#                   user: CurrentUserDetailsSchema
-#     """
-
-#     method_decorators = [jwt_required()]
-
-#     def get(self, username: str):
-#         schema = CurrentUserDetailsSchema()
-#         user = User.query.filter_by(username=username).first_or_404()
-
-#         return {"user": schema.dump(user)}
-
-#     def put(self, username: str):
-#         schema = CurrentUserDetailsSchema()
-#         user = User.query.filter_by(username=username).first_or_404()
-
-#         user = schema.load(request.json, instance=user)
-
-#         db.session.commit()
-
-#         return {"msg": "user updated", "user": schema.dump(user)}
-
-#     def delete(self, username: str):
-#         user = User.query.filter_by(username=username).first_or_404()
-
-#         user.active = False
-
-#         db.session.commit()
-
-#         return {"msg": "user deleted"}
 
 
 class UserList(Resource):
@@ -137,26 +66,22 @@ class UserList(Resource):
                           $ref: '#/components/schemas/UserSchema'
     """
 
-    method_decorators = {"get": [jwt_required(optional=True)], "post": [jwt_required()]}
+    method_decorators = [jwt_required(optional=True)]
 
     def get(self):
-        user = get_current_user()
-        if user:
-            if user.role == User.Role.admin:
-                return "admin"
-            elif user.role == User.Role.default:
-                return "default"
+        schema_type = UserSchema
 
-        schema = UserSchema(many=True)
+        if current_user and current_user.role == User.Role.admin:
+            schema_type = UserSchemaForAdmins
+
+        schema = schema_type(many=True)
         query = User.query
 
         return paginate(query, schema)
 
     def post(self):
-        schema = UserSchema()
-        user = schema.load(request.json)
+        if not current_user or current_user.role != User.Role.admin:
+            return {}, 403
 
-        db.session.add(user)
-        db.session.commit()
-
-        return {"msg": "user created", "user": schema.dump(user)}, 201
+        schema = UserSchemaForAdmins()
+        return add_user(schema)

@@ -4,18 +4,24 @@ from everycache_api.models import User
 
 # general user resource schema
 class UserSchema(ma.SQLAlchemyAutoSchema):
-    username = ma.String()
+    email = ma.String(load_only=True, required=True)
     password = ma.String(load_only=True, required=True)
 
     class Meta:
         model = User
         sqla_session = db.session
         load_instance = True
-        exclude = (
-            "id_",
-            "_password",
-        )
+        fields = ('username', 'password', 'email')
 
+
+class UserSchemaForAdmins(ma.SQLAlchemyAutoSchema):
+    password = ma.String(load_only=True, required=True)
+
+    class Meta:
+        model = User
+        sqla_session = db.session
+        load_instance = True
+        exclude = ('_password',)
 
 # user details resource schema, this one should require logging in
 # class UserDetailsSchema(ma.SQLAlchemyAutoSchema):
