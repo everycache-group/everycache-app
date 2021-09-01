@@ -52,7 +52,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"domin\",\n    \"email\": \"dniemiro2@pm.me\",\n    \"password\": \"12341234\"\n}",
+							"raw": "{\n    \"username\": \"testowy_admin\",\n    \"email\": \"testowy@pm.me\",\n    \"password\": \"12341234\",\n    \"role\": \"default\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -198,7 +198,7 @@
 					"script": {
 						"exec": [
 							"var responseJson = pm.response.json();",
-							"pm.environment.set(\"token\", responseJson.access_token);"
+							"pm.collectionVariables.set(\"token\", responseJson.access_token);"
 						],
 						"type": "text/javascript"
 					}
@@ -209,7 +209,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"email\": \"dniemiro2@pm.me\",\n    \"password\": \"12341234\"\n}",
+					"raw": "{\n    \"email\": \"testowy@pm.me\",\n    \"password\": \"12341234\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
