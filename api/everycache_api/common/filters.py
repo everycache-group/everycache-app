@@ -60,7 +60,7 @@ def _apply_filter(query, schema, field_name, filter_url_value):
     return _filter_query(query, operation, model_field, value)
 
 
-def apply_filters(query, schema):
+def apply_query_filters(query, schema):
     args = request.args.to_dict(flat=False)
 
     for key, values_list in args.items():

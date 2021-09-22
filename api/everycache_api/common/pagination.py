@@ -1,8 +1,8 @@
 """Simple helper to paginate query"""
 from flask import request, url_for
 
-from everycache_api.common.filters import apply_filters
-from everycache_api.common.ordering import apply_ordering
+from everycache_api.common.filters import apply_query_filters
+from everycache_api.common.ordering import apply_query_ordering
 
 DEFAULT_PAGE_SIZE = 50
 DEFAULT_PAGE_NUMBER = 1
@@ -15,8 +15,8 @@ def extract_pagination(page=None, per_page=None, **request_args):
 
 
 def paginate(query, schema):
-    query = apply_ordering(query, schema)
-    query = apply_filters(query, schema)
+    query = apply_query_ordering(query, schema)
+    query = apply_query_filters(query, schema)
 
     page, per_page, other_request_args = extract_pagination(**request.args)
     page_obj = query.paginate(page=page, per_page=per_page)

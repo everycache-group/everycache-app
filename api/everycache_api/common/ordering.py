@@ -4,7 +4,7 @@ from sqlalchemy import asc, desc
 from everycache_api.extensions import ma
 
 
-def apply_ordering(query, schema):
+def apply_query_ordering(query, schema):
     ordering = desc if request.args.get("desc", "").lower() in ("1", "true") else asc
     order_by = request.args.get("order_by")
 
