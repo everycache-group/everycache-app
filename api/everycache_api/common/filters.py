@@ -1,8 +1,10 @@
 import datetime
 
 from flask import request
+from functools import partial
 from marshmallow import fields
 import operator
+
 
 def _parse_value(value, schema_field_type):
     if schema_field_type == fields.Boolean:
@@ -23,24 +25,27 @@ def _parse_value(value, schema_field_type):
     return value
 
 
+def _like_helper(model_field, value, like=True):
+    if like:
+        return model_field.like(f"%{value}%")
+    return model_field.notlike(f"%{value}%")
+
+
 def _filter_query(query, operation_code, model_field, value):
     binary_operations = {
+        None: operator.eq,
         "lte": operator.le,
         "lt": operator.lt,
         "gte": operator.ge,
         "gt": operator.gt,
         "not": operator.ne,
-        None: operator.eq
+        "like": _like_helper,
+        "not-like": partial(_like_helper, like=False)
     }
 
     operation = binary_operations.get(operation_code)
-
     if operation:
         query = query.filter(operation(model_field, value))
-    elif operation_code == "like":
-        query = query.filter(model_field.like(f"%{value}%"))
-    elif operation_code == "not-like":
-        query = query.filter(model_field.notlike(f"%{value}%"))
 
     return query
 
