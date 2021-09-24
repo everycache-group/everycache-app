@@ -1,43 +1,30 @@
+from marshmallow_enum import EnumField
+
 from everycache_api.extensions import db, ma
 from everycache_api.models import User
 
 
-# general user resource schema
 class UserSchema(ma.SQLAlchemyAutoSchema):
-    email = ma.String(load_only=True, required=True)
+    role = EnumField(User.Role)
     password = ma.String(load_only=True, required=True)
+    deleted = ma.Boolean(dump_only=True)
 
     class Meta:
         model = User
         sqla_session = db.session
         load_instance = True
-        fields = ('username', 'password', 'email')
+        ordered = True
+        exclude = ("id_", "deleted", "_password")
 
 
-class UserSchemaForAdmins(ma.SQLAlchemyAutoSchema):
-    password = ma.String(load_only=True, required=True)
+class PublicUserSchema(ma.SQLAlchemyAutoSchema):
+    """Read-only schema"""
+
+    role = EnumField(User.Role)
 
     class Meta:
         model = User
         sqla_session = db.session
         load_instance = True
-        exclude = ('_password',)
-
-# user details resource schema, this one should require logging in
-# class UserDetailsSchema(ma.SQLAlchemyAutoSchema):
-#     active = ma.Boolean(dump_only=True)
-
-#     class Meta:
-#         model = User
-#         sqla_session = db.session
-#         load_instance = True
-#         fields = ("username", "active")
-
-
-# # user details for currently logged in user (uses jwt to specify the user)
-# class CurrentUserDetailsSchema(ma.SQLAlchemyAutoSchema):
-#     class Meta:
-#         model = User
-#         sqla_session = db.session
-#         load_instance = True
-#         fields = ("username", "email", "verified", "active")
+        ordered = True
+        fields = ("deleted", "role", "username")  # whitelist
