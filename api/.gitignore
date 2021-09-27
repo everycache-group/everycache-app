@@ -1,0 +1,8 @@
+# any file or directory starting with "_", except __init__.py files
+_*
+!__init__.py
+
+# .env files with settings and secrets
+*.env
+
+*.db
