@@ -2,13 +2,11 @@ from datetime import datetime
 
 from everycache_api.extensions import db
 
+from .base import BaseMixin
 
-class CacheComment(db.Model):
+
+class CacheComment(BaseMixin, db.Model):
     __tablename__ = "cache_comments"
-
-    # base properties
-    id_ = db.Column("id", db.Integer, primary_key=True, autoincrement=True)
-    deleted = db.Column(db.Boolean, nullable=False, default=False)
 
     # own properties
     created_on = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
