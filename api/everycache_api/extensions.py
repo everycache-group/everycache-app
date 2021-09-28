@@ -16,4 +16,4 @@ apispec = APISpecExt()
 jwt = JWTManager()
 pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
-redis = FlaskRedis()
+redis_client = FlaskRedis()
