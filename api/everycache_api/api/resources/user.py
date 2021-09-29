@@ -220,16 +220,15 @@ class UserListResource(Resource):
 
     def get(self):
         # retrieve multiple users' details
+        query = User.query.filter_by(deleted=False)
 
-        # decide which query and schema to use
-        query = User.query
+        # decide which schema to use
         schema = None
         if current_user and current_user.role == User.Role.Admin:
             # user is an admin
             schema = UserSchema(many=True)
         else:
             # user is not logged in or not an admin
-            query = query.filter_by(verified=True)
             schema = PublicUserSchema(many=True)
 
         return paginate(query, schema), 200
@@ -362,6 +361,7 @@ class UserCacheVisitListResource(Resource):
                           $ref: '#/components/schemas/CacheVisitSchema'
         404:
           description: user not found
+      security: []
     """
 
     method_decorators = [jwt_required()]

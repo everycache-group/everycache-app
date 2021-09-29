@@ -68,6 +68,28 @@ class CacheResource(Resource):
           description: forbidden
         404:
           description: cache not found
+    delete:
+      tags:
+        - api
+      parameters:
+        - in: path
+          name: cache_id
+          schema:
+            type: string
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: cache deleted
+        403:
+          description: forbidden
+        404:
+          description: cache not found
     """
 
     method_decorators = {
@@ -161,6 +183,7 @@ class CacheListResource(Resource):
                           oneOf:
                             - $ref: '#/components/schemas/PublicCacheSchema'
                             - $ref: '#/components/schemas/CacheSchema'
+      security: []
     post:
       tags:
         - api
