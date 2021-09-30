@@ -3,9 +3,11 @@ from flask_restful import Api, Resource
 from marshmallow import ValidationError
 
 from everycache_api.api.resources import (
+    CacheCommentListResource,
     CacheCommentResource,
     CacheListResource,
     CacheResource,
+    CacheVisitListResource,
     CacheVisitResource,
     UserCacheCommentListResource,
     UserCacheListResource,
@@ -38,8 +40,8 @@ resources = [
     ),
     (CacheListResource, "/caches", "caches_list"),
     (CacheResource, "/caches/<int:cache_id>", "cache_by_id"),
-    # (CacheVisitListResource, "/caches/<int:cache_id>/visits", "cache_visits_list"),
-    # (CacheCommentListResource, "/cache/<int:cache_id>/comments", "cache_comments_list"),
+    (CacheVisitListResource, "/caches/<int:cache_id>/visits", "cache_visits_list"),
+    (CacheCommentListResource, "/cache/<int:cache_id>/comments", "cache_comments_list"),
     (CacheVisitResource, "/cache_visits/<int:cache_visit_id>", "cache_visit_by_id"),
     (
         CacheCommentResource,
@@ -54,19 +56,19 @@ for resource, route, endpoint in resources:
 
 @blueprint.before_app_first_request
 def register_views():
-    apispec.spec.components.schema("CacheSchema", schema=CacheSchema)
+    # apispec.spec.components.schema("CacheSchema", schema=CacheSchema)
     apispec.spec.components.schema("PublicCacheSchema", schema=PublicCacheSchema)
     apispec.spec.path(view=CacheResource, app=current_app)
     apispec.spec.path(view=CacheListResource, app=current_app)
 
-    apispec.spec.components.schema("CacheVisitSchema", schema=CacheVisitSchema)
+    # apispec.spec.components.schema("CacheVisitSchema", schema=CacheVisitSchema)
     apispec.spec.path(view=CacheVisitResource, app=current_app)
 
-    apispec.spec.components.schema("CacheCommentSchema", schema=CacheCommentSchema)
+    # apispec.spec.components.schema("CacheCommentSchema", schema=CacheCommentSchema)
     apispec.spec.path(view=CacheCommentResource, app=current_app)
 
-    apispec.spec.components.schema("UserSchema", schema=UserSchema)
-    apispec.spec.components.schema("PublicUserSchema", schema=PublicUserSchema)
+    # apispec.spec.components.schema("UserSchema", schema=UserSchema)
+    # apispec.spec.components.schema("PublicUserSchema", schema=PublicUserSchema)
     apispec.spec.path(view=UserResource, app=current_app)
     apispec.spec.path(view=UserListResource, app=current_app)
     apispec.spec.path(view=UserCacheListResource, app=current_app)
