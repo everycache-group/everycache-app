@@ -1,0 +1,12 @@
+{
+    "connection" : {
+        "protocol": "http",
+        "machine": "localhost",
+        "port": "5000"
+    },
+
+    "resources": ["caches", "users", "auth", "cache_comments"]
+}  
+    
+
+
