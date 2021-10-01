@@ -1,10 +1,13 @@
-from everycache_api.api.schemas.cache import CacheDetailsSchema, CacheSchema
-from everycache_api.api.schemas.profile import ProfileSchema
-from everycache_api.api.schemas.user import UserSchema
+from everycache_api.api.schemas.cache import CacheSchema, PublicCacheSchema
+from everycache_api.api.schemas.cache_comment import CacheCommentSchema
+from everycache_api.api.schemas.cache_visit import CacheVisitSchema
+from everycache_api.api.schemas.user import PublicUserSchema, UserSchema
 
 __all__ = [
-    "CacheDetailsSchema",
+    "CacheCommentSchema",
     "CacheSchema",
-    "ProfileSchema",
+    "CacheVisitSchema",
+    "PublicCacheSchema",
+    "PublicUserSchema",
     "UserSchema",
 ]

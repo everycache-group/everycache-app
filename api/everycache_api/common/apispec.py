@@ -1,8 +1,9 @@
 from apispec import APISpec
 from apispec.exceptions import APISpecError
 from apispec.ext.marshmallow import MarshmallowPlugin
+from apispec.ext.marshmallow.common import resolve_schema_cls
 from apispec_webframeworks.flask import FlaskPlugin
-from flask import Blueprint, jsonify, render_template
+from flask import Blueprint, render_template
 
 
 class FlaskRestfulPlugin(FlaskPlugin):
@@ -51,7 +52,10 @@ class APISpecExt:
             title=app.config["APISPEC_TITLE"],
             version=app.config["APISPEC_VERSION"],
             openapi_version=app.config["OPENAPI_VERSION"],
-            plugins=[MarshmallowPlugin(), FlaskRestfulPlugin()],
+            plugins=[
+                FlaskRestfulPlugin(),
+                MarshmallowPlugin(lambda s: resolve_schema_cls(s).__name__),
+            ],
             **kwargs
         )
 
@@ -72,7 +76,7 @@ class APISpecExt:
         app.register_blueprint(blueprint)
 
     def swagger_json(self):
-        return jsonify(self.spec.to_dict())
+        return self.spec.to_dict()
 
     def swagger_ui(self):
         return render_template("swagger.j2")

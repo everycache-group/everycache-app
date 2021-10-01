@@ -1,41 +1,79 @@
 from flask import Blueprint, current_app, jsonify
-from flask_restful import Api
+from flask_restful import Api, Resource
 from marshmallow import ValidationError
 
 from everycache_api.api.resources import (
-    CacheList,
+    CacheCommentListResource,
+    CacheCommentResource,
+    CacheListResource,
     CacheResource,
-    ProfileResource,
-    UserList,
+    CacheVisitListResource,
+    CacheVisitResource,
+    UserCacheCommentListResource,
+    UserCacheListResource,
+    UserCacheVisitListResource,
+    UserListResource,
     UserResource,
 )
-from everycache_api.api.schemas import CacheSchema, ProfileSchema, UserSchema
+from everycache_api.api.schemas import (
+    CacheCommentSchema,
+    CacheSchema,
+    CacheVisitSchema,
+    PublicCacheSchema,
+    PublicUserSchema,
+    UserSchema,
+)
 from everycache_api.extensions import apispec
 
 blueprint = Blueprint("api", __name__, url_prefix="/api")
 api = Api(blueprint)
 
-api.add_resource(UserList, "/users", endpoint="users_list")
-api.add_resource(UserResource, "/users/<string:username>", endpoint="user_by_username")
+resources = [
+    (UserListResource, "/users", "users_list"),
+    (UserResource, "/users/<string:username>", "user_by_username"),
+    (UserCacheListResource, "/users/<string:username>/caches", "user_caches_list"),
+    (UserCacheVisitListResource, "/users/<string:username>/visits", "user_visits_list"),
+    (
+        UserCacheCommentListResource,
+        "/users/<string:username>/comments",
+        "user_comments_list",
+    ),
+    (CacheListResource, "/caches", "caches_list"),
+    (CacheResource, "/caches/<int:cache_id>", "cache_by_id"),
+    (CacheVisitListResource, "/caches/<int:cache_id>/visits", "cache_visits_list"),
+    (CacheCommentListResource, "/cache/<int:cache_id>/comments", "cache_comments_list"),
+    (CacheVisitResource, "/cache_visits/<int:cache_visit_id>", "cache_visit_by_id"),
+    (
+        CacheCommentResource,
+        "/cache_comments/<int:cache_comment_id>",
+        "cache_comment_by_id",
+    ),
+]
 
-api.add_resource(ProfileResource, "/profile", endpoint="profile")
-
-api.add_resource(CacheList, "/caches", endpoint="caches_list")
-api.add_resource(CacheResource, "/caches/<int:id>", endpoint="cache_by_id")
+for resource, route, endpoint in resources:
+    api.add_resource(resource, route, endpoint=endpoint)
 
 
 @blueprint.before_app_first_request
 def register_views():
-    apispec.spec.components.schema("UserSchema", schema=UserSchema)
-    apispec.spec.path(view=UserResource, app=current_app)
-    apispec.spec.path(view=UserList, app=current_app)
-
-    apispec.spec.components.schema("ProfileSchema", schema=ProfileSchema)
-    apispec.spec.path(view=ProfileResource, app=current_app)
-
-    apispec.spec.components.schema("CacheSchema", schema=CacheSchema)
+    # apispec.spec.components.schema("CacheSchema", schema=CacheSchema)
+    apispec.spec.components.schema("PublicCacheSchema", schema=PublicCacheSchema)
     apispec.spec.path(view=CacheResource, app=current_app)
-    apispec.spec.path(view=CacheList, app=current_app)
+    apispec.spec.path(view=CacheListResource, app=current_app)
+
+    # apispec.spec.components.schema("CacheVisitSchema", schema=CacheVisitSchema)
+    apispec.spec.path(view=CacheVisitResource, app=current_app)
+
+    # apispec.spec.components.schema("CacheCommentSchema", schema=CacheCommentSchema)
+    apispec.spec.path(view=CacheCommentResource, app=current_app)
+
+    # apispec.spec.components.schema("UserSchema", schema=UserSchema)
+    # apispec.spec.components.schema("PublicUserSchema", schema=PublicUserSchema)
+    apispec.spec.path(view=UserResource, app=current_app)
+    apispec.spec.path(view=UserListResource, app=current_app)
+    apispec.spec.path(view=UserCacheListResource, app=current_app)
+    apispec.spec.path(view=UserCacheVisitListResource, app=current_app)
+    apispec.spec.path(view=UserCacheCommentListResource, app=current_app)
 
 
 @blueprint.errorhandler(ValidationError)
