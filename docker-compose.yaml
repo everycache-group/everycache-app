@@ -4,5 +4,7 @@ services:
     build: api 
     ports:
       - "5000:8080"
+    depends_on:
+      - redis
   redis:
     image: "redis:alpine"

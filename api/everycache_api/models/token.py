@@ -11,7 +11,6 @@ class Token(db.Model):
 
     # own properties
     jti = db.Column(db.String(36), nullable=False, unique=True)
-    token_type = db.Column(db.String(10), nullable=False)
     expires = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     revoked = db.Column(db.Boolean, nullable=False, default=False)
 

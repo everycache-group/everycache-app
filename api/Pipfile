@@ -28,6 +28,7 @@ python-dotenv = "*"
 sqlalchemy-utils = "*"
 waitress = "*"
 flask-redis = "*"
+isodate = "*"
 
 [requires]
 python_version = "3.9"

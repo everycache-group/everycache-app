@@ -8,6 +8,7 @@ from everycache_api.auth.helpers import (
     is_token_revoked,
     revoke_token,
 )
+from everycache_api.auth.token_storage import add_token_to_redis_storage, bulk_redis_operation
 from everycache_api.extensions import apispec, jwt
 from everycache_api.models import User
 
@@ -68,8 +69,11 @@ def login():
 
     access_token = create_user_access_token(user)
     refresh_token = create_user_refresh_token(user)
-    add_token_to_database(access_token, current_app.config["JWT_IDENTITY_CLAIM"])
-    add_token_to_database(refresh_token, current_app.config["JWT_IDENTITY_CLAIM"])
+    id_claim = current_app.config["JWT_IDENTITY_CLAIM"]
+    with bulk_redis_operation() as redis_client:
+        add_token_to_redis_storage(access_token, id_claim, redis_client)
+        add_token_to_redis_storage(refresh_token, id_claim, redis_client)
+    add_token_to_database(refresh_token, id_claim)
 
     return {"access_token": access_token, "refresh_token": refresh_token}, 200
 
@@ -107,7 +111,7 @@ def refresh():
         return {"msg": "User in refresh token does not exist"}, 401
 
     access_token = create_user_access_token(current_user)
-    add_token_to_database(access_token, current_app.config["JWT_IDENTITY_CLAIM"])
+    add_token_to_redis_storage(access_token, current_app.config["JWT_IDENTITY_CLAIM"])
 
     return {"access_token": access_token}, 200
 
