@@ -27,6 +27,7 @@ psycopg2-binary = "*"
 python-dotenv = "*"
 sqlalchemy-utils = "*"
 waitress = "*"
+flask-redis = "*"
 
 [requires]
 python_version = "3.9"
