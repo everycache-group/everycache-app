@@ -5,7 +5,23 @@
         "port": "5000"
     },
 
-    "resources": ["caches", "users", "auth", "cache_comments"]
+    "resources": {
+        "cache" : "caches",
+        "user" : "users",
+        "comments" : "cache_comments",
+
+        "login" : "auth/login",
+        "logout": "auth/revoke_access"
+    },
+
+
+    "methods": {
+        "get" : "GET",
+        "post" : "POST",
+        "put" : "PUT",
+        "delete": "DELETE"
+    }
+
 }  
     
 
