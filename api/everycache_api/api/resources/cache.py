@@ -98,9 +98,9 @@ class CacheResource(Resource):
         "delete": [jwt_required()],
     }
 
-    def get(self, cache_id: int):
+    def get(self, cache_id: str):
         # find cache details
-        cache = Cache.query.filter_by(id_=cache_id, deleted=False).first_or_404()
+        cache = Cache.query_ext_id(cache_id).first_or_404()
 
         # decide which schema to use
         schema = None
@@ -118,7 +118,7 @@ class CacheResource(Resource):
 
     def put(self, cache_id: int):
         # find cache
-        cache = Cache.query.filter_by(id_=cache_id, deleted=False).first_or_404()
+        cache = Cache.query_ext_id(cache_id).first_or_404()
 
         # ensure current_user is authorized
         if current_user != cache.owner and current_user.role != User.Role.Admin:
@@ -134,7 +134,7 @@ class CacheResource(Resource):
 
     def delete(self, cache_id: int):
         # find cache
-        cache = Cache.query.filter_by(id_=cache_id, deleted=False).first_or_404()
+        cache = Cache.query_ext_id(cache_id).first_or_404()
 
         # ensure current_user is authorized
         if current_user != cache.owner and current_user.role != User.Role.Admin:
@@ -316,7 +316,7 @@ class CacheVisitListResource(Resource):
 
     def get(self, cache_id):
         # ensure cache with given id exists
-        cache = Cache.query.filter_by(id_=cache_id, deleted=False).first_or_404()
+        cache = Cache.query_ext_id(cache_id).first_or_404()
 
         schema = CacheVisitSchema(many=True)
         query = CacheVisit.query.filter_by(cache=cache)
@@ -326,7 +326,7 @@ class CacheVisitListResource(Resource):
 
     def post(self, cache_id):
         # find cache with given id
-        cache = Cache.query.filter_by(id_=cache_id, deleted=False).first_or_404()
+        cache = Cache.query_ext_id(cache_id).first_or_404()
 
         # create new visit
         schema = CacheVisitSchema()
@@ -419,17 +419,17 @@ class CacheCommentListResource(Resource):
 
     def get(self, cache_id):
         # ensure cache with given id exists
-        Cache.query.filter_by(id_=cache_id, deleted=False).first_or_404()
+        cache = Cache.query_ext_id(cache_id).first_or_404()
 
         schema = CacheCommentSchema(many=True)
-        query = CacheComment.query.filter_by(cache_id=cache_id, deleted=False)
+        query = CacheComment.query.filter_by(cache=cache, deleted=False)
 
         # list comments for cache
         return paginate(query, schema), 200
 
     def post(self, cache_id):
         # find cache with given id
-        cache = Cache.query.filter_by(id_=cache_id, deleted=False).first_or_404()
+        cache = Cache.query_ext_id(cache_id).first_or_404()
 
         # create new comment
         schema = CacheCommentSchema()

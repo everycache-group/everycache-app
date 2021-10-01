@@ -1,11 +1,16 @@
 from everycache_api.extensions import db, ma
 from everycache_api.models import CacheVisit
 
+from .cache import PublicCacheSchema
+from .user import NestedUserSchema
+
 
 class CacheVisitSchema(ma.SQLAlchemyAutoSchema):
-    id = ma.Integer(attribute="id_", dump_only=True)
-    cache_id = ma.Integer(dump_only=True)
-    user_username = ma.String(attribute="user.username", dump_only=True)
+    id = ma.String(attribute="ext_id", dump_only=True)
+    cache_id = ma.Pluck(
+        PublicCacheSchema, field_name="id", attribute="cache", dump_only=True
+    )
+    user = ma.Nested(NestedUserSchema, dump_only=True)
     visited_on = ma.DateTime(dump_only=True)
 
     class Meta:
