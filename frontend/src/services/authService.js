@@ -2,7 +2,8 @@ import * as api from '../api/api-core';
 
 export async function loginUser(email, password)
 {
-    let token;
+ if (!email )
+    return;
 
     await api.login(email, password).then(res => { token = res.access_token;});
 
@@ -11,5 +12,5 @@ export async function loginUser(email, password)
 
 export function logoutUser(token)
 {
-   
+    return await api.logout();  
 }

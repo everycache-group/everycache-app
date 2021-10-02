@@ -5,7 +5,6 @@ export const resources = config.resources;
 
 const methods = config.methods;
 
-
 export async function get(resource, id = null)
 {
     return await sendRequest(methods.get, resource, id)
@@ -13,7 +12,6 @@ export async function get(resource, id = null)
 
 export async function create(resource, params)
 {
-    
     return await sendRequest(methods.post, resource, null, params)
 }
 
@@ -36,4 +34,3 @@ export async function logout()
 {
     return await sendRequest(methods.delete)
 }
-

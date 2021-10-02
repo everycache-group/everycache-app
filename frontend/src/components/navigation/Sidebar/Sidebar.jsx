@@ -6,13 +6,17 @@ import * as AiIcons from 'react-icons/ai'
 import SubMenu from '../Submenu/Submenu.jsx'
 import { IconContext } from 'react-icons/lib'
 
+
 function Sidebar(props) {
     const [sidebar, setSidebar] = useState(true);
     const [token, setToken] = useState("");
     const showSidebar = () => setSidebar(!sidebar);
-
+    
     useEffect(() => {
-        //api.create(api.resources.user, { email: 'a@b.com', password: 'qwerty123', role: 'Admin', username: 'bamer', verified: true });      
+        //api.create(api.resources.user, { email: 'a@b.com', password: 'qwerty123', role: 'Admin', username: 'bamer', verified: true });
+        
+
+    
     }, []);
 
     return (

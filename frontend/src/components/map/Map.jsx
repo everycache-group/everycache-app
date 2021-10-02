@@ -1,6 +1,7 @@
 import mapCSS from "./Map.module.css";
 import React from "react";
 import { MapContainer, TileLayer, Marker, Tooltip } from "react-leaflet";
+import { useState} from 'react'
 
 class Map extends React.Component {
   constructor(props) {
@@ -12,6 +13,11 @@ class Map extends React.Component {
       users: [],
     };
   }
+
+  const [cachesLoaded, setCachesLoaded] = useState(false);
+
+
+  setCachesLoaded(true);
 
   componentDidMount() {
     var backend_url =
