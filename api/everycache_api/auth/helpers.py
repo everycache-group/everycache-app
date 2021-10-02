@@ -9,8 +9,8 @@ from flask_jwt_extended import create_access_token, create_refresh_token, decode
 from flask_jwt_extended.utils import get_jwt_identity
 
 from everycache_api.extensions import db
-from everycache_api.models import Token, User
-from everycache_api.auth.token_storage import get_token_data, revoke_all_user_tokens_redis, set_token_field
+from everycache_api.models import RefreshToken, User
+from everycache_api.auth.token_storage import bulk_redis_operation, delete_token, get_token_key, get_user_token_key, get_user_token_keys
 
 
 def create_jwt_payload(user: User):
@@ -41,7 +41,7 @@ def add_token_to_database(encoded_token, identity_claim):
     expires = datetime.fromtimestamp(decoded_token["exp"])
     revoked = False
 
-    db_token = Token(
+    db_token = RefreshToken(
         jti=jti,
         user_id=user_identity,
         expires=expires,
@@ -59,42 +59,35 @@ def is_token_revoked(jwt_payload):
     it was created.
     """
     jti = jwt_payload["jti"]
-
-    token_data = get_token_data(jti, keys=("revoked",))
-    print(token_data)
-    if token_data is None:
-        return True
-
-    return token_data.get("revoked", False)
+    return get_token_key(jti) is None
 
 
 def revoke_token(token_jti, user_identity):
     """
     Revokes the given token
     """
-    token = Token.query.filter_by(jti=token_jti, user_id=user_identity).first()
+    token = RefreshToken.query.filter_by(jti=token_jti, user_id=user_identity).first()
     if token is not None:
         token.revoked = True
         db.session.commit()
 
-    token_data = get_token_data(token_jti, ("revoked", "user_id"))
-    if token_data["revoked"] or token_data["user_id"] != user_identity:
-        return
-
-    set_token_field(token_jti, "revoked", True)
+    delete_token(get_user_token_key(token_jti, user_identity))
 
 
 def revoke_all_user_tokens(user):
-    tokens = Token.query.filter_by(user=user).all()
+    tokens = RefreshToken.query.filter_by(user=user).all()
 
     if not tokens:
         return False
-
-    revoke_all_user_tokens_redis(get_jwt_identity())
 
     for token in tokens:
         token.revoked = True
 
     db.session.commit()
+
+    redis_token_keys = get_user_token_keys(get_jwt_identity())
+    with bulk_redis_operation as redis_client:
+        for token_key in redis_token_keys:
+            delete_token(token_key, redis_client)
 
     return True

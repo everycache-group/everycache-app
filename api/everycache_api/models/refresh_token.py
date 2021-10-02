@@ -3,7 +3,7 @@ from datetime import datetime
 from everycache_api.extensions import db
 
 
-class Token(db.Model):
+class RefreshToken(db.Model):
     __tablename__ = "tokens"
 
     # base properties
