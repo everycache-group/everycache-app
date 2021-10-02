@@ -8,6 +8,7 @@ black = "*"
 flake8 = "*"
 flake8-isort = "*"
 isort = "*"
+pytest = "*"
 
 [packages]
 apispec = "*"
@@ -28,6 +29,7 @@ python-dotenv = "*"
 sqlalchemy-utils = "*"
 waitress = "*"
 flask-redis = "*"
+fakeredis = "*"
 
 [requires]
 python_version = "3.9"
