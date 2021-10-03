@@ -30,6 +30,7 @@ sqlalchemy-utils = "*"
 waitress = "*"
 flask-redis = "*"
 fakeredis = "*"
+factory-boy = "*"
 
 [requires]
 python_version = "3.9"
