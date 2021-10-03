@@ -5,20 +5,19 @@ import { useSelector } from 'react-redux';
 
 function ProtectedRoute({ component: Component, ...rest }) {
 
-    const isAuth = useSelector(state => state.user.isAuth);
+    const logged = useSelector(state => state.user.logged);
 
     return (  
         <Route
             {...rest}
             render={(props) => {
-                if(isAuth)
+                if(logged)
                     return <Component />
                 else
                     return <Redirect to={{pathname: "/auth", state: {from: props.location}}}/>
             }}
         />
     );
-
 }
 
 export default ProtectedRoute

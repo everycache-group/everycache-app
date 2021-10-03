@@ -10,21 +10,17 @@ import ProtectedRoute from './Routes/ProtectedRoute';
 
 function App() {
 
-   const isAuth =  useSelector(state => state.user.isAuth);
+   const logged =  useSelector((state) => state.user.logged);
 
   //only for testing redux store
   useEffect(() => {
-
     console.clear();
-    console.log(isAuth);
-
   },[]);
 
-
-
   return (
+    
     <Router>
-      {isAuth && <Sidebar />}
+      {logged && <Sidebar />}
       <Switch>
         <Route path='/auth' component={Page.Auth} />
         <ProtectedRoute path="/" exact component={ Page.Home } />

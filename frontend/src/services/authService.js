@@ -7,6 +7,8 @@ export async function loginUser(email, password)
 
     await api.login(email, password).then(res => { token = res.access_token;});
 
+    
+
     return token;
 }
 

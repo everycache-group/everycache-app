@@ -1,20 +1,22 @@
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+
 const initialState = {
-    username: "lolol",
-
-    isAuth: true,
-
-   
-};
-
-function userReducer(state = initialState, action)
-{
-    switch(action.type)
-    {
-        
-
-        default:
-            return state;
-    }
+    logged: false,
+    access_token: "",
+    refresh_token: "",
 }
 
-export default userReducer;
+const userSlice = createSlice({
+    name: 'user',
+    initialState,
+    reducers: {
+        login: state => {
+
+        }
+
+        
+    }
+
+});
+
+export default userSlice.reducer;

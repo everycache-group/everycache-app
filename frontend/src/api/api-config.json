@@ -9,7 +9,7 @@
         "cache" : "caches",
         "user" : "users",
         "comments" : "cache_comments",
-
+        
         "login" : "auth/login",
         "logout": "auth/revoke_access"
     },
@@ -22,7 +22,4 @@
         "delete": "DELETE"
     }
 
-}  
-    
-
-
+}

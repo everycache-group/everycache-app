@@ -47,22 +47,3 @@ function createEndpoint(resource, id = null)
 
     return endpoint;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

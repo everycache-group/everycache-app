@@ -4,7 +4,6 @@ import Button from '@mui/material/Button'
 import * as Style from './style'
 import {Redirect} from 'react-router-dom'
 import * as user from './../../../services/userService';
-import {useStore} from 'react-redux';
 
 
 function Register() {
@@ -17,7 +16,7 @@ function Register() {
     const onRegisterClickHandler = e => {
         e.preventDefault();
 
-        user.create(user)
+        
         
     };
 
