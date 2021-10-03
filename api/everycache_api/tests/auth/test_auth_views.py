@@ -10,7 +10,7 @@ from everycache_api.models import Token
 def valid_login_data():
     user = UserFactory()
 
-    login_data = {"email": user.email, "password": "testpass"}
+    login_data = {"email": user.email, "password": f"testpass{user.id_}"}
     return json.dumps(login_data)
 
 
