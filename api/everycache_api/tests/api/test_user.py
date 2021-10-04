@@ -2,9 +2,12 @@ import json
 
 import pytest
 
+from everycache_api.api.schemas.cache import CacheSchema, PublicCacheSchema
 from everycache_api.api.schemas.user import PublicUserSchema, UserSchema
-from everycache_api.models import User
+from everycache_api.models import Cache, User
+from everycache_api.tests.factories.cache_factory import CacheFactory
 from everycache_api.tests.factories.user_factory import UserFactory
+from everycache_api.tests.helpers import get_auth_header
 
 
 class TestGet:
@@ -18,7 +21,7 @@ class TestGet:
 
     def test_get_self(self, client, logged_in_user):
         user, access_token, _ = logged_in_user
-        headers = {"Authorization": f"Bearer {access_token}"}
+        headers = get_auth_header(access_token)
         response = client.get(f"/api/users/{user.username}",
                               content_type="application/json", headers=headers)
 
@@ -28,7 +31,7 @@ class TestGet:
     def test_get_other_user(self, client, logged_in_user):
         user_1 = UserFactory()
         user_2, access_token, _ = logged_in_user
-        headers = {"Authorization": f"Bearer {access_token}"}
+        headers = get_auth_header(access_token)
         response = client.get(f"/api/users/{user_1.username}",
                               content_type="application/json", headers=headers)
 
@@ -45,7 +48,7 @@ class TestGet:
         user.role = User.Role.Admin
         user_2 = UserFactory()
 
-        headers = {"Authorization": f"Bearer {access_token}"}
+        headers = get_auth_header(access_token)
         response = client.get(f"/api/users/{user_2.username}",
                               content_type="application/json", headers=headers)
         assert response.json == {"user": json.loads(UserSchema().dumps(user_2))}
@@ -72,7 +75,7 @@ class TestPut:
             f"/api/users/{user.username}",
             data=self._get_user_edit_data(user),
             content_type="application/json",
-            headers={"Authorization": f"Bearer {access_token}"})
+            headers=get_auth_header(access_token))
 
     def test_put_self(self, client, logged_in_user):
         user, access_token, _ = logged_in_user
@@ -104,7 +107,7 @@ class TestPut:
             "/api/users/some_other_username",
             data=self._get_user_edit_data(user),
             content_type="application/json",
-            headers={"Authorization": f"Bearer {access_token}"})
+            headers=get_auth_header(access_token))
 
         assert response.status_code == 404
 
@@ -124,7 +127,7 @@ class TestDelete:
         return client.delete(
             f"/api/users/{user_to_be_deleted.username}",
             content_type="application/json",
-            headers={"Authorization": f"Bearer {access_token}"})
+            headers=get_auth_header(access_token))
 
     def test_delete(self, client, logged_in_user, mocked_token_revoke):
         user, access_token, _ = logged_in_user
@@ -165,7 +168,7 @@ class TestDelete:
 
         response = client.delete(
             "/api/users/some_username", content_type="application/json",
-            headers={"Authorization": f"Bearer {access_token}"})
+            headers=get_auth_header(access_token))
 
         assert response.status_code == 404
         mocked_token_revoke.assert_not_called()
@@ -181,7 +184,7 @@ class TestListGet:
 
         headers = {}
         if is_user_logged_in:
-            headers = {"Authorization": f"Bearer {access_token}"}
+            headers = get_auth_header(access_token)
 
         response = client.get("/api/users", headers=headers)
 
@@ -198,7 +201,7 @@ class TestListGet:
 
         headers = {}
         if is_user_logged_in:
-            headers = {"Authorization": f"Bearer {access_token}"}
+            headers = get_auth_header(access_token)
 
         response = client.get("/api/users", headers=headers)
         assert response.json["results"] != []
@@ -216,7 +219,7 @@ class TestListGet:
             UserFactory()
 
         response = client.get(
-            "/api/users", headers={"Authorization": f"Bearer {access_token}"})
+            "/api/users", headers=get_auth_header(access_token))
 
         expected_users = json.loads(UserSchema().dumps(User.query.all(), many=True))
 
@@ -228,7 +231,7 @@ class TestListGet:
         user.role = User.Role.Admin
 
         response = client.get(
-            "/api/users", headers={"Authorization": f"Bearer {access_token}"})
+            "/api/users", headers=get_auth_header(access_token))
 
         assert len(response.json["results"]) == 1
         assert response.status_code == 200
@@ -236,7 +239,7 @@ class TestListGet:
         UserFactory(verified=False)
 
         response = client.get(
-            "/api/users", headers={"Authorization": f"Bearer {access_token}"})
+            "/api/users", headers=get_auth_header(access_token))
 
         assert len(response.json["results"]) == 2
         assert response.status_code == 200
@@ -279,7 +282,7 @@ class TestListPost:
             "/api/users",
             data=user_to_create_data,
             content_type="application/json",
-            headers={"Authorization": f"Bearer {access_token}"})
+            headers=get_auth_header(access_token))
 
         assert response.status_code == 403
         assert "user already logged in" in response.data.decode()
@@ -292,7 +295,7 @@ class TestListPost:
             "/api/users",
             data=user_to_create_data,
             content_type="application/json",
-            headers={"Authorization": f"Bearer {access_token}"})
+            headers=get_auth_header(access_token))
 
         assert response.status_code == 201
         assert "user created" in response.data.decode()
@@ -309,7 +312,7 @@ class TestListPost:
 
         headers = {}
         if is_issued_by_admin:
-            headers = {"Authorization": f"Bearer {access_token}"}
+            headers = get_auth_header(access_token)
 
         response = client.post("/api/users", data=json.dumps(user_to_create_data_dict),
                                content_type="application/json", headers=headers)

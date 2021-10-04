@@ -5,6 +5,7 @@ import pytest
 import everycache_api
 from everycache_api.models import Token
 from everycache_api.tests.factories.user_factory import UserFactory
+from everycache_api.tests.helpers import get_auth_header
 
 
 @pytest.fixture
@@ -76,7 +77,7 @@ def test_login_missing_data(client, login_data):
 def test_refresh(client, valid_token_pair):
     _, valid_refresh_token = valid_token_pair
     count_before = Token.query.count()
-    headers = {"Authorization": f"Bearer {valid_refresh_token}"}
+    headers = get_auth_header(valid_refresh_token)
     response = client.post(
         "/auth/refresh", content_type="application/json", headers=headers)
 
@@ -90,7 +91,7 @@ def test_refresh_user_not_found(client, valid_token_pair, mocker):
 
     mocker.patch.object(everycache_api.auth.views, "current_user", None)
 
-    headers = {"Authorization": f"Bearer {valid_refresh_token}"}
+    headers = get_auth_header(valid_refresh_token)
     response = client.post(
         "/auth/refresh", content_type="application/json", headers=headers)
 
@@ -101,7 +102,7 @@ def test_refresh_user_not_found(client, valid_token_pair, mocker):
 def test_revoke_access_token(client, valid_token_pair, mocker):
     access_token, _ = valid_token_pair
 
-    headers = {"Authorization": f"Bearer {access_token}"}
+    headers = get_auth_header(access_token)
     mock = mocker.patch("everycache_api.auth.views.revoke_token")
     response = client.delete("/auth/revoke_access",
                              content_type="application/json", headers=headers)
@@ -113,7 +114,7 @@ def test_revoke_access_token(client, valid_token_pair, mocker):
 def test_revoke_refresh_token(client, valid_token_pair, mocker):
     _, refresh_token = valid_token_pair
 
-    headers = {"Authorization": f"Bearer {refresh_token}"}
+    headers = get_auth_header(refresh_token)
     mock = mocker.patch("everycache_api.auth.views.revoke_token")
     response = client.delete("/auth/revoke_refresh",
                              content_type="application/json", headers=headers)
