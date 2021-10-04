@@ -71,6 +71,10 @@ def test_is_token_revoked(revoked):
     assert is_token_revoked({"jti": token.jti}) == revoked
 
 
+def test_is_token_revoked_not_found():
+    assert is_token_revoked({"jti": "bogus_jti"}) is True
+
+
 def test_revoke_token():
     token = TokenFactory()
     assert token.revoked is False
@@ -123,3 +127,8 @@ def test_revoke_all_user_tokens_other_users():
 
     assert all((token_1.revoked, token_2.revoked))
     assert not token_3.revoked
+
+
+def test_revoke_all_user_tokens_none_found():
+    user_1 = UserFactory()
+    assert revoke_all_user_tokens(user_1) is False
