@@ -29,6 +29,7 @@ def test_login(client, valid_login_data):
 
     assert "access_token" in response.json
     assert "refresh_token" in response.json
+    assert response.status_code == 200
     assert Token.query.count() == count_before + 2
 
 
@@ -36,6 +37,7 @@ def test_login_not_json(client, valid_login_data):
     response = client.post("/auth/login", data=valid_login_data)
 
     assert "Missing JSON payload in request" in response.data.decode()
+    assert response.status_code == 400
 
 
 def test_login_wrong_email(client):
@@ -44,6 +46,7 @@ def test_login_wrong_email(client):
                            content_type="application/json")
 
     assert "Incorrect email and password combination" in response.data.decode()
+    assert response.status_code == 400
 
 
 def test_login_wrong_password(client):
@@ -54,6 +57,7 @@ def test_login_wrong_password(client):
                            content_type="application/json")
 
     assert "Incorrect email and password combination" in response.data.decode()
+    assert response.status_code == 400
 
 
 @pytest.mark.parametrize("login_data", (
@@ -66,6 +70,7 @@ def test_login_missing_data(client, login_data):
                            content_type="application/json")
 
     assert "Missing e-mail address or password" in response.data.decode()
+    assert response.status_code == 400
 
 
 def test_refresh(client, valid_token_pair):
@@ -77,6 +82,7 @@ def test_refresh(client, valid_token_pair):
 
     assert "access_token" in response.json
     assert Token.query.count() == count_before + 1
+    assert response.status_code == 200
 
 
 def test_refresh_user_not_found(client, valid_token_pair, mocker):
@@ -89,6 +95,7 @@ def test_refresh_user_not_found(client, valid_token_pair, mocker):
         "/auth/refresh", content_type="application/json", headers=headers)
 
     assert response.json == {"msg": "User in refresh token does not exist"}
+    assert response.status_code == 401
 
 
 def test_revoke_access_token(client, valid_token_pair, mocker):
@@ -100,6 +107,7 @@ def test_revoke_access_token(client, valid_token_pair, mocker):
                              content_type="application/json", headers=headers)
     assert response.json["message"] == "token revoked"
     mock.assert_called_once()
+    assert response.status_code == 200
 
 
 def test_revoke_refresh_token(client, valid_token_pair, mocker):
@@ -111,3 +119,4 @@ def test_revoke_refresh_token(client, valid_token_pair, mocker):
                              content_type="application/json", headers=headers)
     assert response.json["message"] == "token revoked"
     mock.assert_called_once()
+    assert response.status_code == 200
