@@ -2,12 +2,15 @@ import os
 import tempfile
 
 import pytest
+from flask import Flask
 from flask_migrate import upgrade
 
-from flask import Flask
-
+from everycache_api.app import (
+    configure_apispec,
+    configure_extensions,
+    register_blueprints,
+)
 from everycache_api.extensions import db
-from everycache_api.app import configure_apispec, configure_extensions, register_blueprints
 
 
 @pytest.fixture(scope="session")
