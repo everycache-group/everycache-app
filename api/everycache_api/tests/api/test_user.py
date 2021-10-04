@@ -320,3 +320,98 @@ class TestListPost:
         assert response.status_code == 400
         assert f"{unique_field_name} is already taken" in response.data.decode()
         assert User.query.count() == 1
+
+
+class TestCacheListGet:
+
+    def _get_headers(self, logged_in_user, tested_role):
+        user, access_token, _ = logged_in_user
+        headers = {}
+        if tested_role is not None:
+            user.role = tested_role
+            headers = get_auth_header(access_token)
+
+        return headers
+
+    @pytest.mark.parametrize("is_user_logged_in", (True, False))
+    def test_get_public_list(self, is_user_logged_in, client, logged_in_user):
+        user, access_token, _ = logged_in_user
+        cache = CacheFactory()
+        CacheFactory()
+        owner = cache.owner
+
+        headers = get_auth_header(access_token) if is_user_logged_in else {}
+        response = client.get(f"/api/users/{owner.username}/caches", headers=headers)
+
+        expected_caches = json.loads(
+            PublicCacheSchema().dumps(Cache.query.filter_by(owner_id=owner.id_),
+                                      many=True))
+        assert response.status_code == 200
+        assert response.json["results"] == expected_caches
+
+    @pytest.mark.parametrize("logged_in_user_role", (None, *list(User.Role)))
+    def test_get_owner_not_found(self, logged_in_user_role, client,
+                                 logged_in_user):
+        headers = self._get_headers(logged_in_user, logged_in_user_role)
+        response = client.get("/api/users/bogus_username/caches",
+                              headers=headers)
+
+        assert response.status_code == 404
+
+    @pytest.mark.parametrize("logged_in_user_role", (None, *list(User.Role)))
+    def test_get_owner_deleted(self, logged_in_user_role, client,
+                               logged_in_user):
+        cache = CacheFactory()
+        cache.owner.deleted = True
+        headers = self._get_headers(logged_in_user, logged_in_user_role)
+        response = client.get(f"/api/users/{cache.owner.username}/caches",
+                              headers=headers)
+
+        assert response.status_code == 404
+
+    @pytest.mark.parametrize("logged_in_user_role", (None, *list(User.Role)))
+    def test_get_deleted_cache(self, logged_in_user_role, client, logged_in_user):
+        cache = CacheFactory()
+
+        headers = self._get_headers(logged_in_user, logged_in_user_role)
+        response = client.get(f"/api/users/{cache.owner.username}/caches",
+                              headers=headers)
+
+        assert len(response.json["results"]) == 1
+
+        cache.deleted = True
+
+        response = client.get(f"/api/users/{cache.owner.username}/caches",
+                              headers=headers)
+
+        assert len(response.json["results"]) == 0
+
+    def test_get_as_admin(self, client, logged_in_user):
+        headers = self._get_headers(logged_in_user, User.Role.Admin)
+        cache = CacheFactory()
+        owner = cache.owner
+        CacheFactory(owner=owner)
+        CacheFactory()
+
+        response = client.get(f"/api/users/{owner.username}/caches", headers=headers)
+
+        expected_caches = json.loads(
+            CacheSchema().dumps(Cache.query.filter_by(owner_id=owner.id_),
+                                many=True))
+        assert response.status_code == 200
+        assert response.json["results"] == expected_caches
+
+    def test_get_as_owner(self, client, logged_in_user):
+        user, *_ = logged_in_user
+        headers = self._get_headers(logged_in_user, User.Role.Default)
+        CacheFactory(owner=user)
+        CacheFactory(owner=user)
+        CacheFactory()
+
+        response = client.get(f"/api/users/{user.username}/caches", headers=headers)
+
+        expected_caches = json.loads(
+            CacheSchema().dumps(Cache.query.filter_by(owner_id=user.id_),
+                                many=True))
+        assert response.status_code == 200
+        assert response.json["results"] == expected_caches

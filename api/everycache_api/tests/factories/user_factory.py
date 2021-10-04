@@ -10,7 +10,7 @@ class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
         sqlalchemy_session = db.session
         sqlalchemy_session_persistence = "commit"
 
-    id_ = factory.Sequence(lambda n: f"{n}")
+    id_ = factory.Sequence(lambda n: n)
     username = factory.Sequence(lambda n: f"testowy-{n}")
     email = factory.Sequence(lambda n: f"testowy-{n}@example.com")
 
