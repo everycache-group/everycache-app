@@ -141,7 +141,7 @@ class UserResource(Resource):
             return 403
 
         # find user
-        user = User.query.filter(username=username).first_or_404()
+        user = User.query.filter_by(username=username).first_or_404()
 
         # mark user as deleted
         user.deleted = True
