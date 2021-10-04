@@ -7,27 +7,8 @@ from everycache_api.models import User
 from everycache_api.tests.factories.user_factory import UserFactory
 
 
-def test_register(client):
-    assert User.query.count() == 0
-
-    user_data = {"username": "testowy", "password": "testpass",
-                 "email": "testowy@example.com", "role": "Default"}
-
-    response = client.post("/api/users", data=json.dumps(user_data),
-                           content_type="application/json")
-    assert "user created" in response.data.decode()
-
-    user_query = User.query.filter_by(username="testowy")
-    assert user_query.count() == 1
-    user = user_query.first()
-    assert user
-
-    assert user.email == "testowy@example.com"
-    assert user.role.name == "Default"
-    assert response.status_code == 201
-
-
 class TestGet:
+
     def test_get_public(self, client):
         user = UserFactory()
         response = client.get(f"/api/users/{user.username}")
@@ -72,6 +53,7 @@ class TestGet:
 
 
 class TestPut:
+
     def _get_user_edit_data(self, user):
         return json.dumps({
             "username": "changed_username",
@@ -187,3 +169,140 @@ class TestDelete:
 
         assert response.status_code == 404
         mocked_token_revoke.assert_not_called()
+
+
+class TestListGet:
+
+    @pytest.mark.parametrize("is_user_logged_in", (False, True))
+    def test_get_public_list(self, is_user_logged_in, client, logged_in_user):
+        user, access_token, _ = logged_in_user
+        for _ in range(5):
+            UserFactory()
+
+        headers = {}
+        if is_user_logged_in:
+            headers = {"Authorization": f"Bearer {access_token}"}
+
+        response = client.get("/api/users", headers=headers)
+
+        users = User.query.filter_by(verified=True)
+        users_expected = json.loads(PublicUserSchema().dumps(users, many=True))
+        assert response.json["results"] == users_expected
+        assert response.json["results"] != []
+        assert response.status_code == 200
+
+    @pytest.mark.parametrize("is_user_logged_in", (False, True))
+    def test_get_unverified_user_gets_hidden(self, is_user_logged_in, client,
+                                             logged_in_user):
+        user, access_token, _ = logged_in_user
+
+        headers = {}
+        if is_user_logged_in:
+            headers = {"Authorization": f"Bearer {access_token}"}
+
+        response = client.get("/api/users", headers=headers)
+        assert response.json["results"] != []
+        assert response.status_code == 200
+
+        user.verified = False
+        response = client.get("/api/users", headers=headers)
+        assert response.json["results"] == []
+        assert response.status_code == 200
+
+    def test_get_admin_list(self, client, logged_in_user):
+        user, access_token, _ = logged_in_user
+        user.role = User.Role.Admin
+        for _ in range(5):
+            UserFactory()
+
+        response = client.get(
+            "/api/users", headers={"Authorization": f"Bearer {access_token}"})
+
+        expected_users = json.loads(UserSchema().dumps(User.query.all(), many=True))
+
+        assert response.json["results"] == expected_users
+        assert response.status_code == 200
+
+    def test_get_admin_sees_all(self, client, logged_in_user):
+        user, access_token, _ = logged_in_user
+        user.role = User.Role.Admin
+
+        response = client.get(
+            "/api/users", headers={"Authorization": f"Bearer {access_token}"})
+
+        assert len(response.json["results"]) == 1
+        assert response.status_code == 200
+
+        UserFactory(verified=False)
+
+        response = client.get(
+            "/api/users", headers={"Authorization": f"Bearer {access_token}"})
+
+        assert len(response.json["results"]) == 2
+        assert response.status_code == 200
+
+
+class TestListPost:
+
+    @pytest.fixture()
+    def user_to_create_data(self):
+        return json.dumps({
+            "username": "testowy",
+            "password": "testpass",
+            "email": "testowy@example.com",
+            "role": "Default"})
+
+    def test_post(self, client, user_to_create_data):
+        assert User.query.count() == 0
+
+        response = client.post("/api/users", data=user_to_create_data,
+                               content_type="application/json")
+
+        assert response.status_code == 201
+        assert "user created" in response.data.decode()
+        user_query = User.query.filter_by(username="testowy")
+        assert user_query.count() == 1
+        user = user_query.first()
+
+        assert user
+        assert user.email == "testowy@example.com"
+        assert user.role.name == "Default"
+
+    @pytest.mark.parametrize("role", list(User.Role))
+    def test_post_logged_in(self, role, client, user_to_create_data, logged_in_user):
+        user, access_token, _ = logged_in_user
+
+        response = client.post(
+            "/api/users",
+            data=user_to_create_data,
+            content_type="application/json",
+            headers={"Authorization": f"Bearer {access_token}"})
+
+        assert response.status_code == 403
+        assert "user already logged in" in response.data.decode()
+
+    def test_post_email_taken(self, client, user_to_create_data, logged_in_user):
+        user, *_ = logged_in_user
+        user.email = "testowy@example.com"
+
+        assert User.query.count() == 1
+
+        response = client.post("/api/users", data=user_to_create_data,
+                               content_type="application/json")
+
+        assert response.status_code == 400
+        assert "email is already taken" in response.data.decode()
+        assert User.query.count() == 1
+
+    def test_post_username_taken(self, client, user_to_create_data, logged_in_user):
+        user, *_ = logged_in_user
+        user.username = "testowy"
+
+        assert User.query.count() == 1
+
+        response = client.post("/api/users", data=user_to_create_data,
+                               content_type="application/json")
+
+        assert response.status_code == 400
+        assert "username is already taken" in response.data.decode()
+        assert User.query.count() == 1
