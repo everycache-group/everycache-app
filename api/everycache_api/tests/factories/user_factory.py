@@ -1,6 +1,7 @@
 import factory
-from everycache_api.models import User as UserModel
+
 from everycache_api.extensions import db
+from everycache_api.models import User as UserModel
 
 
 class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -14,6 +15,7 @@ class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     role = UserModel.Role.Default
     password = factory.Sequence(lambda n: f"testpass{n}")
+    deleted = False
 
 
 class AdminFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -25,3 +27,4 @@ class AdminFactory(factory.alchemy.SQLAlchemyModelFactory):
     email = "testowy_admin@example.com"
     role = UserModel.Role.Admin
     password = "testpassadmin"
+    deleted = False

@@ -1,3 +1,4 @@
+import json
 import os
 import tempfile
 
@@ -11,6 +12,7 @@ from everycache_api.app import (
     register_blueprints,
 )
 from everycache_api.extensions import db
+from everycache_api.tests.factories.user_factory import UserFactory
 
 
 @pytest.fixture(scope="session")
@@ -46,3 +48,12 @@ def _db():
 def client(app):
     with app.test_client() as client:
         yield client
+
+
+@pytest.fixture()
+def logged_in_user(client):
+    user = UserFactory()
+    login_data = json.dumps({"email": user.email, "password": f"testpass{user.id_}"})
+    response = client.post("/auth/login", data=login_data,
+                           content_type="application/json")
+    return user, response.json["access_token"], response.json["refresh_token"]
