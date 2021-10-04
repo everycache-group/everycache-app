@@ -100,7 +100,7 @@ class CacheResource(Resource):
 
         # ensure current_user is authorized
         if current_user != cache.owner and current_user.role != User.Role.Admin:
-            return 403
+            return {}, 403
 
         schema = CacheSchema()
 
@@ -116,7 +116,7 @@ class CacheResource(Resource):
 
         # ensure current_user is authorized
         if current_user != cache.owner and current_user.role != User.Role.Admin:
-            return 403
+            return {}, 403
 
         # mark cache as deleted
         cache.deleted = True

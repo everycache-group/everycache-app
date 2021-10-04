@@ -98,7 +98,7 @@ class CacheCommentResource(Resource):
 
         # ensure current_user is authorized
         if current_user != comment.author and current_user.role != User.Role.Admin:
-            return 403
+            return {}, 403
 
         schema = CacheCommentSchema()
 
@@ -119,7 +119,7 @@ class CacheCommentResource(Resource):
 
         # ensure current_user is authorized
         if current_user != comment.author and current_user.role != User.Role.Admin:
-            return 403
+            return {}, 403
 
         # mark comment as deleted
         comment.deleted = True

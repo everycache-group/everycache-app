@@ -98,7 +98,7 @@ class CacheVisitResource(Resource):
 
         # ensure current_user is authorized
         if current_user != visit.user and current_user.role != User.Role.Admin:
-            return 403
+            return {}, 403
 
         schema = CacheVisitSchema()
 
@@ -116,7 +116,7 @@ class CacheVisitResource(Resource):
 
         # ensure current_user is authorized
         if current_user != visit.user and current_user.role != User.Role.Admin:
-            return 403
+            return {}, 403
 
         # delete visit
         db.session.delete(visit)

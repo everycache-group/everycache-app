@@ -122,7 +122,7 @@ class UserResource(Resource):
     def put(self, username: str):
         # ensure current_user is authorized
         if current_user.username != username and current_user.role != User.Role.Admin:
-            return 403
+            return {}, 403
 
         # find user
         user = User.query.filter_by(username=username).first_or_404()
@@ -138,7 +138,7 @@ class UserResource(Resource):
     def delete(self, username: str):
         # ensure current_user is authorized
         if current_user.username != username and current_user.role != User.Role.Admin:
-            return 403
+            return {}, 403
 
         # find user
         user = User.query.filter(username=username).first_or_404()
