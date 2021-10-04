@@ -268,8 +268,7 @@ class TestListPost:
         assert user.email == "testowy@example.com"
         assert user.role.name == "Default"
 
-    @pytest.mark.parametrize("role", list(User.Role))
-    def test_post_logged_in(self, role, client, user_to_create_data, logged_in_user):
+    def test_post_logged_in(self, client, user_to_create_data, logged_in_user):
         user, access_token, _ = logged_in_user
 
         response = client.post(
@@ -280,6 +279,19 @@ class TestListPost:
 
         assert response.status_code == 403
         assert "user already logged in" in response.data.decode()
+
+    def test_post_logged_in_as_admin(self, client, user_to_create_data, logged_in_user):
+        user, access_token, _ = logged_in_user
+        user.role = User.Role.Admin
+
+        response = client.post(
+            "/api/users",
+            data=user_to_create_data,
+            content_type="application/json",
+            headers={"Authorization": f"Bearer {access_token}"})
+
+        assert response.status_code == 201
+        assert "user created" in response.data.decode()
 
     def test_post_email_taken(self, client, user_to_create_data, logged_in_user):
         user, *_ = logged_in_user
