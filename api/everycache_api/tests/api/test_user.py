@@ -245,12 +245,16 @@ class TestListGet:
 class TestListPost:
 
     @pytest.fixture()
-    def user_to_create_data(self):
-        return json.dumps({
+    def user_to_create_data_dict(self):
+        return {
             "username": "testowy",
             "password": "testpass",
             "email": "testowy@example.com",
-            "role": "Default"})
+            "role": "Default"}
+
+    @pytest.fixture()
+    def user_to_create_data(self, user_to_create_data_dict):
+        return json.dumps(user_to_create_data_dict)
 
     def test_post(self, client, user_to_create_data):
         assert User.query.count() == 0
@@ -293,28 +297,23 @@ class TestListPost:
         assert response.status_code == 201
         assert "user created" in response.data.decode()
 
-    def test_post_email_taken(self, client, user_to_create_data, logged_in_user):
-        user, *_ = logged_in_user
-        user.email = "testowy@example.com"
+    @pytest.mark.parametrize("is_issued_by_admin", (True, False))
+    @pytest.mark.parametrize("unique_field_name", ("username", "email"))
+    def test_post_unique_value_taken(self, is_issued_by_admin, unique_field_name,
+                                     client, user_to_create_data_dict, logged_in_user):
+        user, access_token, _ = logged_in_user
+        setattr(user, unique_field_name, user_to_create_data_dict[unique_field_name])
+        user.role = User.Role.Admin
 
         assert User.query.count() == 1
 
-        response = client.post("/api/users", data=user_to_create_data,
-                               content_type="application/json")
+        headers = {}
+        if is_issued_by_admin:
+            headers = {"Authorization": f"Bearer {access_token}"}
+
+        response = client.post("/api/users", data=json.dumps(user_to_create_data_dict),
+                               content_type="application/json", headers=headers)
 
         assert response.status_code == 400
-        assert "email is already taken" in response.data.decode()
-        assert User.query.count() == 1
-
-    def test_post_username_taken(self, client, user_to_create_data, logged_in_user):
-        user, *_ = logged_in_user
-        user.username = "testowy"
-
-        assert User.query.count() == 1
-
-        response = client.post("/api/users", data=user_to_create_data,
-                               content_type="application/json")
-
-        assert response.status_code == 400
-        assert "username is already taken" in response.data.decode()
+        assert f"{unique_field_name} is already taken" in response.data.decode()
         assert User.query.count() == 1
