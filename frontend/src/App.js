@@ -18,8 +18,9 @@ function App() {
   },[]);
 
   return (
-    
+    <>
     <Router>
+      
       {logged && <Sidebar />}
       <Switch>
         <Route path='/auth' component={Page.Auth} />
@@ -28,6 +29,9 @@ function App() {
       </Switch>
     </Router>
 
+
+   
+    </>
   );
 }
 

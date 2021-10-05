@@ -6,5 +6,6 @@ export const RegisterForm = styled.form`
     flex-direction: column;
     align-items: center;
     justify-content: space-around;
-    height: 300px;
+    height: 350px;
+    z-index: 0;
 `;
