@@ -3,9 +3,11 @@ import json
 import pytest
 
 from everycache_api.api.schemas.cache import CacheSchema, PublicCacheSchema
+from everycache_api.api.schemas.cache_visit import CacheVisitSchema
 from everycache_api.api.schemas.user import PublicUserSchema, UserSchema
-from everycache_api.models import Cache, User
+from everycache_api.models import Cache, CacheVisit, User
 from everycache_api.tests.factories.cache_factory import CacheFactory
+from everycache_api.tests.factories.cache_visit_factory import CacheVisitFactory
 from everycache_api.tests.factories.user_factory import UserFactory
 from everycache_api.tests.helpers import get_auth_header
 
@@ -415,3 +417,82 @@ class TestCacheListGet:
                                 many=True))
         assert response.status_code == 200
         assert response.json["results"] == expected_caches
+
+
+class TestCacheVisitListGet:
+
+    def _validate_success_for_user(self, client, user, access_token):
+        response = client.get(f"/api/users/{user.username}/visits",
+                              headers=get_auth_header(access_token))
+
+        cache_visits_for_user = CacheVisit.query.filter_by(user=user)
+        expected_cache_visits = json.loads(
+            CacheVisitSchema().dumps(cache_visits_for_user, many=True))
+        assert response.json["results"] == expected_cache_visits
+        assert response.status_code == 200
+
+    def test_get_unauthorized(self, client):
+        response = client.get("/api/users/username/visits")
+        assert response.status_code == 401
+
+    @pytest.mark.parametrize("logged_in_user_role", list(User.Role))
+    def test_get_own_visits(self, logged_in_user_role, client, logged_in_user):
+        user, access_token, _ = logged_in_user
+        user.role = logged_in_user_role
+        CacheVisitFactory(user=user)
+        CacheVisitFactory()
+
+        self._validate_success_for_user(client, user, access_token)
+
+    @pytest.mark.parametrize("logged_in_user_role", list(User.Role))
+    def test_get_other_user_visits(self, logged_in_user_role, client, logged_in_user):
+        logged_user, access_token, _ = logged_in_user
+        logged_user.role = logged_in_user_role
+        cache_visit = CacheVisitFactory()
+        user = cache_visit.user
+        CacheVisitFactory(user=user)
+        CacheVisitFactory()
+
+        self._validate_success_for_user(client, user, access_token)
+
+    @pytest.mark.parametrize("logged_in_user_role", list(User.Role))
+    def test_get_no_user_found(self, logged_in_user_role, client, logged_in_user):
+        logged_user, access_token, _ = logged_in_user
+        logged_user.role = logged_in_user_role
+        CacheVisitFactory()
+
+        response = client.get("/api/users/username/visits",
+                              headers=get_auth_header(access_token))
+
+        assert response.status_code == 404
+
+    @pytest.mark.parametrize("logged_in_user_role", list(User.Role))
+    def test_get_no_user_deleted(self, logged_in_user_role, client, logged_in_user):
+        logged_user, access_token, _ = logged_in_user
+        logged_user.role = logged_in_user_role
+        cache_visit = CacheVisitFactory()
+        user = cache_visit.user
+        user.deleted = True
+
+        response = client.get(f"/api/users/{user.username}/visits",
+                              headers=get_auth_header(access_token))
+
+        assert response.status_code == 404
+
+    @pytest.mark.parametrize("deleted_name", ("cache_visit", "cache"))
+    @pytest.mark.parametrize("logged_in_user_role", list(User.Role))
+    def test_get_deleted(self, deleted_name, logged_in_user_role, client,
+                         logged_in_user):
+        logged_user, access_token, _ = logged_in_user
+        logged_user.role = logged_in_user_role
+        cache_visit = CacheVisitFactory()
+        if deleted_name == "cache_visit":
+            cache_visit.deleted = True
+        else:
+            getattr(cache_visit, deleted_name).deleted = True
+
+        response = client.get(f"/api/users/{cache_visit.user.username}/visits",
+                              headers=get_auth_header(access_token))
+
+        assert response.status_code == 200
+        assert response.json["results"] == []
