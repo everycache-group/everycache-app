@@ -214,8 +214,8 @@ class TestListGet:
 
         users = User.query.filter_by(verified=True)
         users_expected = json.loads(PublicUserSchema().dumps(users, many=True))
+        assert user in users.all()
         assert response.json["results"] == users_expected
-        assert response.json["results"] != []
         assert response.status_code == 200
 
     @pytest.mark.parametrize("is_user_logged_in", (False, True))
@@ -323,6 +323,7 @@ class TestListPost:
 
         assert response.status_code == 201
         assert "user created" in response.data.decode()
+        assert User.query.count() == 2
 
     @pytest.mark.parametrize("is_issued_by_admin", (True, False))
     @pytest.mark.parametrize("unique_field_name", ("username", "email"))
@@ -358,10 +359,12 @@ class TestCacheListGet:
         headers = get_auth_header(access_token) if is_user_logged_in else {}
         response = client.get(f"/api/users/{owner.username}/caches", headers=headers)
 
+        caches = Cache.query.filter_by(owner_id=owner.id_)
         expected_caches = json.loads(
-            PublicCacheSchema().dumps(Cache.query.filter_by(owner_id=owner.id_),
-                                      many=True))
+            PublicCacheSchema().dumps(caches, many=True))
+
         assert response.status_code == 200
+        assert cache in caches.all()
         assert response.json["results"] == expected_caches
 
     @pytest.mark.parametrize("logged_in_user_role", (None, *list(User.Role)))
@@ -410,25 +413,25 @@ class TestCacheListGet:
 
         response = client.get(f"/api/users/{owner.username}/caches", headers=headers)
 
-        expected_caches = json.loads(
-            CacheSchema().dumps(Cache.query.filter_by(owner_id=owner.id_),
-                                many=True))
+        caches = Cache.query.filter_by(owner_id=owner.id_)
+        expected_caches = json.loads(CacheSchema().dumps(caches, many=True))
         assert response.status_code == 200
+        assert cache in caches.all()
         assert response.json["results"] == expected_caches
 
     def test_get_as_owner(self, client, logged_in_user):
         user, *_ = logged_in_user
         headers = _get_headers(logged_in_user, User.Role.Default)
-        CacheFactory(owner=user)
+        cache = CacheFactory(owner=user)
         CacheFactory(owner=user)
         CacheFactory()
 
         response = client.get(f"/api/users/{user.username}/caches", headers=headers)
 
-        expected_caches = json.loads(
-            CacheSchema().dumps(Cache.query.filter_by(owner_id=user.id_),
-                                many=True))
+        caches = Cache.query.filter_by(owner_id=user.id_)
+        expected_caches = json.loads(CacheSchema().dumps(caches, many=True))
         assert response.status_code == 200
+        assert cache in caches.all()
         assert response.json["results"] == expected_caches
 
 
