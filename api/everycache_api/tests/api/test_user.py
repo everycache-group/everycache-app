@@ -444,7 +444,7 @@ class TestCacheListGet:
         assert response.json["results"] == expected_caches
 
 
-class TestCacheVisitListGet:
+class TestUserCacheVisitListGet:
 
     def _validate_success_for_user(self, client, user, access_token, cache_visit):
         response = client.get(f"/api/users/{user.username}/visits",
