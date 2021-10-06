@@ -14,7 +14,7 @@ from everycache_api.tests.factories.user_factory import UserFactory
 from everycache_api.tests.helpers import get_auth_header, get_headers_for_user
 
 
-class TestGet:
+class TestUserGet:
 
     def test_get_public(self, client):
         user = UserFactory()
@@ -70,7 +70,7 @@ class TestGet:
         assert response.status_code == 404
 
 
-class TestPut:
+class TestUserPut:
 
     def _get_user_edit_data(self, user):
         return json.dumps({
@@ -127,7 +127,7 @@ class TestPut:
         assert response.status_code == 404
 
 
-class TestDelete:
+class TestUserDelete:
 
     @pytest.fixture()
     def mocked_token_revoke(self, mocker):
@@ -189,7 +189,7 @@ class TestDelete:
         mocked_token_revoke.assert_not_called()
 
 
-class TestListGet:
+class TestUserListGet:
 
     @pytest.mark.parametrize("is_user_logged_in", (False, True))
     def test_get_public_list(self, is_user_logged_in, client, logged_in_user):
@@ -278,7 +278,7 @@ class TestListGet:
         assert response.status_code == 200
 
 
-class TestListPost:
+class TestUserListPost:
 
     @pytest.fixture()
     def user_to_create_data_dict(self):
@@ -356,7 +356,7 @@ class TestListPost:
         assert User.query.count() == 1
 
 
-class TestCacheListGet:
+class TestUserCacheListGet:
 
     @pytest.mark.parametrize("is_user_logged_in", (True, False))
     def test_get_public_list(self, is_user_logged_in, client, logged_in_user):
