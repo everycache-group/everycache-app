@@ -5,7 +5,7 @@ import pytest
 from everycache_api.api.schemas.cache import CacheSchema, PublicCacheSchema
 from everycache_api.models import Cache, User
 from everycache_api.tests.factories.cache_factory import CacheFactory
-from everycache_api.tests.helpers import get_headers_for_user
+from everycache_api.tests.helpers import get_auth_header, get_headers_for_user
 
 
 class TestCacheGet:
@@ -222,3 +222,98 @@ class TestCacheDelete:
 
         assert response.status_code == 403
         assert cache.deleted is False
+
+
+class TestCacheListGet:
+
+    @pytest.mark.parametrize("is_user_logged_in", (False, True))
+    def test_get_public_list(self, is_user_logged_in, client, logged_in_user):
+        user, access_token, _ = logged_in_user
+        cache = CacheFactory()
+        for _ in range(5):
+            CacheFactory()
+
+        headers = {}
+        if is_user_logged_in:
+            headers = get_auth_header(access_token)
+
+        response = client.get("/api/caches", headers=headers)
+
+        caches = Cache.query.all()
+        caches_expected = json.loads(PublicCacheSchema().dumps(caches, many=True))
+        assert cache in caches
+        assert response.json["results"] == caches_expected
+        assert response.status_code == 200
+
+    def test_get_admin_list(self, client, logged_in_user):
+        for _ in range(5):
+            CacheFactory()
+
+        headers = get_headers_for_user(logged_in_user, User.Role.Admin)
+        response = client.get("/api/caches", headers=headers)
+
+        expected_caches = json.loads(
+            CacheSchema().dumps(Cache.query.all(), many=True))
+
+        assert response.json["results"] == expected_caches
+        assert response.status_code == 200
+
+    @pytest.mark.parametrize("logged_in_user_role", list(User.Role))
+    def test_get_deleted_cache_hidden(self, logged_in_user_role, client,
+                                      logged_in_user):
+        cache = CacheFactory()
+        headers = get_headers_for_user(logged_in_user, logged_in_user_role)
+
+        response = client.get("/api/caches", headers=headers)
+        assert len(response.json["results"]) == 1
+
+        cache.deleted = True
+
+        response = client.get("/api/caches", headers=headers)
+        assert len(response.json["results"]) == 0
+
+
+class TestCacheListPost:
+
+    @pytest.fixture()
+    def _post_data_dict(self):
+        return {
+            "lon": 2.3,
+            "lat": 4.3,
+            "name": "new_cache_name"
+        }
+
+    @pytest.fixture()
+    def _post_data(self, _post_data_dict):
+        return json.dumps(_post_data_dict)
+
+    def _send_post_request(self, client, post_data, headers):
+        return client.post(
+            "/api/caches",
+            headers=headers,
+            content_type="application/json",
+            data=post_data)
+
+    def test_post_unauthorized(self, client, _post_data):
+        assert Cache.query.count() == 0
+        response = self._send_post_request(client, _post_data, {})
+
+        assert response.status_code == 401
+        assert Cache.query.count() == 0
+
+    @pytest.mark.parametrize("logged_in_user_role", list(User.Role))
+    def test_post_cache_created(self, logged_in_user_role, client, _post_data_dict,
+                                logged_in_user):
+        user, *_ = logged_in_user
+        headers = get_headers_for_user(logged_in_user, logged_in_user_role)
+        _post_data = json.dumps(_post_data_dict)
+
+        assert Cache.query.count() == 0
+        response = self._send_post_request(client, _post_data, headers)
+
+        assert response.status_code == 201
+        assert Cache.query.count() == 1
+        cache = Cache.query.first()
+        for key, value in _post_data_dict.items():
+            assert type(value)(getattr(cache, key)) == value
+        assert cache.owner == user
