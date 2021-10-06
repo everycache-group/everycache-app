@@ -35,9 +35,9 @@ class TestCacheGet:
         response = client.get(f"/api/caches/{cache.id_}", headers=headers)
 
         cache = Cache.query.filter_by(id_=cache.id_).first()
-        cache_deserailized = json.loads(PublicCacheSchema().dumps(cache))
+        cache_deserialized = json.loads(PublicCacheSchema().dumps(cache))
         assert response.status_code == 200
-        assert response.json["cache"] == cache_deserailized
+        assert response.json["cache"] == cache_deserialized
 
     def test_get_other_user_cache_by_admin(self, client, logged_in_user):
         cache = CacheFactory()
@@ -47,9 +47,9 @@ class TestCacheGet:
 
         assert response.status_code == 200
         cache = Cache.query.filter_by(id_=cache.id_).first()
-        cache_deserailized = json.loads(CacheSchema().dumps(cache))
+        cache_deserialized = json.loads(CacheSchema().dumps(cache))
 
-        assert response.json["cache"] == cache_deserailized
+        assert response.json["cache"] == cache_deserialized
 
     @pytest.mark.parametrize("logged_in_user_role", list(User.Role))
     def test_get_own_cache(self, logged_in_user_role, client, logged_in_user):
@@ -61,9 +61,9 @@ class TestCacheGet:
 
         assert response.status_code == 200
         cache = Cache.query.filter_by(id_=cache.id_).first()
-        cache_deserailized = json.loads(CacheSchema().dumps(cache))
+        cache_deserialized = json.loads(CacheSchema().dumps(cache))
 
-        assert response.json["cache"] == cache_deserailized
+        assert response.json["cache"] == cache_deserialized
 
 
 class TestCachePut:
