@@ -227,6 +227,24 @@ class TestListGet:
         assert response.json["results"] == []
         assert response.status_code == 200
 
+    @pytest.mark.parametrize("is_user_logged_in", (False, True))
+    def test_get_deleted_user_gets_hidden(self, is_user_logged_in, client,
+                                          logged_in_user):
+        user, access_token, _ = logged_in_user
+
+        headers = {}
+        if is_user_logged_in:
+            headers = get_auth_header(access_token)
+
+        response = client.get("/api/users", headers=headers)
+        assert response.json["results"] != []
+        assert response.status_code == 200
+
+        user.deleted = True
+        response = client.get("/api/users", headers=headers)
+        assert response.json["results"] == []
+        assert response.status_code == 200
+
     def test_get_admin_list(self, client, logged_in_user):
         user, access_token, _ = logged_in_user
         user.role = User.Role.Admin
