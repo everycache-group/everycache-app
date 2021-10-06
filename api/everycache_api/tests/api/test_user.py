@@ -32,15 +32,6 @@ class TestGet:
         assert response.json == {"user": json.loads(PublicUserSchema().dumps(user))}
         assert response.status_code == 200
 
-    def test_get_self(self, client, logged_in_user):
-        user, access_token, _ = logged_in_user
-        headers = get_auth_header(access_token)
-        response = client.get(f"/api/users/{user.username}",
-                              content_type="application/json", headers=headers)
-
-        assert response.json == {"user": json.loads(UserSchema().dumps(user))}
-        assert response.status_code == 200
-
     def test_get_other_user(self, client, logged_in_user):
         user_1 = UserFactory()
         user_2, access_token, _ = logged_in_user
@@ -51,12 +42,21 @@ class TestGet:
         assert response.json == {"user": json.loads(PublicUserSchema().dumps(user_1))}
         assert response.status_code == 200
 
+    def test_get_self(self, client, logged_in_user):
+        user, access_token, _ = logged_in_user
+        headers = get_auth_header(access_token)
+        response = client.get(f"/api/users/{user.username}",
+                              content_type="application/json", headers=headers)
+
+        assert response.json == {"user": json.loads(UserSchema().dumps(user))}
+        assert response.status_code == 200
+
     def test_get_no_user(self, client):
         response = client.get("/api/users/username", content_type="application/json")
 
         assert response.status_code == 404
 
-    def test_get_admin(self, client, logged_in_user):
+    def test_get_by_admin(self, client, logged_in_user):
         user, access_token, _ = logged_in_user
         user.role = User.Role.Admin
         user_2 = UserFactory()
@@ -66,6 +66,17 @@ class TestGet:
                               content_type="application/json", headers=headers)
         assert response.json == {"user": json.loads(UserSchema().dumps(user_2))}
         assert response.status_code == 200
+
+    @pytest.mark.parametrize("logged_in_user_role", (None, *list(User.Role)))
+    def test_get_deleted_user(self, logged_in_user_role, client, logged_in_user):
+        headers = _get_headers(logged_in_user, logged_in_user_role)
+        user = UserFactory()
+        user.deleted = True
+
+        response = client.get(f"/api/users/{user.username}",
+                              content_type="application/json", headers=headers)
+
+        assert response.status_code == 404
 
 
 class TestPut:
