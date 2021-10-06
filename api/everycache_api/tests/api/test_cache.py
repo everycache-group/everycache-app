@@ -64,3 +64,72 @@ class TestCacheGet:
         cache_deserailized = json.loads(CacheSchema().dumps(cache))
 
         assert response.json["cache"] == cache_deserailized
+
+
+class TestCachePut:
+
+    @pytest.fixture()
+    def _put_data_dict(self):
+        return {
+            "lon": 2.3,
+            "lat": 4.3,
+            "name": "new_cache_name"
+        }
+
+    @pytest.fixture()
+    def _put_data(self, _put_data_dict):
+        return json.dumps(_put_data_dict)
+
+    def _send_put_request(self, client, put_data, headers, cache_id):
+        return client.put(
+            f"/api/caches/{cache_id}",
+            headers=headers,
+            content_type="application/json",
+            data=put_data)
+
+    def test_put_unauthorized(self, client, _put_data):
+        cache = CacheFactory()
+        response = self._send_put_request(client, _put_data, {}, cache.id_)
+
+        assert response.status_code == 401
+
+    @pytest.mark.parametrize("logged_in_user_role", list(User.Role))
+    def test_put_cache_not_found(self, logged_in_user_role, _put_data, client,
+                                 logged_in_user):
+        headers = get_headers_for_user(logged_in_user, logged_in_user_role)
+        response = self._send_put_request(client, _put_data, headers, 2)
+
+        assert response.status_code == 404
+
+    @pytest.mark.parametrize("logged_in_user_role", list(User.Role))
+    def test_put_cache_deleted(self, logged_in_user_role, _put_data, client,
+                               logged_in_user):
+        user, *_ = logged_in_user
+        cache = CacheFactory(deleted=True, owner=user)
+        headers = get_headers_for_user(logged_in_user, logged_in_user_role)
+        response = self._send_put_request(client, _put_data, headers, cache.id_)
+        assert response.status_code == 404
+
+    @pytest.mark.parametrize("logged_in_user_role", list(User.Role))
+    def test_put_own_cache(self, logged_in_user_role, _put_data_dict, client,
+                           logged_in_user):
+        user, *_ = logged_in_user
+        cache = CacheFactory(owner=user)
+
+        headers = get_headers_for_user(logged_in_user, logged_in_user_role)
+        response = self._send_put_request(
+            client, json.dumps(_put_data_dict), headers, cache.id_)
+
+        assert response.status_code == 200
+        for key, value in _put_data_dict.items():
+            assert type(value)(getattr(cache, key)) == value
+
+    def test_put_other_users_cache(self, client, _put_data, logged_in_user):
+        cache = CacheFactory()
+        init_name = cache.name
+        headers = get_headers_for_user(logged_in_user, User.Role.Default)
+        response = self._send_put_request(
+            client, _put_data, headers, cache.id_)
+
+        assert response.status_code == 403
+        assert cache.name == init_name
