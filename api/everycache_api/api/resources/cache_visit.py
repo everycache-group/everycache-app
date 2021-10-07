@@ -1,4 +1,4 @@
-from flask import request
+from flask import abort, request
 from flask_jwt_extended import current_user, jwt_required
 from flask_restful import Resource
 
@@ -98,7 +98,7 @@ class CacheVisitResource(Resource):
 
         # ensure current_user is authorized
         if current_user != visit.user and current_user.role != User.Role.Admin:
-            return 403
+            abort(403)
 
         schema = CacheVisitSchema()
 
@@ -116,7 +116,7 @@ class CacheVisitResource(Resource):
 
         # ensure current_user is authorized
         if current_user != visit.user and current_user.role != User.Role.Admin:
-            return 403
+            abort(403)
 
         # delete visit
         db.session.delete(visit)
