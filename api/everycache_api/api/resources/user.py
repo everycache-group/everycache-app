@@ -1,4 +1,4 @@
-from flask import request
+from flask import abort, request
 from flask_jwt_extended import current_user, jwt_required
 from flask_restful import Resource
 
@@ -122,7 +122,7 @@ class UserResource(Resource):
     def put(self, user_id: str):
         # ensure current_user is authorized
         if current_user.ext_id != user_id and current_user.role != User.Role.Admin:
-            return 403
+            abort(403)
 
         # find user
         user = User.query_ext_id(user_id).filter_by(deleted=False).first_or_404()
@@ -138,8 +138,8 @@ class UserResource(Resource):
 
     def delete(self, user_id: str):
         # ensure current_user is authorized
-        if current_user.user_id != user_id and current_user.role != User.Role.Admin:
-            return 403
+        if current_user.ext_id != user_id and current_user.role != User.Role.Admin:
+            abort(403)
 
         # find user
         user = User.query_ext_id(user_id).filter_by(deleted=False).first_or_404()
