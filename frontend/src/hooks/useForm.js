@@ -23,11 +23,17 @@ const useForm = (initialFormValues, callback) => {
     };
 
     useEffect(() => {
+        
+        console.log(errors);
+
         if(isInitialMount.current)
         {
+          
             isInitialMount.current = false;
         } else {
-            const formOk = Object.keys(errors).length === 0; // if no errors
+
+            const formOk = Object.keys(errors).length === 0;
+            
             if(formOk && callback instanceof Function)
                 callback();
         }

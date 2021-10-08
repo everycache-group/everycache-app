@@ -9,12 +9,7 @@ export async function sendRequest(action, resource, id = null, params)
     const endpoint     = createEndpoint(resource, id);
     const fetchOptions = createfetchOptions(action, params);
     
-    const response = await fetch(endpoint, fetchOptions);
-    const json     = await response.json();
-
-    console.log(json);
-
-    return json;
+    return await fetch(endpoint, fetchOptions);
 }
 
 function createfetchOptions(action, params)

@@ -8,6 +8,7 @@ function AuthenticationPage() {
         <Style.AuthWrapper>
             <Style.AuthContainer>
                 <Login />
+                
             </Style.AuthContainer>
         </Style.AuthWrapper>
     )

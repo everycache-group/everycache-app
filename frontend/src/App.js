@@ -10,7 +10,9 @@ import ProtectedRoute from './Routes/ProtectedRoute';
 
 function App() {
 
-   const logged =  useSelector((state) => state.user.logged);
+
+  
+   const logged =  useSelector((state) => state.auth.logged);
 
   //only for testing redux store
   useEffect(() => {
