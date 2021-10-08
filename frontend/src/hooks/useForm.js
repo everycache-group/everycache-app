@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef} from 'react'
 import validation from './../services/validationFormService'
 
-const useForm = (initialFormValues, formValidHandler) => {
+const useForm = (initialFormValues, callback) => {
     const [formValues, setFormValues] = useState(initialFormValues);
     const [errors, setErrors] = useState({});
     const [formValid, setFormValid]= useState(false);
@@ -28,8 +28,8 @@ const useForm = (initialFormValues, formValidHandler) => {
             isInitialMount.current = false;
         } else {
             const formOk = Object.keys(errors).length === 0; // if no errors
-            if(formOk && formValidHandler instanceof Function)
-            formValidHandler();
+            if(formOk && callback instanceof Function)
+                callback();
         }
     }, [errors])
 

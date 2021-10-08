@@ -28,8 +28,6 @@ function App() {
         <ProtectedRoute path="/submenu1"  component= { Page.SubMenu1 } />
       </Switch>
     </Router>
-
-
    
     </>
   );

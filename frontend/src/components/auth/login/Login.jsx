@@ -1,24 +1,25 @@
 import React, {useState} from 'react'
-
 import * as Style from './style'
 import TextField from '@mui/material/TextField'
 import LoadingButton from '@mui/lab/LoadingButton'
 import useForm from '../../../hooks/useForm'
+import * as auth from '../../../services/authService'
 
 
 
 
 function Login() {
-
     const [registering, setRegistering]= useState(false);
 
     const {handleFormSubmit, handleUserInput, formValues, errors} = useForm({
-        username: "",  email: "",  password: "",}
+        email: "",  password: "",}
         , () => {
-        const {username, email, password} = formValues;
-        //user.create(username, email, password).then(() => "XD");
+        const {email, password} = formValues;
+        
+        auth.loginUser(email, password).then(response => {
+            
+        }).catch(x => "Login Failed");
     });
-
 
 
     return (

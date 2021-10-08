@@ -19,7 +19,7 @@ function Register() {
         password2: ""
     }, () => {
         const {username, email, password} = formValues;
-        user.create(username, email, password).then(() => "XD");
+        user.create(username, email, password).then(x => console.log("register succesfull")).catch(x => console.log("failed!"));
     });
     
     return (
