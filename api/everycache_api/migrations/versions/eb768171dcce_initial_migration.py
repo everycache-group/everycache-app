@@ -36,7 +36,6 @@ def upgrade():
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column("deleted", sa.Boolean(), nullable=False),
         sa.Column("name", sa.Text(), nullable=False),
-        sa.Column("description", sa.Text(), nullable=False),
         sa.Column("created_on", sa.DateTime(), nullable=False),
         sa.Column("lon", sa.Numeric(scale=4), nullable=False),
         sa.Column("lat", sa.Numeric(scale=4), nullable=False),
