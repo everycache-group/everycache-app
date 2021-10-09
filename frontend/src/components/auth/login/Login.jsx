@@ -3,9 +3,8 @@ import * as Style from "./style";
 import TextField from "@mui/material/TextField";
 import LoadingButton from "@mui/lab/LoadingButton";
 import useForm from "../../../hooks/useForm";
-import * as auth from "../../../services/authService";
-import { login } from "./../../../redux/slices/authSlice";
-import { useDispatch } from "react-redux";
+import { loginUser } from "./../../../redux/slices/authSlice";
+import { useDispatch, useSelector } from "react-redux";
 import { Redirect } from "react-router";
 
 function Login() {
@@ -14,6 +13,8 @@ function Login() {
 
   const dispatch = useDispatch();
 
+  const logged = useSelector((state) => state.auth.logged);
+
   const { handleFormSubmit, handleUserInput, formValues, errors } = useForm(
     {
       email: "",
@@ -21,23 +22,11 @@ function Login() {
     },
     () => {
       const { email, password } = formValues;
-
-      auth
-        .loginUser(email, password, (response) => {
-          dispatch(
-            login({
-              access_token: response.access_token,
-              refresh_token: response.refresh_token,
-            })
-          );
-
-          setRedirect(true);
-        })
-        .catch((x) => console.log(x));
+      dispatch(loginUser({ email, password }));
     }
   );
 
-  if (redirect) return <Redirect to="/" />;
+  if (logged) return <Redirect to="/" />;
 
   return (
     <Style.LoginForm>

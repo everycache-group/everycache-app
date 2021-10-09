@@ -3,8 +3,8 @@ import * as api from "./../api/api-core";
 const userResource = api.resources.user;
 
 //tested
-export async function create(username, email, password) {
-  return await api.create(userResource, { username, email, password });
+export async function create(userData) {
+  return await api.create(userResource, userData);
 }
 
 //TODO check it
