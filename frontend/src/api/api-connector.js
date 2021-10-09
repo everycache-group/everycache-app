@@ -1,44 +1,38 @@
-import config from './api-config.json'
+import config from "./api-config.json";
 
-const {protocol, machine, port} = config.connection;
+const { protocol, machine, port } = config.connection;
 const apiUrl = `${protocol}://${machine}:${port}`;
 
+export async function sendRequest(action, resource, id = null, params) {
+  const endpoint = createEndpoint(resource, id);
+  const fetchOptions = createfetchOptions(action, params);
 
-export async function sendRequest(action, resource, id = null, params)
-{
-    const endpoint     = createEndpoint(resource, id);
-    const fetchOptions = createfetchOptions(action, params);
-
-    return await fetch(endpoint, fetchOptions).catch(x => x);
+  return await fetch(endpoint, fetchOptions).catch((x) => x);
 }
 
-function createfetchOptions(action, params)
-{
-    const options = {};
+function createfetchOptions(action, params) {
+  const options = {};
 
-    if(action)
-        options.method = action;
+  if (action) options.method = action;
 
-    if(params)
-        options.body = JSON.stringify(params);
+  if (params) options.body = JSON.stringify(params);
 
-    options.headers = {
-        'Content-Type': 'application/json'
-    }
+  options.headers = {
+    "Content-Type": "application/json",
+  };
 
-    //console.log(options);
+  //console.log(options);
 
-    return options;
+  return options;
 }
 
-function createEndpoint(resource, id = null)
-{
-    let endpoint = `${apiUrl}/${resource}`;
+function createEndpoint(resource, id = null) {
+  let endpoint = `${apiUrl}/${resource}`;
 
-    if(id) {
-        endpoint += `/${id}`
-    }
-    //console.log(endpoint);
+  if (id) {
+    endpoint += `/${id}`;
+  }
+  //console.log(endpoint);
 
-    return endpoint;
+  return endpoint;
 }

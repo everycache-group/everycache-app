@@ -17,7 +17,6 @@ class Map extends React.Component {
   const [cachesLoaded, setCachesLoaded] = useState(false);
 
 
-  setCachesLoaded(true);
 
   componentDidMount() {
     var backend_url =
