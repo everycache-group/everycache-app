@@ -2,13 +2,15 @@ import React, { useState } from "react";
 import * as Style from "./style";
 import TextField from "@mui/material/TextField";
 import LoadingButton from "@mui/lab/LoadingButton";
-import { Redirect } from "react-router-dom";
-import * as user from "./../../../services/userService";
-
 import useForm from "../../../hooks/useForm";
+import { createUser } from "./../../../redux/slices/userSlice";
+import { useDispatch } from "react-redux";
+import { create } from "../../../api/api-core";
 
 function Register() {
   const [registering, setRegistering] = useState(false);
+
+  const dispatch = useDispatch();
 
   const { handleFormSubmit, handleUserInput, formValues, errors } = useForm(
     {
@@ -19,10 +21,14 @@ function Register() {
     },
     () => {
       const { username, email, password } = formValues;
-      user
-        .create(username, email, password)
-        .then((x) => console.log("register succesfull"))
-        .catch((x) => console.log("failed!"));
+
+      dispatch(
+        createUser({
+          username,
+          email,
+          password,
+        })
+      );
     }
   );
 
