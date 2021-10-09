@@ -5,17 +5,15 @@ from sqlalchemy_utils.types.choice import ChoiceType
 
 from everycache_api.extensions import db, pwd_context
 
+from .base import BaseMixin
 
-class User(db.Model):
+
+class User(BaseMixin, db.Model):
     class Role(Enum):
         Admin = "admin"
         Default = "default"
 
     __tablename__ = "users"
-
-    # base properties
-    id_ = db.Column("id", db.Integer, primary_key=True, autoincrement=True)
-    deleted = db.Column(db.Boolean, nullable=False, default=False)
 
     # own properties
     username = db.Column(db.String(80), unique=True, nullable=False)

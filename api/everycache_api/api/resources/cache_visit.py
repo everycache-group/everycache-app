@@ -80,21 +80,17 @@ class CacheVisitResource(Resource):
 
     method_decorators = {"put": jwt_required(), "delete": jwt_required()}
 
-    def get(self, visit_id):
+    def get(self, cache_visit_id: str):
         # find and return visit
-        visit = CacheVisit.query.filter_by(
-            visit_id=visit_id, deleted=False
-        ).first_or_404()
+        visit = CacheVisit.query_ext_id(cache_visit_id).first_or_404()
 
         schema = CacheVisitSchema()
 
         return {"cache_visit": schema.dump(visit)}, 200
 
-    def put(self, visit_id):
+    def put(self, cache_visit_id: str):
         # find visit
-        visit = CacheVisit.query.filter_by(
-            visit_id=visit_id, deleted=False
-        ).first_or_404()
+        visit = CacheVisit.query_ext_id(cache_visit_id).first_or_404()
 
         # ensure current_user is authorized
         if current_user != visit.user and current_user.role != User.Role.Admin:
@@ -108,11 +104,9 @@ class CacheVisitResource(Resource):
 
         return {"msg": "cache visit updated", "cache_visit": schema.dump(visit)}, 200
 
-    def delete(self, visit_id):
+    def delete(self, cache_visit_id: str):
         # find visit
-        visit = CacheVisit.query.filter_by(
-            visit_id=visit_id, deleted=False
-        ).first_or_404()
+        visit = CacheVisit.query_ext_id(cache_visit_id).first_or_404()
 
         # ensure current_user is authorized
         if current_user != visit.user and current_user.role != User.Role.Admin:

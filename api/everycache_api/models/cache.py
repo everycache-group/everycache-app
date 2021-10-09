@@ -2,13 +2,11 @@ from datetime import datetime
 
 from everycache_api.extensions import db
 
+from .base import BaseMixin
 
-class Cache(db.Model):
+
+class Cache(BaseMixin, db.Model):
     __tablename__ = "caches"
-
-    # base properties
-    id_ = db.Column("id", db.Integer, primary_key=True, autoincrement=True)
-    deleted = db.Column(db.Boolean, nullable=False, default=False)
 
     # own properties
     name = db.Column(db.Text, nullable=False)
