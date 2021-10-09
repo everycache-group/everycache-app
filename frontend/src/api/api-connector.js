@@ -8,8 +8,8 @@ export async function sendRequest(action, resource, id = null, params)
 {
     const endpoint     = createEndpoint(resource, id);
     const fetchOptions = createfetchOptions(action, params);
-    
-    return await fetch(endpoint, fetchOptions);
+
+    return await fetch(endpoint, fetchOptions).catch(x => x);
 }
 
 function createfetchOptions(action, params)
@@ -26,7 +26,7 @@ function createfetchOptions(action, params)
         'Content-Type': 'application/json'
     }
 
-    console.log(options);
+    //console.log(options);
 
     return options;
 }
@@ -38,7 +38,7 @@ function createEndpoint(resource, id = null)
     if(id) {
         endpoint += `/${id}`
     }
-    console.log(endpoint);
+    //console.log(endpoint);
 
     return endpoint;
 }

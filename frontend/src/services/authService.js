@@ -5,10 +5,16 @@ export async function loginUser(email, password, callback)
 {
     const response =  await api.login(email, password);
 
-    if(response.ok) {
-        callback();
-    }
+    const json = await response.json();
 
+    
+
+    if(response.ok) {
+        callback(json);
+    }
+    else {
+        Promise.reject(json);
+    }
 }
 
 export async function logoutUser(token)
