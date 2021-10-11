@@ -175,7 +175,7 @@ def revoke_refresh_token():
 @jwt.user_lookup_loader
 def user_loader_callback(jwt_headers, jwt_payload):
     identity = jwt_payload["sub"]
-    return User.query.filter_by(id_=identity).one_or_none()
+    return User.query_ext_id(identity).one_or_none()
 
 
 @jwt.token_in_blocklist_loader

@@ -30,22 +30,26 @@ api = Api(blueprint)
 
 resources = [
     (UserListResource, "/users", "users_list"),
-    (UserResource, "/users/<string:username>", "user_by_username"),
-    (UserCacheListResource, "/users/<string:username>/caches", "user_caches_list"),
-    (UserCacheVisitListResource, "/users/<string:username>/visits", "user_visits_list"),
+    (UserResource, "/users/<string:user_id>", "user_by_username"),
+    (UserCacheListResource, "/users/<string:user_id>/caches", "user_caches_list"),
+    (UserCacheVisitListResource, "/users/<string:user_id>/visits", "user_visits_list"),
     (
         UserCacheCommentListResource,
-        "/users/<string:username>/comments",
+        "/users/<string:user_id>/comments",
         "user_comments_list",
     ),
     (CacheListResource, "/caches", "caches_list"),
-    (CacheResource, "/caches/<int:cache_id>", "cache_by_id"),
-    (CacheVisitListResource, "/caches/<int:cache_id>/visits", "cache_visits_list"),
-    (CacheCommentListResource, "/cache/<int:cache_id>/comments", "cache_comments_list"),
-    (CacheVisitResource, "/cache_visits/<int:cache_visit_id>", "cache_visit_by_id"),
+    (CacheResource, "/caches/<string:cache_id>", "cache_by_id"),
+    (CacheVisitListResource, "/caches/<string:cache_id>/visits", "cache_visits_list"),
+    (
+        CacheCommentListResource,
+        "/caches/<string:cache_id>/comments",
+        "cache_comments_list",
+    ),
+    (CacheVisitResource, "/cache_visits/<string:cache_visit_id>", "cache_visit_by_id"),
     (
         CacheCommentResource,
-        "/cache_comments/<int:cache_comment_id>",
+        "/cache_comments/<string:cache_comment_id>",
         "cache_comment_by_id",
     ),
 ]
@@ -60,6 +64,8 @@ def register_views():
     apispec.spec.components.schema("PublicCacheSchema", schema=PublicCacheSchema)
     apispec.spec.path(view=CacheResource, app=current_app)
     apispec.spec.path(view=CacheListResource, app=current_app)
+    apispec.spec.path(view=CacheVisitListResource, app=current_app)
+    apispec.spec.path(view=CacheCommentListResource, app=current_app)
 
     # apispec.spec.components.schema("CacheVisitSchema", schema=CacheVisitSchema)
     apispec.spec.path(view=CacheVisitResource, app=current_app)

@@ -1,0 +1,20 @@
+version: "3.9"
+services:
+  web:
+    build: api
+    ports:
+      - "5000:8080"
+    volumes:
+      - ./api:/code
+    command: ["flask", "run", "--host", "0.0.0.0", "--port", "8080"]
+    environment:
+      - FLASK_APP=${FLASK_APP}
+      - FLASK_ENV=${FLASK_ENV}
+      - SECRET_KEY=${SECRET_KEY}
+      - HASHIDS_SALT=${HASHIDS_SALT}
+    depends_on:
+      - redis
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
