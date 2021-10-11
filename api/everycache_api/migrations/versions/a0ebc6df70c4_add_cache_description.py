@@ -8,7 +8,6 @@ Create Date: 2021-10-07 17:30:05.325333
 
 import sqlalchemy as sa
 from alembic import op
-from everycache_api.models import Cache
 
 # revision identifiers, used by Alembic
 revision = 'a0ebc6df70c4'
