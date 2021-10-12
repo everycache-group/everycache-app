@@ -8,13 +8,13 @@ from datetime import datetime
 from flask_jwt_extended import create_access_token, create_refresh_token, decode_token
 from sqlalchemy.orm.exc import NoResultFound
 
-from everycache_api.extensions import db
+from everycache_api.extensions import db, hashids
 from everycache_api.models import Token, User
 
 
 def create_jwt_payload(user: User):
-    identity = user.id_
-    claims = {"role": user.role.value}
+    identity = user.ext_id
+    claims = {"role": user.role.name}
 
     return {"identity": identity, "additional_claims": claims}
 
@@ -37,14 +37,14 @@ def add_token_to_database(encoded_token, identity_claim):
 
     jti = decoded_token["jti"]
     token_type = decoded_token["type"]
-    user_identity = decoded_token[identity_claim]
+    user_id = hashids.decode(decoded_token[identity_claim])[0]
     expires = datetime.fromtimestamp(decoded_token["exp"])
     revoked = False
 
     db_token = Token(
         jti=jti,
         token_type=token_type,
-        user_id=user_identity,
+        user_id=user_id,
         expires=expires,
         revoked=revoked,
     )

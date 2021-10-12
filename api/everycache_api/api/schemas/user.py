@@ -9,11 +9,13 @@ from everycache_api.models import User
 
 
 class UserSchema(ma.SQLAlchemyAutoSchema):
-    role = EnumField(User.Role)
+    id = ma.String(attribute="ext_id", dump_only=True)
+    username = ma.String(required=False)
+    email = ma.String(required=False)
     password = ma.String(
         load_only=True, required=True, validate=validate.Length(8, 255)
     )
-    deleted = ma.Boolean(dump_only=True)
+    role = EnumField(User.Role)
 
     @validates("username")
     def validate_username(self, value):
@@ -45,6 +47,7 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
 class PublicUserSchema(ma.SQLAlchemyAutoSchema):
     """Read-only schema"""
 
+    id = ma.String(attribute="ext_id", dump_only=True)
     role = EnumField(User.Role)
 
     class Meta:
@@ -52,4 +55,18 @@ class PublicUserSchema(ma.SQLAlchemyAutoSchema):
         sqla_session = db.session
         load_instance = True
         ordered = True
-        fields = ("deleted", "role", "username")  # whitelist
+        fields = ("id", "role", "username")  # whitelist
+
+
+class NestedUserSchema(ma.SQLAlchemyAutoSchema):
+    """Used in other schemas"""
+
+    id = ma.String(attribute="ext_id", dump_only=True)
+    username = ma.String(dump_only=True)
+
+    class Meta:
+        model = User
+        sqla_session = db.session
+        load_instance = True
+        ordered = True
+        fields = ("id", "username")  # whitelist

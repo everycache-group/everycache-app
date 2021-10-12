@@ -1,4 +1,4 @@
-from flask import request
+from flask import abort, request
 from flask_jwt_extended import current_user, jwt_required
 from flask_restful import Resource
 
@@ -25,7 +25,7 @@ class UserResource(Resource):
         - api
       parameters:
         - in: path
-          name: username
+          name: user_id
           schema:
             type: string
       responses:
@@ -47,7 +47,7 @@ class UserResource(Resource):
         - api
       parameters:
         - in: path
-          name: username
+          name: user_id
           schema:
             type: string
       requestBody:
@@ -76,7 +76,7 @@ class UserResource(Resource):
         - api
       parameters:
         - in: path
-          name: username
+          name: user_id
           schema:
             type: string
       responses:
@@ -101,14 +101,14 @@ class UserResource(Resource):
         "delete": [jwt_required()],
     }
 
-    def get(self, username: str):
+    def get(self, user_id: str):
         # find user
-        user = User.query.filter_by(username=username).first_or_404()
+        user = User.query_ext_id(user_id).filter_by(deleted=False).first_or_404()
 
         # decide which schema to use
         schema = None
         if current_user and (
-            current_user.username == username or current_user.role == User.Role.Admin
+            current_user.ext_id == user_id or current_user.role == User.Role.Admin
         ):
             # user is querying own account info or is an admin
             schema = UserSchema()
@@ -119,29 +119,30 @@ class UserResource(Resource):
         # return user details
         return {"user": schema.dump(user)}, 200
 
-    def put(self, username: str):
+    def put(self, user_id: str):
         # ensure current_user is authorized
-        if current_user.username != username and current_user.role != User.Role.Admin:
-            return 403
+        if current_user.ext_id != user_id and current_user.role != User.Role.Admin:
+            abort(403)
 
         # find user
-        user = User.query.filter_by(username=username).first_or_404()
+        user = User.query_ext_id(user_id).filter_by(deleted=False).first_or_404()
 
         schema = UserSchema()
 
         # update and return user details
         user = schema.load(request.json, instance=user)
+
         db.session.commit()
 
         return {"msg": "user updated", "user": schema.dump(user)}, 200
 
-    def delete(self, username: str):
+    def delete(self, user_id: str):
         # ensure current_user is authorized
-        if current_user.username != username and current_user.role != User.Role.Admin:
-            return 403
+        if current_user.ext_id != user_id and current_user.role != User.Role.Admin:
+            abort(403)
 
         # find user
-        user = User.query.filter(username=username).first_or_404()
+        user = User.query_ext_id(user_id).filter_by(deleted=False).first_or_404()
 
         # mark user as deleted
         user.deleted = True
@@ -220,16 +221,15 @@ class UserListResource(Resource):
 
     def get(self):
         # retrieve multiple users' details
+        query = User.query.filter_by(deleted=False)
 
-        # decide which query and schema to use
-        query = User.query
+        # decide which schema to use
         schema = None
         if current_user and current_user.role == User.Role.Admin:
             # user is an admin
             schema = UserSchema(many=True)
         else:
             # user is not logged in or not an admin
-            query = query.filter_by(verified=True)
             schema = PublicUserSchema(many=True)
 
         return paginate(query, schema), 200
@@ -241,6 +241,9 @@ class UserListResource(Resource):
 
         schema = UserSchema()
         user = schema.load(request.json)
+
+        if request.json.get("current_password") != request.json.get("new_password"):
+            return {"msg": "passwords do not match"}, 400
 
         if User.query.filter_by(email=user.email).first():
             return {"msg": "email is already taken"}, 400
@@ -263,7 +266,7 @@ class UserCacheListResource(Resource):
         - api
       parameters:
         - in: path
-          name: username
+          name: user_id
           schema:
             type: string
         - in: query
@@ -301,17 +304,17 @@ class UserCacheListResource(Resource):
 
     method_decorators = [jwt_required(optional=True)]
 
-    def get(self, username: str):
+    def get(self, user_id: str):
         # retrieve user's owned caches
 
         # find user
-        user = User.query.filter_by(username=username, deleted=False).first_or_404()
+        user = User.query_ext_id(user_id).filter_by(deleted=False).first_or_404()
 
         # decide which schema to use
         query = Cache.query.filter_by(owner=user, deleted=False)
         schema = None
         if current_user and (
-            username == current_user.username or current_user.role == User.Role.Admin
+            current_user == user or current_user.role == User.Role.Admin
         ):
             # owner or admin
             schema = CacheSchema(many=True)
@@ -331,7 +334,7 @@ class UserCacheVisitListResource(Resource):
         - api
       parameters:
         - in: path
-          name: username
+          name: user_id
           schema:
             type: string
         - in: query
@@ -362,15 +365,16 @@ class UserCacheVisitListResource(Resource):
                           $ref: '#/components/schemas/CacheVisitSchema'
         404:
           description: user not found
+      security: []
     """
 
     method_decorators = [jwt_required()]
 
-    def get(self, username: str):
+    def get(self, user_id: str):
         # retrieve user's cache visits
 
         # find user
-        user = User.query.filter_by(username=username).first_or_404()
+        user = User.query_ext_id(user_id).filter_by(deleted=False).first_or_404()
 
         query = CacheVisit.query.filter_by(user=user)
         schema = CacheVisitSchema(many=True)
@@ -387,7 +391,7 @@ class UserCacheCommentListResource(Resource):
         - api
       parameters:
         - in: path
-          name: username
+          name: user_id
           schema:
             type: string
         - in: query
@@ -423,11 +427,11 @@ class UserCacheCommentListResource(Resource):
 
     method_decorators = [jwt_required(optional=True)]
 
-    def get(self, username: str):
+    def get(self, user_id: str):
         # retrieve user's cache comments
 
         # find user
-        user = User.query.filter_by(username=username).first_or_404()
+        user = User.query_ext_id(user_id).filter_by(deleted=False).first_or_404()
 
         query = CacheComment.query.filter_by(author=user, deleted=False)
         schema = CacheCommentSchema(many=True)
