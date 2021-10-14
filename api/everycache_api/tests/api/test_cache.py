@@ -2,8 +2,14 @@ import json
 
 import pytest
 from everycache_api.api.schemas.cache import CacheSchema, PublicCacheSchema
-from everycache_api.models import Cache, User
+from everycache_api.api.schemas.cache_comment import CacheCommentSchema
+from everycache_api.api.schemas.cache_visit import CacheVisitSchema
+from everycache_api.models import Cache, CacheComment, CacheVisit, User
+from everycache_api.tests.factories.cache_comment_factory import \
+    CacheCommentFactory
 from everycache_api.tests.factories.cache_factory import CacheFactory
+from everycache_api.tests.factories.cache_visit_factory import \
+    CacheVisitFactory
 from everycache_api.tests.helpers import get_auth_header, get_headers_for_user
 
 
@@ -119,7 +125,6 @@ class TestCachePut:
         response = self._send_put_request(
             client, json.dumps(_put_data_dict), headers, cache.ext_id)
 
-        print(response.json)
         assert response.status_code == 200
         for key, value in _put_data_dict.items():
             assert type(value)(getattr(cache, key)) == value
@@ -318,3 +323,175 @@ class TestCacheListPost:
         for key, value in _post_data_dict.items():
             assert type(value)(getattr(cache, key)) == value
         assert cache.owner == user
+
+
+class TestCacheVisitListResourceGet:
+
+    @pytest.mark.parametrize("logged_in_user_role", [None, *list(User.Role)])
+    def test_get(self, logged_in_user_role, client, logged_in_user):
+        cache = CacheFactory()
+        cache_visit = CacheVisitFactory(cache=cache)
+        CacheVisitFactory()
+        headers = get_headers_for_user(logged_in_user, logged_in_user_role)
+
+        response = client.get(f"/api/caches/{cache.ext_id}/visits", headers=headers)
+
+        db_visit = CacheVisit.query_ext_id(ext_id=cache_visit.ext_id).first()
+        expected_visit = json.loads(CacheVisitSchema().dumps(db_visit))
+
+        assert response.status_code == 200
+        assert len(response.json["results"]) == 1
+        assert response.json["results"] == [expected_visit]
+
+    @pytest.mark.parametrize("logged_in_user_role", [None, *list(User.Role)])
+    def test_get_cache_deleted(self, logged_in_user_role, client, logged_in_user):
+        cache = CacheFactory()
+        cache_visit = CacheVisitFactory(cache=cache)
+        cache_visit.cache.deleted = True
+        headers = get_headers_for_user(logged_in_user, logged_in_user_role)
+
+        response = client.get(f"/api/caches/{cache.ext_id}/visits", headers=headers)
+
+        assert response.status_code == 404
+
+    @pytest.mark.parametrize("logged_in_user_role", [None, *list(User.Role)])
+    def test_get_deleted(self, logged_in_user_role, client, logged_in_user):
+        cache = CacheFactory()
+        cache_visit = CacheVisitFactory(cache=cache)
+        cache_visit.deleted = True
+        CacheVisitFactory()
+        headers = get_headers_for_user(logged_in_user, logged_in_user_role)
+
+        response = client.get(f"/api/caches/{cache.ext_id}/visits", headers=headers)
+
+        assert response.status_code == 200
+        assert len(response.json["results"]) == 0
+
+
+class TestCacheVisitListResourcePost:
+
+    def test_post_unauthorized(self, client):
+        cache = CacheFactory()
+        response = client.post(f"/api/caches/{cache.ext_id}/visits", headers={})
+        assert response.status_code == 401
+        assert CacheVisit.query.count() == 0
+
+    @pytest.mark.parametrize("logged_in_user_role", list(User.Role))
+    def test_post_no_cache(self, logged_in_user_role, client, logged_in_user):
+        headers = get_headers_for_user(logged_in_user, logged_in_user_role)
+        response = client.post("/api/caches/cache_ext_id/visits", headers=headers)
+        assert response.status_code == 404
+        assert CacheVisit.query.count() == 0
+
+    @pytest.mark.parametrize("logged_in_user_role", list(User.Role))
+    def test_post_cache_deleted(self, logged_in_user_role, client, logged_in_user):
+        cache = CacheFactory(deleted=True)
+        headers = get_headers_for_user(logged_in_user, logged_in_user_role)
+        response = client.post(f"/api/caches/{cache.ext_id}/visits", headers=headers)
+        assert response.status_code == 404
+        assert CacheVisit.query.count() == 0
+
+    @pytest.mark.parametrize("logged_in_user_role", list(User.Role))
+    def test_post(self, logged_in_user_role, client, logged_in_user):
+        user, *_ = logged_in_user
+        cache = CacheFactory()
+        headers = get_headers_for_user(logged_in_user, logged_in_user_role)
+
+        response = client.post(
+            f"/api/caches/{cache.ext_id}/visits",
+            headers=headers,
+            content_type="application/json",
+            data=json.dumps({})
+        )
+
+        assert response.status_code == 201
+        assert CacheVisit.query.count() == 1
+        visit = CacheVisit.query.first()
+        assert visit.cache == cache
+        assert visit.user == user
+
+
+class TestCacheCommentListResourceGet:
+
+    @pytest.mark.parametrize("logged_in_user_role", [None, *list(User.Role)])
+    def test_get(self, logged_in_user_role, client, logged_in_user):
+        cache_comment = CacheCommentFactory()
+        CacheCommentFactory()
+        headers = get_headers_for_user(logged_in_user, logged_in_user_role)
+
+        response = client.get(
+            f"/api/caches/{cache_comment.cache.ext_id}/comments", headers=headers)
+
+        db_comment = CacheComment.query_ext_id(ext_id=cache_comment.ext_id).first()
+        expected_comment = json.loads(CacheCommentSchema().dumps(db_comment))
+
+        assert response.status_code == 200
+        assert len(response.json["results"]) == 1
+        assert response.json["results"] == [expected_comment]
+
+    @pytest.mark.parametrize("logged_in_user_role", [None, *list(User.Role)])
+    def test_get_cache_deleted(self, logged_in_user_role, client, logged_in_user):
+        cache = CacheFactory()
+        cache_comment = CacheCommentFactory(cache=cache)
+        cache_comment.cache.deleted = True
+        headers = get_headers_for_user(logged_in_user, logged_in_user_role)
+
+        response = client.get(f"/api/caches/{cache.ext_id}/comments", headers=headers)
+
+        assert response.status_code == 404
+
+    @pytest.mark.parametrize("logged_in_user_role", [None, *list(User.Role)])
+    def test_get_deleted(self, logged_in_user_role, client, logged_in_user):
+        cache = CacheFactory()
+        cache_comment = CacheCommentFactory(cache=cache)
+        cache_comment.deleted = True
+        CacheCommentFactory()
+        headers = get_headers_for_user(logged_in_user, logged_in_user_role)
+
+        response = client.get(f"/api/caches/{cache.ext_id}/comments", headers=headers)
+
+        assert response.status_code == 200
+        assert len(response.json["results"]) == 0
+
+
+class TestCacheCommentListResourcePost:
+
+    def test_post_unauthorized(self, client):
+        cache = CacheFactory()
+        response = client.post(f"/api/caches/{cache.ext_id}/comments", headers={})
+        assert response.status_code == 401
+        assert CacheComment.query.count() == 0
+
+    @pytest.mark.parametrize("logged_in_user_role", list(User.Role))
+    def test_post_no_cache(self, logged_in_user_role, client, logged_in_user):
+        headers = get_headers_for_user(logged_in_user, logged_in_user_role)
+        response = client.post("/api/caches/cache_ext_id/comments", headers=headers)
+        assert response.status_code == 404
+        assert CacheComment.query.count() == 0
+
+    @pytest.mark.parametrize("logged_in_user_role", list(User.Role))
+    def test_post_cache_deleted(self, logged_in_user_role, client, logged_in_user):
+        cache = CacheFactory(deleted=True)
+        headers = get_headers_for_user(logged_in_user, logged_in_user_role)
+        response = client.post(f"/api/caches/{cache.ext_id}/comments", headers=headers)
+        assert response.status_code == 404
+        assert CacheComment.query.count() == 0
+
+    @pytest.mark.parametrize("logged_in_user_role", list(User.Role))
+    def test_post(self, logged_in_user_role, client, logged_in_user):
+        user, *_ = logged_in_user
+        cache = CacheFactory()
+        headers = get_headers_for_user(logged_in_user, logged_in_user_role)
+
+        response = client.post(
+            f"/api/caches/{cache.ext_id}/comments",
+            headers=headers,
+            content_type="application/json",
+            data=json.dumps({"text": "Example"})
+        )
+
+        assert response.status_code == 201
+        assert CacheComment.query.count() == 1
+        comment = CacheComment.query.first()
+        assert comment.cache == cache
+        assert comment.author == user

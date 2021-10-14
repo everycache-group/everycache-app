@@ -244,7 +244,6 @@ class TestUserListGet:
 
         user.deleted = True
         response = client.get("/api/users", headers=headers)
-        print(response.json)
         assert len(response.json["results"]) == 1
         assert response.status_code == 200
 
