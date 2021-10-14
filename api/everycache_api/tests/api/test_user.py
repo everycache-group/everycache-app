@@ -1,15 +1,16 @@
 import json
 
 import pytest
-
 from everycache_api.api.schemas.cache import CacheSchema, PublicCacheSchema
 from everycache_api.api.schemas.cache_comment import CacheCommentSchema
 from everycache_api.api.schemas.cache_visit import CacheVisitSchema
 from everycache_api.api.schemas.user import PublicUserSchema, UserSchema
 from everycache_api.models import Cache, CacheComment, CacheVisit, User
-from everycache_api.tests.factories.cache_comment_factory import CacheCommentFactory
+from everycache_api.tests.factories.cache_comment_factory import \
+    CacheCommentFactory
 from everycache_api.tests.factories.cache_factory import CacheFactory
-from everycache_api.tests.factories.cache_visit_factory import CacheVisitFactory
+from everycache_api.tests.factories.cache_visit_factory import \
+    CacheVisitFactory
 from everycache_api.tests.factories.user_factory import UserFactory
 from everycache_api.tests.helpers import get_auth_header, get_headers_for_user
 
@@ -18,7 +19,7 @@ class TestUserGet:
 
     def test_get_public(self, client):
         user = UserFactory()
-        response = client.get(f"/api/users/{user.username}")
+        response = client.get(f"/api/users/{user.ext_id}")
 
         assert response.json == {"user": json.loads(PublicUserSchema().dumps(user))}
         assert response.status_code == 200
@@ -27,7 +28,7 @@ class TestUserGet:
         user_1 = UserFactory()
         user_2, access_token, _ = logged_in_user
         headers = get_auth_header(access_token)
-        response = client.get(f"/api/users/{user_1.username}",
+        response = client.get(f"/api/users/{user_1.ext_id}",
                               content_type="application/json", headers=headers)
 
         assert response.json == {"user": json.loads(PublicUserSchema().dumps(user_1))}
@@ -36,7 +37,7 @@ class TestUserGet:
     def test_get_self(self, client, logged_in_user):
         user, access_token, _ = logged_in_user
         headers = get_auth_header(access_token)
-        response = client.get(f"/api/users/{user.username}",
+        response = client.get(f"/api/users/{user.ext_id}",
                               content_type="application/json", headers=headers)
 
         assert response.json == {"user": json.loads(UserSchema().dumps(user))}
@@ -53,7 +54,7 @@ class TestUserGet:
         user_2 = UserFactory()
 
         headers = get_auth_header(access_token)
-        response = client.get(f"/api/users/{user_2.username}",
+        response = client.get(f"/api/users/{user_2.ext_id}",
                               content_type="application/json", headers=headers)
         assert response.json == {"user": json.loads(UserSchema().dumps(user_2))}
         assert response.status_code == 200
@@ -64,7 +65,7 @@ class TestUserGet:
         user = UserFactory()
         user.deleted = True
 
-        response = client.get(f"/api/users/{user.username}",
+        response = client.get(f"/api/users/{user.ext_id}",
                               content_type="application/json", headers=headers)
 
         assert response.status_code == 404
@@ -87,7 +88,7 @@ class TestUserPut:
     def _send_put_request(self, client, user_to_be_changed, access_token):
         user = user_to_be_changed
         return client.put(
-            f"/api/users/{user.username}",
+            f"/api/users/{user.ext_id}",
             data=self._get_user_edit_data(user),
             content_type="application/json",
             headers=get_auth_header(access_token))
@@ -140,7 +141,7 @@ class TestUserDelete:
 
     def _send_delete_request(self, client, user_to_be_deleted, access_token):
         return client.delete(
-            f"/api/users/{user_to_be_deleted.username}",
+            f"/api/users/{user_to_be_deleted.ext_id}",
             content_type="application/json",
             headers=get_auth_header(access_token))
 
@@ -182,7 +183,7 @@ class TestUserDelete:
         user.role = User.Role.Admin
 
         response = client.delete(
-            "/api/users/some_username", content_type="application/json",
+            "/api/users/some_ext_id", content_type="application/json",
             headers=get_auth_header(access_token))
 
         assert response.status_code == 404
@@ -230,19 +231,21 @@ class TestUserListGet:
     @pytest.mark.parametrize("is_user_logged_in", (False, True))
     def test_get_deleted_user_gets_hidden(self, is_user_logged_in, client,
                                           logged_in_user):
-        user, access_token, _ = logged_in_user
+        _, access_token, _ = logged_in_user
+        user = UserFactory()
 
         headers = {}
         if is_user_logged_in:
             headers = get_auth_header(access_token)
 
         response = client.get("/api/users", headers=headers)
-        assert response.json["results"] != []
+        assert len(response.json["results"]) == 2
         assert response.status_code == 200
 
         user.deleted = True
         response = client.get("/api/users", headers=headers)
-        assert response.json["results"] == []
+        print(response.json)
+        assert len(response.json["results"]) == 1
         assert response.status_code == 200
 
     def test_get_admin_list(self, client, logged_in_user):
@@ -366,7 +369,7 @@ class TestUserCacheListGet:
         owner = cache.owner
 
         headers = get_auth_header(access_token) if is_user_logged_in else {}
-        response = client.get(f"/api/users/{owner.username}/caches", headers=headers)
+        response = client.get(f"/api/users/{owner.ext_id}/caches", headers=headers)
 
         caches = Cache.query.filter_by(owner_id=owner.id_)
         expected_caches = json.loads(
@@ -380,7 +383,7 @@ class TestUserCacheListGet:
     def test_get_owner_not_found(self, logged_in_user_role, client,
                                  logged_in_user):
         headers = get_headers_for_user(logged_in_user, logged_in_user_role)
-        response = client.get("/api/users/bogus_username/caches",
+        response = client.get("/api/users/bogus_ext_id/caches",
                               headers=headers)
 
         assert response.status_code == 404
@@ -391,7 +394,7 @@ class TestUserCacheListGet:
         cache = CacheFactory()
         cache.owner.deleted = True
         headers = get_headers_for_user(logged_in_user, logged_in_user_role)
-        response = client.get(f"/api/users/{cache.owner.username}/caches",
+        response = client.get(f"/api/users/{cache.owner.ext_id}/caches",
                               headers=headers)
 
         assert response.status_code == 404
@@ -401,14 +404,14 @@ class TestUserCacheListGet:
         cache = CacheFactory()
 
         headers = get_headers_for_user(logged_in_user, logged_in_user_role)
-        response = client.get(f"/api/users/{cache.owner.username}/caches",
+        response = client.get(f"/api/users/{cache.owner.ext_id}/caches",
                               headers=headers)
 
         assert len(response.json["results"]) == 1
 
         cache.deleted = True
 
-        response = client.get(f"/api/users/{cache.owner.username}/caches",
+        response = client.get(f"/api/users/{cache.owner.ext_id}/caches",
                               headers=headers)
 
         assert len(response.json["results"]) == 0
@@ -420,7 +423,7 @@ class TestUserCacheListGet:
         CacheFactory(owner=owner)
         CacheFactory()
 
-        response = client.get(f"/api/users/{owner.username}/caches", headers=headers)
+        response = client.get(f"/api/users/{owner.ext_id}/caches", headers=headers)
 
         caches = Cache.query.filter_by(owner_id=owner.id_)
         expected_caches = json.loads(CacheSchema().dumps(caches, many=True))
@@ -435,7 +438,7 @@ class TestUserCacheListGet:
         CacheFactory(owner=user)
         CacheFactory()
 
-        response = client.get(f"/api/users/{user.username}/caches", headers=headers)
+        response = client.get(f"/api/users/{user.ext_id}/caches", headers=headers)
 
         caches = Cache.query.filter_by(owner_id=user.id_)
         expected_caches = json.loads(CacheSchema().dumps(caches, many=True))
@@ -447,7 +450,7 @@ class TestUserCacheListGet:
 class TestUserCacheVisitListGet:
 
     def _validate_success_for_user(self, client, user, access_token, cache_visit):
-        response = client.get(f"/api/users/{user.username}/visits",
+        response = client.get(f"/api/users/{user.ext_id}/visits",
                               headers=get_auth_header(access_token))
 
         cache_visits_for_user = CacheVisit.query.filter_by(user=user)
@@ -487,7 +490,7 @@ class TestUserCacheVisitListGet:
         logged_user.role = logged_in_user_role
         CacheVisitFactory()
 
-        response = client.get("/api/users/username/visits",
+        response = client.get("/api/users/ext_id/visits",
                               headers=get_auth_header(access_token))
 
         assert response.status_code == 404
@@ -500,7 +503,7 @@ class TestUserCacheVisitListGet:
         user = cache_visit.user
         user.deleted = True
 
-        response = client.get(f"/api/users/{user.username}/visits",
+        response = client.get(f"/api/users/{user.ext_id}/visits",
                               headers=get_auth_header(access_token))
 
         assert response.status_code == 404
@@ -517,7 +520,7 @@ class TestUserCacheVisitListGet:
         else:
             getattr(cache_visit, deleted_name).deleted = True
 
-        response = client.get(f"/api/users/{cache_visit.user.username}/visits",
+        response = client.get(f"/api/users/{cache_visit.user.ext_id}/visits",
                               headers=get_auth_header(access_token))
 
         assert response.status_code == 200
@@ -535,7 +538,7 @@ class TestUserCacheCommentListGet:
         headers = get_headers_for_user(logged_in_user, logged_in_user_role)
 
         response = client.get(
-            f"/api/users/{cache_comment.author.username}/comments", headers=headers)
+            f"/api/users/{cache_comment.author.ext_id}/comments", headers=headers)
 
         cache_comments_for_user = CacheComment.query.filter_by(
             author=cache_comment.author)
@@ -550,7 +553,7 @@ class TestUserCacheCommentListGet:
     def test_get_user_not_found(self, logged_in_user_role, client, logged_in_user):
         headers = get_headers_for_user(logged_in_user, logged_in_user_role)
 
-        response = client.get("/api/users/username/comments", headers=headers)
+        response = client.get("/api/users/ext_id/comments", headers=headers)
 
         assert response.status_code == 404
 
@@ -561,7 +564,7 @@ class TestUserCacheCommentListGet:
         cache_comment.author.deleted = True
 
         response = client.get(
-            f"/api/users/{cache_comment.author.username}/comments", headers=headers)
+            f"/api/users/{cache_comment.author.ext_id}/comments", headers=headers)
 
         assert response.status_code == 404
 
@@ -571,14 +574,14 @@ class TestUserCacheCommentListGet:
         cache_comment = CacheCommentFactory()
 
         response = client.get(
-            f"/api/users/{cache_comment.author.username}/comments", headers=headers)
+            f"/api/users/{cache_comment.author.ext_id}/comments", headers=headers)
 
         assert len(response.json["results"]) == 1
 
         cache_comment.cache.deleted = True
 
         response = client.get(
-            f"/api/users/{cache_comment.author.username}/comments", headers=headers)
+            f"/api/users/{cache_comment.author.ext_id}/comments", headers=headers)
 
         assert len(response.json["results"]) == 0
 
@@ -588,12 +591,12 @@ class TestUserCacheCommentListGet:
         cache_comment = CacheCommentFactory()
 
         response = client.get(
-            f"/api/users/{cache_comment.author.username}/comments", headers=headers)
+            f"/api/users/{cache_comment.author.ext_id}/comments", headers=headers)
 
         assert len(response.json["results"]) == 1
 
         cache_comment.deleted = True
         response = client.get(
-            f"/api/users/{cache_comment.author.username}/comments", headers=headers)
+            f"/api/users/{cache_comment.author.ext_id}/comments", headers=headers)
 
         assert len(response.json["results"]) == 0
