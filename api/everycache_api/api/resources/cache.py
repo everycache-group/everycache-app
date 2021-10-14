@@ -1,16 +1,11 @@
-from flask import abort, request
-from flask_jwt_extended import current_user, jwt_required
-from flask_restful import Resource
-
-from everycache_api.api.schemas import (
-    CacheCommentSchema,
-    CacheSchema,
-    CacheVisitSchema,
-    PublicCacheSchema,
-)
+from everycache_api.api.schemas import (CacheCommentSchema, CacheSchema,
+                                        CacheVisitSchema, PublicCacheSchema)
 from everycache_api.common.pagination import paginate
 from everycache_api.extensions import db
 from everycache_api.models import Cache, CacheComment, CacheVisit, User
+from flask import abort, request
+from flask_jwt_extended import current_user, jwt_required
+from flask_restful import Resource
 
 
 class CacheResource(Resource):
