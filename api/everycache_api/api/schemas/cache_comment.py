@@ -8,7 +8,7 @@ from .user import NestedUserSchema
 class CacheCommentSchema(ma.SQLAlchemyAutoSchema):
     id = ma.String(attribute="ext_id", dump_only=True)
     cache_id = ma.Pluck(
-        PublicCacheSchema, field_name="id", atribute="cache", dump_only=True
+        PublicCacheSchema, field_name="id", attribute="cache", dump_only=True
     )
     author = ma.Nested(NestedUserSchema, dump_only=True)
     created_on = ma.DateTime(dump_only=True)
