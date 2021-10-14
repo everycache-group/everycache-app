@@ -1,10 +1,9 @@
-from flask import abort, request
-from flask_jwt_extended import current_user, jwt_required
-from flask_restful import Resource
-
 from everycache_api.api.schemas import CacheVisitSchema
 from everycache_api.extensions import db
 from everycache_api.models import CacheVisit, User
+from flask import abort, request
+from flask_jwt_extended import current_user, jwt_required
+from flask_restful import Resource
 
 
 class CacheVisitResource(Resource):
@@ -78,11 +77,12 @@ class CacheVisitResource(Resource):
           description: cache visit not found
     """
 
-    method_decorators = {"put": jwt_required(), "delete": jwt_required()}
+    method_decorators = {"put": [jwt_required()], "delete": [jwt_required()]}
 
     def get(self, cache_visit_id: str):
         # find and return visit
-        visit = CacheVisit.query_ext_id(cache_visit_id).first_or_404()
+        visit = CacheVisit.query_ext_id(cache_visit_id).filter(
+            CacheVisit.cache.has(deleted=False)).first_or_404()
 
         schema = CacheVisitSchema()
 
@@ -90,7 +90,8 @@ class CacheVisitResource(Resource):
 
     def put(self, cache_visit_id: str):
         # find visit
-        visit = CacheVisit.query_ext_id(cache_visit_id).first_or_404()
+        visit = CacheVisit.query_ext_id(cache_visit_id).filter(
+            CacheVisit.cache.has(deleted=False)).first_or_404()
 
         # ensure current_user is authorized
         if current_user != visit.user and current_user.role != User.Role.Admin:
@@ -100,7 +101,7 @@ class CacheVisitResource(Resource):
 
         # update and return visit
         visit = schema.load(request.json, instance=visit)
-        db.sessiom.commit()
+        db.session.commit()
 
         return {"msg": "cache visit updated", "cache_visit": schema.dump(visit)}, 200
 
@@ -113,7 +114,7 @@ class CacheVisitResource(Resource):
             abort(403)
 
         # delete visit
-        db.session.delete(visit)
+        visit.deleted = True
         db.session.commit()
 
         return {"msg": "cache visit deleted"}, 200
