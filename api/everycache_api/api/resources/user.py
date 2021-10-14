@@ -237,9 +237,6 @@ class UserListResource(Resource):
         schema = UserSchema()
         user = schema.load(request.json)
 
-        if request.json.get("current_password") != request.json.get("new_password"):
-            return {"msg": "passwords do not match"}, 400
-
         if User.query.filter_by(email=user.email).first():
             return {"msg": "email is already taken"}, 400
 
