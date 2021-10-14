@@ -1,17 +1,16 @@
 from everycache_api.extensions import db, ma
 from everycache_api.models import Cache
 
-from .user import PublicUserSchema, UserSchema
+from .user import NestedUserSchema
+from marshmallow import validate
 
 
 class CacheSchema(ma.SQLAlchemyAutoSchema):
-    id = ma.Integer(attribute="id_", dump_only=True)
+    id = ma.String(attribute="ext_id", dump_only=True)
     created_on = ma.DateTime(dump_only=True)
-    lon = ma.Float()
-    lat = ma.Float()
-    owner_username = ma.Pluck(
-        UserSchema, field_name="username", attribute="owner", dump_only=True
-    )
+    lon = ma.Float(validate=validate.Range(-180.0, 180.0))
+    lat = ma.Float(validate=validate.Range(-90.0, 90.0))
+    owner = ma.Nested(NestedUserSchema, dump_only=True)
 
     class Meta:
         model = Cache
@@ -24,13 +23,11 @@ class CacheSchema(ma.SQLAlchemyAutoSchema):
 class PublicCacheSchema(ma.SQLAlchemyAutoSchema):
     """Read-only schema"""
 
-    id = ma.Integer(attribute="id_", dump_only=True)
+    id = ma.String(attribute="ext_id", dump_only=True)
     created_on = ma.DateTime(dump_only=True)
     lon = ma.Float()
     lat = ma.Float()
-    owner_username = ma.Pluck(
-        PublicUserSchema, field_name="username", attribute="owner", dump_only=True
-    )
+    owner = ma.Nested(NestedUserSchema, dump_only=True)
 
     class Meta:
         model = Cache

@@ -2,13 +2,11 @@ from datetime import datetime
 
 from everycache_api.extensions import db
 
+from .base import BaseMixin
 
-class CacheVisit(db.Model):
+
+class CacheVisit(BaseMixin, db.Model):
     __tablename__ = "cache_visits"
-
-    # base properties
-    id_ = db.Column("id", db.Integer, primary_key=True)
-    deleted = db.Column(db.Boolean, nullable=False, default=False)
 
     # own properties
     visited_on = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)

@@ -1,6 +1,7 @@
 from apispec import APISpec
 from apispec.exceptions import APISpecError
 from apispec.ext.marshmallow import MarshmallowPlugin
+from apispec.ext.marshmallow.common import resolve_schema_cls
 from apispec_webframeworks.flask import FlaskPlugin
 from flask import Blueprint, render_template
 
@@ -51,7 +52,10 @@ class APISpecExt:
             title=app.config["APISPEC_TITLE"],
             version=app.config["APISPEC_VERSION"],
             openapi_version=app.config["OPENAPI_VERSION"],
-            plugins=[MarshmallowPlugin(), FlaskRestfulPlugin()],
+            plugins=[
+                FlaskRestfulPlugin(),
+                MarshmallowPlugin(lambda s: resolve_schema_cls(s).__name__),
+            ],
             **kwargs
         )
 
