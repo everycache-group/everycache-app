@@ -3,16 +3,12 @@ import os
 import tempfile
 
 import pytest
-from flask import Flask
-from flask_migrate import upgrade
-
-from everycache_api.app import (
-    configure_apispec,
-    configure_extensions,
-    register_blueprints,
-)
+from everycache_api.app import (configure_apispec, configure_extensions,
+                                register_blueprints)
 from everycache_api.extensions import db
 from everycache_api.tests.factories.user_factory import UserFactory
+from flask import Flask
+from flask_migrate import upgrade
 
 
 @pytest.fixture(scope="session")
@@ -36,7 +32,7 @@ def app():
 
 
 @pytest.fixture(scope="function", autouse=True)
-def _db():
+def _db(app):
     db.create_all()
     yield db
     db.session.rollback()

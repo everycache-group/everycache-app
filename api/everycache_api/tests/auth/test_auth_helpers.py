@@ -1,27 +1,24 @@
 from datetime import datetime
 
 import pytest
-
-from everycache_api.auth.helpers import (
-    add_token_to_database,
-    create_jwt_payload,
-    create_user_access_token,
-    create_user_refresh_token,
-    is_token_revoked,
-    revoke_all_user_tokens,
-    revoke_token,
-)
+from everycache_api.auth.helpers import (add_token_to_database,
+                                         create_jwt_payload,
+                                         create_user_access_token,
+                                         create_user_refresh_token,
+                                         is_token_revoked,
+                                         revoke_all_user_tokens, revoke_token)
 from everycache_api.models import Token
 from everycache_api.tests.factories.token_factory import TokenFactory
-from everycache_api.tests.factories.user_factory import AdminFactory, UserFactory
+from everycache_api.tests.factories.user_factory import (AdminFactory,
+                                                         UserFactory)
 
 
 @pytest.mark.parametrize("factory", (UserFactory, AdminFactory))
 def test_create_jwt_payload(factory):
     user = factory()
 
-    assert create_jwt_payload(user) == {"identity": user.id_, "additional_claims": {
-        "role": user.role.value}}
+    assert create_jwt_payload(user) == {"identity": user.ext_id, "additional_claims": {
+        "role": user.role.name}}
 
 
 def test_create_user_access_token(mocker):
@@ -43,11 +40,12 @@ def test_create_user_refresh_token(mocker):
 
 
 def test_add_token_to_database(mocker):
+    user = UserFactory()
     identity_claim = "id_claim"
     decoded_token = {
         "jti": "test_jti",
         "type": "test_token_type",
-        identity_claim: 666,
+        identity_claim: user.ext_id,
         "exp": datetime.now().timestamp()
     }
     mocker.patch("everycache_api.auth.helpers.decode_token",
@@ -60,7 +58,7 @@ def test_add_token_to_database(mocker):
 
     assert token.jti == decoded_token["jti"]
     assert token.token_type == decoded_token["type"]
-    assert token.user_id == decoded_token[identity_claim]
+    assert token.user_id == user.id_
     assert token.expires == datetime.fromtimestamp(decoded_token["exp"])
     assert token.revoked is False
 
