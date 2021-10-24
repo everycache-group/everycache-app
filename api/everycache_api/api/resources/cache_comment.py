@@ -1,9 +1,10 @@
-from everycache_api.api.schemas import CacheCommentSchema
-from everycache_api.extensions import db
-from everycache_api.models import CacheComment, User
 from flask import abort, request
 from flask_jwt_extended import current_user, jwt_required
 from flask_restful import Resource
+
+from everycache_api.api.schemas import CacheCommentSchema
+from everycache_api.extensions import db
+from everycache_api.models import CacheComment, User
 
 
 class CacheCommentResource(Resource):
@@ -81,8 +82,11 @@ class CacheCommentResource(Resource):
 
     def get(self, cache_comment_id: str):
         # find and return comment
-        comment = CacheComment.query_ext_id(cache_comment_id).filter(
-            CacheComment.cache.has(deleted=False)).first_or_404()
+        comment = (
+            CacheComment.query_ext_id(cache_comment_id)
+            .filter(CacheComment.cache.has(deleted=False))
+            .first_or_404()
+        )
 
         schema = CacheCommentSchema()
 
@@ -90,8 +94,11 @@ class CacheCommentResource(Resource):
 
     def put(self, cache_comment_id: str):
         # find comment
-        comment = CacheComment.query_ext_id(cache_comment_id).filter(
-            CacheComment.cache.has(deleted=False)).first_or_404()
+        comment = (
+            CacheComment.query_ext_id(cache_comment_id)
+            .filter(CacheComment.cache.has(deleted=False))
+            .first_or_404()
+        )
 
         # ensure current_user is authorized
         if current_user != comment.author and current_user.role != User.Role.Admin:
