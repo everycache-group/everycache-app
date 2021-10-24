@@ -1,6 +1,7 @@
+from marshmallow import validate
+
 from everycache_api.extensions import db, ma
 from everycache_api.models import Cache
-from marshmallow import validate
 
 from .user import NestedUserSchema
 
