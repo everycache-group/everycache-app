@@ -1,13 +1,19 @@
-from everycache_api.api.schemas import (CacheCommentSchema, CacheSchema,
-                                        CacheVisitSchema, PublicCacheSchema,
-                                        PublicUserSchema, UserSchema)
+from flask import abort, request
+from flask_jwt_extended import current_user, jwt_required
+from flask_restful import Resource
+
+from everycache_api.api.schemas import (
+    CacheCommentSchema,
+    CacheSchema,
+    CacheVisitSchema,
+    PublicCacheSchema,
+    PublicUserSchema,
+    UserSchema,
+)
 from everycache_api.auth.helpers import revoke_all_user_tokens
 from everycache_api.common.pagination import paginate
 from everycache_api.extensions import db
 from everycache_api.models import Cache, CacheComment, CacheVisit, User
-from flask import abort, request
-from flask_jwt_extended import current_user, jwt_required
-from flask_restful import Resource
 
 
 class UserResource(Resource):
@@ -372,7 +378,8 @@ class UserCacheVisitListResource(Resource):
         user = User.query_ext_id(user_id).first_or_404()
 
         query = CacheVisit.query.filter_by(user=user, deleted=False).filter(
-            CacheVisit.cache.has(deleted=False))
+            CacheVisit.cache.has(deleted=False)
+        )
         schema = CacheVisitSchema(many=True)
 
         return paginate(query, schema), 200
@@ -430,7 +437,8 @@ class UserCacheCommentListResource(Resource):
         user = User.query_ext_id(user_id).filter_by(deleted=False).first_or_404()
 
         query = CacheComment.query.filter_by(author=user, deleted=False).filter(
-            CacheComment.cache.has(deleted=False))
+            CacheComment.cache.has(deleted=False)
+        )
         schema = CacheCommentSchema(many=True)
 
         return paginate(query, schema), 200
