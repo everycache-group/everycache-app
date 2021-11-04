@@ -121,7 +121,7 @@ class CacheVisitResource(Resource):
             abort(403)
 
         # delete visit
-        visit.deleted = True
+        db.session.delete(visit)
         db.session.commit()
 
         return {"msg": "cache visit deleted"}, 200
