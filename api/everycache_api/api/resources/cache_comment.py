@@ -78,11 +78,15 @@ class CacheCommentResource(Resource):
           description: cache comment not found
     """
 
-    method_decorators = {"put": jwt_required(), "delete": jwt_required()}
+    method_decorators = {"put": [jwt_required()], "delete": [jwt_required()]}
 
     def get(self, cache_comment_id: str):
         # find and return comment
-        comment = CacheComment.query_ext_id(cache_comment_id).first_or_404()
+        comment = (
+            CacheComment.query_ext_id(cache_comment_id)
+            .filter(CacheComment.cache.has(deleted=False))
+            .first_or_404()
+        )
 
         schema = CacheCommentSchema()
 
@@ -90,7 +94,11 @@ class CacheCommentResource(Resource):
 
     def put(self, cache_comment_id: str):
         # find comment
-        comment = CacheComment.query_ext_id(cache_comment_id).first_or_404()
+        comment = (
+            CacheComment.query_ext_id(cache_comment_id)
+            .filter(CacheComment.cache.has(deleted=False))
+            .first_or_404()
+        )
 
         # ensure current_user is authorized
         if current_user != comment.author and current_user.role != User.Role.Admin:

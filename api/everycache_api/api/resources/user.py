@@ -230,6 +230,7 @@ class UserListResource(Resource):
             schema = UserSchema(many=True)
         else:
             # user is not logged in or not an admin
+            query = query.filter_by(verified=True)
             schema = PublicUserSchema(many=True)
 
         return paginate(query, schema), 200
@@ -241,9 +242,6 @@ class UserListResource(Resource):
 
         schema = UserSchema()
         user = schema.load(request.json)
-
-        if request.json.get("current_password") != request.json.get("new_password"):
-            return {"msg": "passwords do not match"}, 400
 
         if User.query.filter_by(email=user.email).first():
             return {"msg": "email is already taken"}, 400
@@ -374,9 +372,11 @@ class UserCacheVisitListResource(Resource):
         # retrieve user's cache visits
 
         # find user
-        user = User.query_ext_id(user_id).filter_by(deleted=False).first_or_404()
+        user = User.query_ext_id(user_id).first_or_404()
 
-        query = CacheVisit.query.filter_by(user=user)
+        query = CacheVisit.query.filter_by(user=user, deleted=False).filter(
+            CacheVisit.cache.has(deleted=False)
+        )
         schema = CacheVisitSchema(many=True)
 
         return paginate(query, schema), 200
@@ -433,7 +433,9 @@ class UserCacheCommentListResource(Resource):
         # find user
         user = User.query_ext_id(user_id).filter_by(deleted=False).first_or_404()
 
-        query = CacheComment.query.filter_by(author=user, deleted=False)
+        query = CacheComment.query.filter_by(author=user, deleted=False).filter(
+            CacheComment.cache.has(deleted=False)
+        )
         schema = CacheCommentSchema(many=True)
 
         return paginate(query, schema), 200
