@@ -10,6 +10,7 @@ class Cache(BaseMixin, db.Model):
 
     # own properties
     name = db.Column(db.Text, nullable=False)
+    description = db.Column(db.Text, nullable=False)
     created_on = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     lon = db.Column(db.Numeric(scale=4, asdecimal=True), nullable=False)
     lat = db.Column(db.Numeric(scale=4, asdecimal=True), nullable=False)
