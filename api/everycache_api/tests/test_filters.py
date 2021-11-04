@@ -153,7 +153,7 @@ def test_apply_query_filter(app, mocker):
 
     with app.test_request_context():
         request_mock = mocker.patch("everycache_api.common.filters.request")
-    args_mock = mocker.MagicMock()
+    args_mock = request_mock.args = mocker.MagicMock()
     args_mock.to_dict.return_value = args
     request_mock.args = args_mock
 
