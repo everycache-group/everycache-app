@@ -1,6 +1,11 @@
 import pytest
 from marshmallow import ValidationError
 from everycache_api.api.resources.user import UserListResource
+from everycache_api.app import create_app
+
+
+def test_create_app():
+    assert create_app("everycache_api.tests.test_config")
 
 
 @pytest.mark.parametrize("endpoint", ("/api/users", "/api/caches"))

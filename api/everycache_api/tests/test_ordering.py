@@ -50,6 +50,25 @@ def test_apply_query_ordering_nested(desc, order_by, app, mocker):
         apply_query_ordering(query_mock, schema_mock)
 
 
+@pytest.mark.parametrize("desc", ("true", "false"))
+@pytest.mark.parametrize("order_by", ("field1", "field2"))
+def test_apply_query_ordering_no_model_field(desc, order_by, app, mocker):
+    query_mock = mocker.MagicMock()
+    schema_mock = _get_schema_mock(app, mocker, desc, order_by, fields.Nested)
+    schema_mock.fields = {}
+
+    assert apply_query_ordering(query_mock, schema_mock) == query_mock
+
+
+def test_apply_query_ordering_no_order_by(app, mocker):
+    query_mock = mocker.MagicMock()
+    schema_mock = mocker.MagicMock()
+    schema_mock.fields = {}
+
+    with app.test_request_context():
+        assert apply_query_ordering(query_mock, schema_mock) == query_mock
+
+
 def test_query_ordering_pluck(mocker):
     query_mock = mocker.MagicMock()
     schema_field_mock = mocker.MagicMock()
