@@ -29,6 +29,7 @@ python-dotenv = "*"
 sqlalchemy-utils = "*"
 waitress = "*"
 flask-redis = "*"
+flask-cors = "*"
 
 [requires]
 python_version = "3.9"
