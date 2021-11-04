@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 
 from flask import request
 from functools import partial
@@ -20,7 +20,10 @@ def _parse_value(value, schema_field_type):
         except ValueError:
             return None
     elif schema_field_type == fields.DateTime:
-        value = datetime.strptime(value, "%d-%m-%y")
+        try:
+            value = datetime.strptime(value, "%d-%m-%Y")
+        except ValueError:
+            return None
 
     return value
 
@@ -32,7 +35,7 @@ def _like_helper(model_field, value, like=True):
 
 
 def _filter_query(query, operation_code, model_field, value):
-    binary_operations = {
+    operations = {
         None: operator.eq,
         "lte": operator.le,
         "lt": operator.lt,
@@ -40,10 +43,9 @@ def _filter_query(query, operation_code, model_field, value):
         "gt": operator.gt,
         "not": operator.ne,
         "like": _like_helper,
-        "not-like": partial(_like_helper, like=False)
+        "not-like": partial(_like_helper, like=False),
     }
-
-    operation = binary_operations.get(operation_code)
+    operation = operations.get(operation_code)
     if operation:
         query = query.filter(operation(model_field, value))
 
