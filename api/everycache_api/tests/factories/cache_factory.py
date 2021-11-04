@@ -1,5 +1,6 @@
 import factory
 import factory.fuzzy
+
 from everycache_api.extensions import db
 from everycache_api.models import Cache as CacheModel
 from everycache_api.tests.factories.user_factory import UserFactory

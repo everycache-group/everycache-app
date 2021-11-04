@@ -1,5 +1,6 @@
 import pytest
 from marshmallow import ValidationError
+
 from everycache_api.api.resources.user import UserListResource
 from everycache_api.app import create_app
 

@@ -1,11 +1,12 @@
 import json
 
 import pytest
+
 from everycache_api.api.schemas.cache_comment import CacheCommentSchema
+from everycache_api.extensions import db
 from everycache_api.models import CacheComment, User
 from everycache_api.tests.factories.cache_comment_factory import CacheCommentFactory
 from everycache_api.tests.helpers import get_headers_for_user
-from everycache_api.extensions import db
 
 
 class TestCacheCommentGet:

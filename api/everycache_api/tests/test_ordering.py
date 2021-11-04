@@ -1,10 +1,11 @@
 import pytest
-from everycache_api.common.ordering import (
-    apply_query_ordering,
-    _query_ordering_pluck,
-    _query_ordering_custom,
-)
 from marshmallow import fields
+
+from everycache_api.common.ordering import (
+    _query_ordering_custom,
+    _query_ordering_pluck,
+    apply_query_ordering,
+)
 
 
 def _get_schema_mock(app, mocker, desc, order_by, field_type):

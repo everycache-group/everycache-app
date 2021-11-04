@@ -2,11 +2,12 @@ import json
 
 import pytest
 from sqlalchemy.exc import InvalidRequestError
+
 from everycache_api.api.schemas.cache_visit import CacheVisitSchema
+from everycache_api.extensions import db
 from everycache_api.models import CacheVisit, User
 from everycache_api.tests.factories.cache_visit_factory import CacheVisitFactory
 from everycache_api.tests.helpers import get_headers_for_user
-from everycache_api.extensions import db
 
 
 class TestCacheVisitGet:

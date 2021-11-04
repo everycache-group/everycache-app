@@ -1,6 +1,7 @@
 import factory
-from everycache_api.models import Token as TokenModel
+
 from everycache_api.extensions import db
+from everycache_api.models import Token as TokenModel
 from everycache_api.tests.factories.user_factory import UserFactory
 
 

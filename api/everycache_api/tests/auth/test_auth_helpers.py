@@ -1,16 +1,19 @@
 from datetime import datetime
 
 import pytest
-from everycache_api.auth.helpers import (add_token_to_database,
-                                         create_jwt_payload,
-                                         create_user_access_token,
-                                         create_user_refresh_token,
-                                         is_token_revoked,
-                                         revoke_all_user_tokens, revoke_token)
+
+from everycache_api.auth.helpers import (
+    add_token_to_database,
+    create_jwt_payload,
+    create_user_access_token,
+    create_user_refresh_token,
+    is_token_revoked,
+    revoke_all_user_tokens,
+    revoke_token,
+)
 from everycache_api.models import Token
 from everycache_api.tests.factories.token_factory import TokenFactory
-from everycache_api.tests.factories.user_factory import (AdminFactory,
-                                                         UserFactory)
+from everycache_api.tests.factories.user_factory import AdminFactory, UserFactory
 
 
 @pytest.mark.parametrize("factory", (UserFactory, AdminFactory))

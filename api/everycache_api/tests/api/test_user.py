@@ -1,17 +1,18 @@
 import json
 
 import pytest
+
 from everycache_api.api.schemas.cache import CacheSchema, PublicCacheSchema
 from everycache_api.api.schemas.cache_comment import CacheCommentSchema
 from everycache_api.api.schemas.cache_visit import CacheVisitSchema
 from everycache_api.api.schemas.user import PublicUserSchema, UserSchema
+from everycache_api.extensions import db
 from everycache_api.models import Cache, CacheComment, CacheVisit, User
 from everycache_api.tests.factories.cache_comment_factory import CacheCommentFactory
 from everycache_api.tests.factories.cache_factory import CacheFactory
 from everycache_api.tests.factories.cache_visit_factory import CacheVisitFactory
 from everycache_api.tests.factories.user_factory import UserFactory
 from everycache_api.tests.helpers import get_auth_header, get_headers_for_user
-from everycache_api.extensions import db
 
 
 class TestUserGet:
