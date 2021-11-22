@@ -2,12 +2,12 @@ import logging
 from sys import stdout
 
 from flask import Flask
+from flask_cors import CORS
 
 from everycache_api import api, auth
+from everycache_api.config import FRONTEND_APP_URL
 from everycache_api.extensions import apispec, db, jwt, migrate, redis_client
 
-from everycache_api.config import FRONTEND_APP_URL
-from flask_cors import CORS
 
 def create_app(config_object="everycache_api.config"):
     """Create application factory, as explained here: http://flask.pocoo.org/docs/patterns/appfactories/.
