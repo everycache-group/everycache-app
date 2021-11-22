@@ -1,15 +1,16 @@
 from flask import Blueprint, current_app, request
-from flask_jwt_extended import current_user, get_jwt, get_jwt_identity, jwt_required
+from flask_jwt_extended import current_user, get_jwt, jwt_required
 
 from everycache_api.auth.helpers import (
-    add_token_to_database,
     create_user_access_token,
     create_user_refresh_token,
     is_token_revoked,
+    load_tokens_from_database_to_storage,
+    revoke_all_user_tokens,
     revoke_token,
+    save_encoded_token,
 )
-from everycache_api.auth.token_storage import add_token_to_redis_storage, bulk_redis_operation
-from everycache_api.extensions import apispec, jwt
+from everycache_api.extensions import apispec, jwt, redis_client
 from everycache_api.models import User
 
 blueprint = Blueprint("auth", __name__, url_prefix="/auth")
@@ -69,11 +70,9 @@ def login():
 
     access_token = create_user_access_token(user)
     refresh_token = create_user_refresh_token(user)
-    id_claim = current_app.config["JWT_IDENTITY_CLAIM"]
-    with bulk_redis_operation() as redis_client:
-        add_token_to_redis_storage(access_token, id_claim, redis_client)
-        add_token_to_redis_storage(refresh_token, id_claim, redis_client)
-    add_token_to_database(refresh_token, id_claim)
+
+    save_encoded_token(access_token)
+    save_encoded_token(refresh_token)
 
     return {"access_token": access_token, "refresh_token": refresh_token}, 200
 
@@ -111,7 +110,7 @@ def refresh():
         return {"msg": "User in refresh token does not exist"}, 401
 
     access_token = create_user_access_token(current_user)
-    add_token_to_redis_storage(access_token, current_app.config["JWT_IDENTITY_CLAIM"])
+    save_encoded_token(access_token)
 
     return {"access_token": access_token}, 200
 
@@ -140,9 +139,8 @@ def revoke_access_token():
         401:
           description: unauthorized
     """
-    jti = get_jwt()["jti"]
-    user_identity = get_jwt_identity()
-    revoke_token(jti, user_identity)
+    revoke_token(get_jwt())
+
     return {"message": "token revoked"}, 200
 
 
@@ -170,16 +168,45 @@ def revoke_refresh_token():
         401:
           description: unauthorized
     """
-    jti = get_jwt()["jti"]
-    user_identity = get_jwt_identity()
-    revoke_token(jti, user_identity)
+    revoke_token(get_jwt())
+
     return {"message": "token revoked"}, 200
+
+
+@blueprint.route("/revoke_all", methods=["DELETE"])
+@jwt_required()
+def revoke_all_tokens():
+    """Revoke all tokens, used for logging out of all devices
+
+    ---
+    delete:
+      tags:
+        - auth
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: all tokens revoked
+        400:
+          description: bad request
+        401:
+          description: unauthorized
+    """
+    revoke_all_user_tokens(current_user)
+
+    return {"message": "all tokens revoked"}, 200
 
 
 @jwt.user_lookup_loader
 def user_loader_callback(jwt_headers, jwt_payload):
-    identity = jwt_payload["sub"]
-    return User.query.filter_by(id_=identity).one_or_none()
+    user_identity = jwt_payload["sub"]
+
+    return User.query.filter_by(id_=user_identity).one_or_none()
 
 
 @jwt.token_in_blocklist_loader
@@ -193,3 +220,11 @@ def register_views():
     apispec.spec.path(view=refresh, app=current_app)
     apispec.spec.path(view=revoke_access_token, app=current_app)
     apispec.spec.path(view=revoke_refresh_token, app=current_app)
+    apispec.spec.path(view=revoke_all_tokens, app=current_app)
+
+    if redis_client:
+        current_app.logger.info("Loading tokens from database to redis storage...")
+
+        load_tokens_from_database_to_storage()
+
+        current_app.logger.info("Done")

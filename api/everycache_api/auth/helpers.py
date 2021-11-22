@@ -6,11 +6,13 @@ https://github.com/vimalloc/flask-jwt-extended/blob/master/examples/blocklist_da
 from datetime import datetime
 
 from flask_jwt_extended import create_access_token, create_refresh_token, decode_token
-from flask_jwt_extended.utils import get_jwt_identity
+from sqlalchemy import and_
 
-from everycache_api.extensions import db
-from everycache_api.models import RefreshToken, User
-from everycache_api.auth.token_storage import bulk_redis_operation, delete_token, get_token_key, get_user_token_key, get_user_token_keys
+from everycache_api.extensions import redis_client
+from everycache_api.models import Token, User
+
+from . import database_helper as db_helper
+from . import storage_helper as redis_helper
 
 
 def create_jwt_payload(user: User):
@@ -28,66 +30,76 @@ def create_user_refresh_token(user: User):
     return create_refresh_token(**create_jwt_payload(user))
 
 
-def add_token_to_database(encoded_token, identity_claim):
-    """
-    Adds a new token to the database.
-
-    :param identity_claim: configured key to get user identity
-    """
+def save_encoded_token(encoded_token):
     decoded_token = decode_token(encoded_token)
 
     jti = decoded_token["jti"]
-    user_identity = decoded_token[identity_claim]
+    token_type = decoded_token["type"]
+    user_identity = decoded_token["sub"]
     expires = datetime.fromtimestamp(decoded_token["exp"])
     revoked = False
 
-    db_token = RefreshToken(
+    token = Token(
         jti=jti,
+        token_type=token_type,
         user_id=user_identity,
         expires=expires,
         revoked=revoked,
     )
-    db.session.add(db_token)
-    db.session.commit()
+
+    if redis_client:
+        redis_helper.save_token(token)
+
+    if token_type == "refresh" or not redis_client:
+        # if redis is used, only refresh tokens are saved in database
+        db_helper.save_token(token)
+
+    return True
 
 
 def is_token_revoked(jwt_payload):
     """
-    Checks if the given token is revoked or not. Because we are adding all the
-    tokens that we create into redis, if the token is not present
-    there we are going to consider it revoked, as we don't know where
-    it was created.
+    Checks if the given token is revoked or not. Because we are saving all tokens we
+    create, if the token is not found, it is consider revoked
     """
+    user_identity = jwt_payload["sub"]
+    token_type = jwt_payload["type"]
     jti = jwt_payload["jti"]
-    return get_token_key(jti) is None
+
+    if redis_client:
+        return redis_helper.is_token_revoked(user_identity, token_type, jti)
+    else:
+        return db_helper.is_token_revoked(user_identity, token_type, jti)
 
 
-def revoke_token(token_jti, user_identity):
-    """
-    Revokes the given token
-    """
-    token = RefreshToken.query.filter_by(jti=token_jti, user_id=user_identity).first()
-    if token is not None:
-        token.revoked = True
-        db.session.commit()
+def revoke_token(jwt_payload):
+    if is_token_revoked(jwt_payload):
+        raise Exception("Token is already revoked")
 
-    delete_token(get_user_token_key(token_jti, user_identity))
+    jti = jwt_payload["jti"]
+    user_identity = jwt_payload["sub"]
+    token_type = jwt_payload["type"]
+
+    if redis_client:
+        redis_helper.revoke_token(user_identity, token_type, jti)
+
+    if token_type == "refresh" or not redis_client:
+        # if redis is used, only refresh tokens are saved in database
+        db_helper.revoke_token(user_identity, token_type, jti)
 
 
 def revoke_all_user_tokens(user):
-    tokens = RefreshToken.query.filter_by(user=user).all()
+    if redis_client:
+        redis_helper.revoke_all_user_tokens(user)
 
-    if not tokens:
-        return False
-
-    for token in tokens:
-        token.revoked = True
-
-    db.session.commit()
-
-    redis_token_keys = get_user_token_keys(get_jwt_identity())
-    with bulk_redis_operation as redis_client:
-        for token_key in redis_token_keys:
-            delete_token(token_key, redis_client)
+    db_helper.revoke_all_user_tokens(user)
 
     return True
+
+
+def load_tokens_from_database_to_storage():
+    tokens = Token.query.filter(
+        and_(Token.revoked is False, Token.expires > datetime.now())
+    ).all()
+
+    return redis_helper.save_multiple_tokens(tokens)
