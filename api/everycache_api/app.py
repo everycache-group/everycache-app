@@ -29,9 +29,10 @@ def configure_extensions(app):
     """Configure flask extensions"""
     db.init_app(app)
     migrate.init_app(app, db)
-
     jwt.init_app(app)
-    redis_client.init_app(app)
+
+    if redis_client:
+        redis_client.init_app(app)
 
     return True
 
