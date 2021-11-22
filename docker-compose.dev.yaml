@@ -1,9 +1,10 @@
 version: "3.9"
+
 services:
   web:
     build: api
     ports:
-      - "5000:8080"
+      - 5000:8080
     volumes:
       - ./api:/code
     command: ["flask", "run", "--host", "0.0.0.0", "--port", "8080"]
@@ -15,6 +16,13 @@ services:
     depends_on:
       - redis
   redis:
-    image: "redis:alpine"
+    image: redis:alpine
     ports:
-      - "6379:6379"
+      - 6379:6379
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    ports:
+      - 8081:8081
