@@ -1,7 +1,13 @@
 version: "3.9"
 
 services:
-  web:
+  frontend:
+     build: frontend
+     ports:
+        - "80:3000"
+     depends_on:
+        - api
+  api:
     build: api
     ports:
       - 5000:8080
