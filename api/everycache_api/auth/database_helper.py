@@ -4,10 +4,10 @@ from everycache_api.extensions import db
 from everycache_api.models import Token, User
 
 
-def _get_token(user_identity, token_type, jti):  # raises NoResultFound
-    return Token.query.filter_by(
-        user_id=user_identity, token_type=token_type, jti=jti
-    ).one()
+def _get_token(user_id, token_type, jti):  # raises NoResultFound
+    user = User.query_ext_id(user_id).one()
+
+    return Token.query.filter_by(user=user, token_type=token_type, jti=jti).one()
 
 
 def save_token(token: Token):
@@ -15,18 +15,18 @@ def save_token(token: Token):
     db.session.commit()
 
 
-def is_token_revoked(user_identity, token_type, jti):
+def is_token_revoked(user_id, token_type, jti):
     try:
-        token = _get_token(user_identity, token_type, jti)
+        token = _get_token(user_id, token_type, jti)
     except NoResultFound:
         return True
     else:
         return token.revoked
 
 
-def revoke_token(user_identity, token_type, jti):
+def revoke_token(user_id, token_type, jti):
     try:
-        token = _get_token(user_identity, token_type, jti)
+        token = _get_token(user_id, token_type, jti)
     except NoResultFound:
         return False
     else:

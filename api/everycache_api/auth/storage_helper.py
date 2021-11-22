@@ -15,8 +15,8 @@ def _bulk_redis_operation():
         pipeline.execute()
 
 
-def _format_token_key(user_identity, token_type, jti):
-    return f"jwt_token:user_id-{user_identity}:{token_type}:jti-{jti}".encode()
+def _format_token_key(user_id, token_type, jti):
+    return f"jwt_token:user_id-{user_id}:{token_type}:jti-{jti}".encode()
 
 
 def _delete_key(key, pipeline=redis_client):
@@ -24,7 +24,7 @@ def _delete_key(key, pipeline=redis_client):
 
 
 def save_token(token: Token, pipeline=redis_client):
-    token_key = _format_token_key(token.user_id, token.token_type, token.jti)
+    token_key = _format_token_key(token.user.ext_id, token.token_type, token.jti)
 
     pipeline.set(token_key, "noop".encode())
     pipeline.expire(token_key, (token.expires - datetime.now()).seconds)
@@ -40,20 +40,20 @@ def save_multiple_tokens(tokens: List[Token]):
     return True
 
 
-def is_token_revoked(user_identity, token_type, jti):
-    key = _format_token_key(user_identity, token_type, jti)
+def is_token_revoked(user_id, token_type, jti):
+    key = _format_token_key(user_id, token_type, jti)
 
     return redis_client.get(key) is None
 
 
-def revoke_token(user_identity, token_type, jti):
-    key = _format_token_key(user_identity, token_type, jti)
+def revoke_token(user_id, token_type, jti):
+    key = _format_token_key(user_id, token_type, jti)
 
     return _delete_key(key)
 
 
 def revoke_all_user_tokens(user: User):
-    keys = redis_client.keys(f"jwt_token:user_id-{user.id_}:*")
+    keys = redis_client.keys(f"jwt_token:user_id-{user.ext_id}:*")
 
     with _bulk_redis_operation() as pipeline:
         for key in keys:

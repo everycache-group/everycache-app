@@ -12,6 +12,7 @@ services:
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
       - SECRET_KEY=${SECRET_KEY}
+      - HASHIDS_SALT=${HASHIDS_SALT}
       - REDIS_URL=${REDIS_URL}
     depends_on:
       - redis

@@ -204,9 +204,9 @@ def revoke_all_tokens():
 
 @jwt.user_lookup_loader
 def user_loader_callback(jwt_headers, jwt_payload):
-    user_identity = jwt_payload["sub"]
+    user_id = jwt_payload["sub"]
 
-    return User.query.filter_by(id_=user_identity).one_or_none()
+    return User.query_ext_id(user_id).one_or_none()
 
 
 @jwt.token_in_blocklist_loader

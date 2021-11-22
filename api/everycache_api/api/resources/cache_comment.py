@@ -1,4 +1,4 @@
-from flask import request
+from flask import abort, request
 from flask_jwt_extended import current_user, jwt_required
 from flask_restful import Resource
 
@@ -78,27 +78,31 @@ class CacheCommentResource(Resource):
           description: cache comment not found
     """
 
-    method_decorators = {"put": jwt_required(), "delete": jwt_required()}
+    method_decorators = {"put": [jwt_required()], "delete": [jwt_required()]}
 
-    def get(self, cache_comment_id):
+    def get(self, cache_comment_id: str):
         # find and return comment
-        comment = CacheComment.query.filter_by(
-            id_=cache_comment_id, deleted=False
-        ).first_or_404()
+        comment = (
+            CacheComment.query_ext_id(cache_comment_id)
+            .filter(CacheComment.cache.has(deleted=False))
+            .first_or_404()
+        )
 
         schema = CacheCommentSchema()
 
         return {"cache_comment": schema.dump(comment)}, 200
 
-    def put(self, cache_comment_id):
+    def put(self, cache_comment_id: str):
         # find comment
-        comment = CacheComment.query.filter_by(
-            id_=cache_comment_id, deleted=False
-        ).first_or_404()
+        comment = (
+            CacheComment.query_ext_id(cache_comment_id)
+            .filter(CacheComment.cache.has(deleted=False))
+            .first_or_404()
+        )
 
         # ensure current_user is authorized
         if current_user != comment.author and current_user.role != User.Role.Admin:
-            return 403
+            abort(403)
 
         schema = CacheCommentSchema()
 
@@ -111,15 +115,13 @@ class CacheCommentResource(Resource):
             "cache_comment": schema.dump(comment),
         }, 200
 
-    def delete(self, cache_comment_id):
+    def delete(self, cache_comment_id: str):
         # find comment
-        comment = CacheComment.query.filter_by(
-            id_=cache_comment_id, deleted=False
-        ).first_or_404()
+        comment = CacheComment.query_ext_id(cache_comment_id).first_or_404()
 
         # ensure current_user is authorized
         if current_user != comment.author and current_user.role != User.Role.Admin:
-            return 403
+            abort(403)
 
         # mark comment as deleted
         comment.deleted = True
