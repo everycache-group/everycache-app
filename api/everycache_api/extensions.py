@@ -1,3 +1,4 @@
+from flask_apscheduler import APScheduler
 from flask_jwt_extended import JWTManager
 from flask_marshmallow import Marshmallow
 from flask_migrate import Migrate
@@ -23,3 +24,5 @@ if REDIS_URL:
     redis_client = FlaskRedis()
 else:
     redis_client = False
+
+apscheduler = APScheduler()
