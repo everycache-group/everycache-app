@@ -99,7 +99,7 @@ def revoke_all_user_tokens(user: User):
 
 def load_tokens_from_database_to_storage():
     tokens = Token.query.filter(
-        and_(Token.revoked is False, Token.expires > datetime.now())
+        and_(Token.revoked is False, Token.expires > datetime.utcnow())
     ).all()
 
     return redis_helper.save_multiple_tokens(tokens)

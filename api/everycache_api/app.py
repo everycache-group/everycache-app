@@ -5,6 +5,7 @@ from flask import Flask
 from flask_cors import CORS
 
 from everycache_api import api, auth
+from everycache_api.auth.helpers import load_tokens_from_database_to_storage
 from everycache_api.config import FRONTEND_APP_URL
 from everycache_api.extensions import apispec, db, jwt, migrate, redis_client
 
@@ -22,7 +23,23 @@ def create_app(config_object="everycache_api.config"):
     configure_apispec(app)
     register_blueprints(app)
 
+    start_extensions(app)
+
     return app
+
+
+def start_extensions(app):
+    with app.app_context():
+        if redis_client:
+            app.logger.info("Loading valid tokens from database to redis storage...")
+
+            load_tokens_from_database_to_storage()
+
+            app.logger.info("Done")
+        else:
+            app.logger.info(
+                "Running without redis, skipping loading tokens from database."
+            )
 
 
 def configure_extensions(app):
