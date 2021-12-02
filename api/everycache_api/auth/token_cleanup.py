@@ -10,16 +10,15 @@ from everycache_api.models import Token
 
 def cleanup_expired_tokens():
     with apscheduler.app.app_context():
-        tokens = Token.query.filter(Token.expires < datetime.utcnow()).all()
+        query = Token.query.filter(Token.expires < datetime.utcnow())
+        count = query.count()
 
-        if tokens:
+        if count:
             current_app.logger.info(
-                f"Found {len(tokens)} expired tokens in database. Cleaning up..."
+                f"Found {count} expired tokens in database. Cleaning up..."
             )
 
-            for token in tokens:
-                db.session.delete(token)
-
+            query.delete()
             db.session.commit()
 
             current_app.logger.info("Done")
@@ -29,5 +28,5 @@ def cleanup_expired_tokens():
 
 def add_token_cleanup_job():
     # add job to scheduler
-    trigger = IntervalTrigger(hour="*/12", timezone=utc)
+    trigger = IntervalTrigger(hours=12, timezone=utc)
     apscheduler.add_job("token_cleanup_job", cleanup_expired_tokens, trigger=trigger)
