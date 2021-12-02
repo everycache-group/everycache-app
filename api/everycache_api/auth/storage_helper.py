@@ -2,6 +2,8 @@ from contextlib import contextmanager
 from datetime import datetime
 from typing import List
 
+from sqlalchemy import and_
+
 from everycache_api.extensions import redis_client
 from everycache_api.models import Token, User
 
@@ -60,3 +62,11 @@ def revoke_all_user_tokens(user: User):
             _delete_key(key, pipeline)
 
     return True
+
+
+def load_tokens_from_database_to_storage():
+    tokens = Token.query.filter(
+        and_(Token.revoked.is_(False), Token.expires > datetime.utcnow())
+    ).all()
+
+    return save_multiple_tokens(tokens)
