@@ -6,7 +6,6 @@ https://github.com/vimalloc/flask-jwt-extended/blob/master/examples/blocklist_da
 from datetime import datetime
 
 from flask_jwt_extended import create_access_token, create_refresh_token, decode_token
-from sqlalchemy import and_
 
 from everycache_api.extensions import redis_client
 from everycache_api.models import Token, User
@@ -95,11 +94,3 @@ def revoke_all_user_tokens(user: User):
     db_helper.revoke_all_user_tokens(user)
 
     return True
-
-
-def load_tokens_from_database_to_storage():
-    tokens = Token.query.filter(
-        and_(Token.revoked is False, Token.expires > datetime.utcnow())
-    ).all()
-
-    return redis_helper.save_multiple_tokens(tokens)

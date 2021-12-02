@@ -5,7 +5,7 @@ from flask import Flask
 from flask_cors import CORS
 
 from everycache_api import api, auth
-from everycache_api.auth.helpers import load_tokens_from_database_to_storage
+from everycache_api.auth.storage_helper import load_tokens_from_database_to_storage
 from everycache_api.config import FRONTEND_APP_URL
 from everycache_api.extensions import apispec, db, jwt, migrate, redis_client
 
