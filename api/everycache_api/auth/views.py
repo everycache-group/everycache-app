@@ -5,12 +5,11 @@ from everycache_api.auth.helpers import (
     create_user_access_token,
     create_user_refresh_token,
     is_token_revoked,
-    load_tokens_from_database_to_storage,
     revoke_all_user_tokens,
     revoke_token,
     save_encoded_token,
 )
-from everycache_api.extensions import apispec, jwt, redis_client
+from everycache_api.extensions import apispec, jwt
 from everycache_api.models import User
 
 blueprint = Blueprint("auth", __name__, url_prefix="/auth")
@@ -221,10 +220,3 @@ def register_views():
     apispec.spec.path(view=revoke_access_token, app=current_app)
     apispec.spec.path(view=revoke_refresh_token, app=current_app)
     apispec.spec.path(view=revoke_all_tokens, app=current_app)
-
-    if redis_client:
-        current_app.logger.info("Loading tokens from database to redis storage...")
-
-        load_tokens_from_database_to_storage()
-
-        current_app.logger.info("Done")
