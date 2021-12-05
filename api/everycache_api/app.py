@@ -34,8 +34,6 @@ def create_app(config_object="everycache_api.config"):
     configure_apispec(app)
     register_blueprints(app)
 
-    start_extensions(app)
-
     return app
 
 
@@ -43,16 +41,14 @@ def start_extensions(app):
     with app.app_context():
         app.logger.info("Starting expired tokens cleanup job...")
 
-        # run token cleanup job once at app launch
-        cleanup_expired_tokens()
-
         add_token_cleanup_job()
         apscheduler.start()
 
         app.logger.info("Done")
 
         if redis_client:
-            app.logger.info("Loading valid tokens from database to redis storage...")
+            app.logger.info(
+                "Loading valid tokens from database to redis storage...")
 
             load_tokens_from_database_to_storage()
 
