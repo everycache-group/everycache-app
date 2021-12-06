@@ -2,12 +2,8 @@ import logging
 from sys import stdout
 
 from flask import Flask
-from flask_cors import CORS
 
 from everycache_api import api, auth
-from everycache_api.auth.storage_helper import load_tokens_from_database_to_storage
-from everycache_api.auth.token_cleanup import add_token_cleanup_job
-from everycache_api.config import FRONTEND_APP_URL
 from everycache_api.extensions import (
     apispec,
     apscheduler,
@@ -24,7 +20,6 @@ def create_app(config_object="everycache_api.config"):
     :param config_object: The configuration object to use.
     """
     app = Flask(__name__)
-    CORS(app, origin={FRONTEND_APP_URL})
     app.config.from_object(config_object)
 
     configure_extensions(app)
@@ -32,23 +27,6 @@ def create_app(config_object="everycache_api.config"):
     register_blueprints(app)
 
     return app
-
-
-def start_extensions(app):
-    with app.app_context():
-        add_token_cleanup_job()
-        apscheduler.start()
-
-        if redis_client:
-            app.logger.info("Loading valid tokens from database to redis storage...")
-
-            load_tokens_from_database_to_storage()
-
-            app.logger.info("Done")
-        else:
-            app.logger.info(
-                "Running without redis, skipping loading tokens from database."
-            )
 
 
 def configure_extensions(app):
