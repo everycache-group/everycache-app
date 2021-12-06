@@ -14,7 +14,7 @@ DEBUG = ENV == "development" or getenv_bool("DEBUG")
 
 SECRET_KEY = getenv("SECRET_KEY")
 
-SQLALCHEMY_DATABASE_URI = getenv("DATABASE_URI", "sqlite:///dev.db")
+SQLALCHEMY_DATABASE_URI = getenv("DATABASE_URI")
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 HASHIDS_ALPHABET = getenv("HASHIDS_ALPHABET", "abcdefghijklmnopqrstuvwxyz")
