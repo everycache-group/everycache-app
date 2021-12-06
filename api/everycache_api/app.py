@@ -5,11 +5,8 @@ from flask import Flask
 from flask_cors import CORS
 
 from everycache_api import api, auth
-from everycache_api.auth.token_cleanup import (
-    add_token_cleanup_job,
-    cleanup_expired_tokens,
-)
 from everycache_api.auth.storage_helper import load_tokens_from_database_to_storage
+from everycache_api.auth.token_cleanup import add_token_cleanup_job
 from everycache_api.config import FRONTEND_APP_URL
 from everycache_api.extensions import (
     apispec,
@@ -39,16 +36,11 @@ def create_app(config_object="everycache_api.config"):
 
 def start_extensions(app):
     with app.app_context():
-        app.logger.info("Starting expired tokens cleanup job...")
-
         add_token_cleanup_job()
         apscheduler.start()
 
-        app.logger.info("Done")
-
         if redis_client:
-            app.logger.info(
-                "Loading valid tokens from database to redis storage...")
+            app.logger.info("Loading valid tokens from database to redis storage...")
 
             load_tokens_from_database_to_storage()
 
