@@ -1,36 +1,39 @@
+# development docker-compose; extends and overrides base docker-compose.yaml file;
+# for usage example, please see dev-composition.sh
+
 version: "3.9"
 
 services:
   frontend:
-    build: frontend
     ports:
-      - 80:3000
-    depends_on:
-      - api
+      - 3000:3000
+
   api:
-    build: api
-    ports:
-      - 5000:8080
+    environment:
+      FLASK_ENV: development
+      FRONTEND_APP_URL: frontend:3000
+      HASHIDS_SALT: dev-hashids-salt
+      SECRET_KEY: dev-secret-key
+    command: flask run --host 0.0.0.0
     volumes:
       - ./api:/code
-    command: ["flask", "run", "--host", "0.0.0.0", "--port", "8080"]
-    environment:
-      - FLASK_APP=${FLASK_APP}
-      - FLASK_ENV=${FLASK_ENV}
-      - SECRET_KEY=${SECRET_KEY}
-      - HASHIDS_SALT=${HASHIDS_SALT}
-      - FRONTEND_APP_URL=${FRONTEND_APP_URL}
-      - REDIS_URL=${REDIS_URL}
-    depends_on:
-      - redis
+    ports:
+      - 5000:5000
+
+  database:
+    ports:
+      - 5432:5432
+
   redis:
-    image: redis:alpine
     ports:
       - 6379:6379
+
   redis-commander:
     image: rediscommander/redis-commander:latest
+    depends_on:
+      - redis
     environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
     ports:
       - 8081:8081
