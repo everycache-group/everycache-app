@@ -2,14 +2,19 @@ from os import getenv
 
 from dotenv import load_dotenv
 
+
+def getenv_bool(env_var_name: str) -> bool:
+    return getenv(env_var_name, "").lower in ["true", "1"]
+
+
 load_dotenv()
 
 ENV = getenv("FLASK_ENV")
-DEBUG = ENV == "development" or getenv("DEBUG", "").lower() in ["true", "1"]
+DEBUG = ENV == "development" or getenv_bool("DEBUG")
 
 SECRET_KEY = getenv("SECRET_KEY")
 
-SQLALCHEMY_DATABASE_URI = getenv("DATABASE_URI", "sqlite:///dev.db")
+SQLALCHEMY_DATABASE_URI = getenv("DATABASE_URI")
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 HASHIDS_ALPHABET = getenv("HASHIDS_ALPHABET", "abcdefghijklmnopqrstuvwxyz")

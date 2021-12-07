@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from apscheduler.triggers.interval import IntervalTrigger
 from flask import current_app
@@ -28,5 +28,13 @@ def cleanup_expired_tokens():
 
 def add_token_cleanup_job():
     # add job to scheduler
-    trigger = IntervalTrigger(hours=12, timezone=utc)
-    apscheduler.add_job("token_cleanup_job", cleanup_expired_tokens, trigger=trigger)
+    trigger = IntervalTrigger(
+        hours=12, timezone=utc, start_date=datetime.utcnow() + timedelta(minutes=1)
+    )
+    apscheduler.add_job(
+        "token_cleanup_job",
+        cleanup_expired_tokens,
+        trigger=trigger,
+        misfire_grace_time=60,
+        coalesce=True,
+    )
