@@ -2,14 +2,19 @@ from os import getenv
 
 from dotenv import load_dotenv
 
+
+def getenv_bool(env_var_name: str) -> bool:
+    return getenv(env_var_name, "").lower in ["true", "1"]
+
+
 load_dotenv()
 
 ENV = getenv("FLASK_ENV")
-DEBUG = ENV == "development" or getenv("DEBUG", "").lower() in ["true", "1"]
+DEBUG = ENV == "development" or getenv_bool("DEBUG")
 
 SECRET_KEY = getenv("SECRET_KEY")
 
-SQLALCHEMY_DATABASE_URI = getenv("DATABASE_URI", "sqlite:///dev.db")
+SQLALCHEMY_DATABASE_URI = getenv("DATABASE_URI")
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 HASHIDS_ALPHABET = getenv("HASHIDS_ALPHABET", "abcdefghijklmnopqrstuvwxyz")
@@ -19,4 +24,5 @@ HASHIDS_SALT = getenv("HASHIDS_SALT")
 JWT_ACCESS_TOKEN_EXPIRES = int(getenv("JWT_ACCESS_TOKEN_EXPIRY_MINUTES", "15")) * 60
 JWT_REFRESH_TOKEN_EXPIRES = int(getenv("JWT_REFRESH_TOKEN_EXPIRY_MINUTES", "720")) * 60
 
-REDIS_URL = "redis://redis:6379/0"
+REDIS_URL = getenv("REDIS_URL")
+FRONTEND_APP_URL = getenv("FRONTEND_APP_URL", "http://localhost:3000")

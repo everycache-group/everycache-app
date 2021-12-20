@@ -1,6 +1,6 @@
 from flask import Blueprint, current_app, jsonify
-from flask_restful import Api, Resource
-from marshmallow import ValidationError
+from flask_restful import Api as BaseApi
+from marshmallow.exceptions import ValidationError
 
 from everycache_api.api.resources import (
     CacheCommentListResource,
@@ -24,6 +24,18 @@ from everycache_api.api.schemas import (
     UserSchema,
 )
 from everycache_api.extensions import apispec
+
+handled_exceptions = [ValidationError]
+
+
+class Api(BaseApi):
+    def error_router(self, original_handler, e):
+        if type(e) in handled_exceptions:
+            # pass exception through flask_restful to blueprint/app error handler
+            return original_handler(e)
+
+        return super().error_router(original_handler, e)
+
 
 blueprint = Blueprint("api", __name__, url_prefix="/api")
 api = Api(blueprint)

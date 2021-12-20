@@ -4,7 +4,14 @@ from sys import stdout
 from flask import Flask
 
 from everycache_api import api, auth
-from everycache_api.extensions import apispec, db, jwt, migrate, redis_client
+from everycache_api.extensions import (
+    apispec,
+    apscheduler,
+    db,
+    jwt,
+    migrate,
+    redis_client,
+)
 
 
 def create_app(config_object="everycache_api.config"):
@@ -26,9 +33,12 @@ def configure_extensions(app):
     """Configure flask extensions"""
     db.init_app(app)
     migrate.init_app(app, db)
-
     jwt.init_app(app)
-    redis_client.init_app(app)
+
+    if redis_client:
+        redis_client.init_app(app)
+
+    apscheduler.init_app(app)
 
     return True
 

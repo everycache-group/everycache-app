@@ -1,0 +1,3 @@
+# .env files with settings and secrets
+*.env
+!dev.env
