@@ -1,4 +1,7 @@
 import factory
+import datetime
+from datetime import timezone, datetime
+from factory.fuzzy import FuzzyDateTime
 
 from everycache_api.extensions import db
 from everycache_api.models import Token as TokenModel
@@ -15,3 +18,7 @@ class TokenFactory(factory.alchemy.SQLAlchemyModelFactory):
     token_type = "refresh"
     revoked = False
     user = factory.SubFactory(UserFactory)
+    expires = FuzzyDateTime(
+        datetime.now(timezone.utc),
+        datetime(2169, 1, 1, tzinfo=timezone.utc)
+    )

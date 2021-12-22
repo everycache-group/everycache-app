@@ -7,5 +7,3 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False
 # jwt access and refresh tokens validity times in minutes
 JWT_ACCESS_TOKEN_EXPIRES = 30
 JWT_REFRESH_TOKEN_EXPIRES = 60
-
-REDIS_URL = "redis://redis:6379/0"

@@ -121,3 +121,16 @@ def test_revoke_refresh_token(client, valid_token_pair, mocker):
     assert response.json["message"] == "token revoked"
     mock.assert_called_once()
     assert response.status_code == 200
+
+
+def test_revoke_all(client, valid_token_pair, mocker):
+    access_token, refresh_token = valid_token_pair
+
+    headers = get_auth_header(access_token)
+    mock = mocker.patch("everycache_api.auth.views.revoke_all_user_tokens")
+    response = client.delete("/auth/revoke_all",
+                             content_type="application/json", headers=headers)
+
+    assert response.json["message"] == "all tokens revoked"
+    mock.assert_called_once()
+    assert response.status_code == 200

@@ -3,17 +3,20 @@ from datetime import datetime
 import pytest
 
 from everycache_api.auth.helpers import (
-    add_token_to_database,
     create_jwt_payload,
     create_user_access_token,
     create_user_refresh_token,
     is_token_revoked,
     revoke_all_user_tokens,
     revoke_token,
+    save_encoded_token,
 )
 from everycache_api.models import Token
 from everycache_api.tests.factories.token_factory import TokenFactory
 from everycache_api.tests.factories.user_factory import AdminFactory, UserFactory
+
+
+TOKEN_TYPES = ("access", "refresh")
 
 
 @pytest.mark.parametrize("factory", (UserFactory, AdminFactory))
@@ -42,19 +45,21 @@ def test_create_user_refresh_token(mocker):
     mock.assert_called_once()
 
 
-def test_add_token_to_database(mocker):
+@pytest.mark.parametrize("token_type", TOKEN_TYPES)
+def test_save_encoded_token(token_type, mocker):
     user = UserFactory()
-    identity_claim = "id_claim"
     decoded_token = {
         "jti": "test_jti",
-        "type": "test_token_type",
-        identity_claim: user.ext_id,
-        "exp": datetime.now().timestamp()
+        "exp": datetime.now().timestamp(),
+        "type": token_type,
+        "sub": user.ext_id
     }
     mocker.patch("everycache_api.auth.helpers.decode_token",
                  return_value=decoded_token)
 
-    add_token_to_database(None, identity_claim)
+    token = create_user_access_token(user)
+    result = save_encoded_token(token)
+    assert result
 
     assert Token.query.count() == 1
     token = Token.query.first()
@@ -67,37 +72,45 @@ def test_add_token_to_database(mocker):
 
 
 @pytest.mark.parametrize("revoked", (True, False))
-def test_is_token_revoked(revoked):
-    token = TokenFactory(revoked=revoked)
-    assert is_token_revoked({"jti": token.jti}) == revoked
+@pytest.mark.parametrize("token_type", TOKEN_TYPES)
+def test_is_token_revoked(revoked, token_type):
+    token = TokenFactory(revoked=revoked, token_type=token_type)
+    sub = token.user.ext_id
+    res = is_token_revoked({"jti": token.jti, "type": token_type, "sub": sub})
+    assert res == revoked
 
 
 def test_is_token_revoked_not_found():
-    assert is_token_revoked({"jti": "bogus_jti"}) is True
+    with pytest.raises(Exception):
+        is_token_revoked({"jti": "t_jti", "type": "t_tt", "sub": "t_sub"})
 
 
-def test_revoke_token():
-    token = TokenFactory()
+@pytest.mark.parametrize("token_type", TOKEN_TYPES)
+def test_revoke_token(token_type):
+    token = TokenFactory(token_type=token_type)
     assert token.revoked is False
 
-    revoke_token(token.jti, token.user_id)
+    revoke_token(
+        {"jti": token.jti, "sub": token.user.ext_id, "type": token_type})
 
     assert token.revoked is True
 
 
 def test_revoke_token_no_token():
     with pytest.raises(Exception):
-        revoke_token("test_jti", 666)
+        revoke_token({"jti": "jti", "sub": "ext_id", "type": "token_type"})
 
 
-def test_revoke_one_token():
-    token_1 = TokenFactory()
-    token_2 = TokenFactory(user=token_1.user)
+@pytest.mark.parametrize("token_type", TOKEN_TYPES)
+def test_revoke_one_token(token_type):
+    token_1 = TokenFactory(token_type=token_type)
+    token_2 = TokenFactory(user=token_1.user, token_type=token_type)
 
     assert not token_1.revoked
     assert not token_2.revoked
 
-    revoke_token(token_2.jti, token_2.user.id_)
+    revoke_token(
+        {"jti": token_2.jti, "sub": token_2.user.ext_id, "type": token_type})
 
     assert not token_1.revoked
     assert token_2.revoked
@@ -132,4 +145,4 @@ def test_revoke_all_user_tokens_other_users():
 
 def test_revoke_all_user_tokens_none_found():
     user_1 = UserFactory()
-    assert revoke_all_user_tokens(user_1) is False
+    assert revoke_all_user_tokens(user_1)
