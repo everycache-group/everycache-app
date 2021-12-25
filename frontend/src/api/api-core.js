@@ -28,6 +28,6 @@ export async function login(email, password) {
   });
 }
 
-export async function logout() {
-  return await sendRequest(methods.delete);
+export async function logout(token) {
+  return await sendRequest(methods.delete, resources.logout, null, {});
 }

@@ -5,9 +5,10 @@ const apiUrl = `${protocol}://${machine}:${port}`;
 
 export async function sendRequest(action, resource, id = null, params) {
   const endpoint = createEndpoint(resource, id);
+
   const fetchOptions = createfetchOptions(action, params);
 
-  return await fetch(endpoint, fetchOptions).catch((x) => x);
+  return await fetch(endpoint, fetchOptions);
 }
 
 function createfetchOptions(action, params) {
@@ -17,12 +18,20 @@ function createfetchOptions(action, params) {
 
   if (params) options.body = JSON.stringify(params);
 
-  options.headers = {
-    "Content-Type": "application/json",
-  };
+  const headers = new Headers();
 
-  //console.log(options);
+  headers.append("Content-Type", "application/json");
+  headers.append("Accept", "application/json");
 
+  const token = window.sessionStorage.getItem("user-access-token");
+
+  if (token) {
+    headers.append("Access-Control-Allow-Origin", "*");
+    headers.append("Access-Control-Allow-Headers", "Authorization");
+    headers.append("Authorization", `Bearer ${token}`);
+  }
+
+  options.headers = headers;
   return options;
 }
 
@@ -32,7 +41,6 @@ function createEndpoint(resource, id = null) {
   if (id) {
     endpoint += `/${id}`;
   }
-  //console.log(endpoint);
 
   return endpoint;
 }
