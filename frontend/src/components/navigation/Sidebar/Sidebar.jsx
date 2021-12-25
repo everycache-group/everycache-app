@@ -5,6 +5,7 @@ import * as FaIcons from "react-icons/fa";
 import * as AiIcons from "react-icons/ai";
 import SubMenu from "../Submenu/Submenu.jsx";
 import { IconContext } from "react-icons/lib";
+import UserBar from "../UserBar/UserBar.jsx";
 
 function Sidebar(props) {
   const [sidebar, setSidebar] = useState(true);
@@ -23,6 +24,7 @@ function Sidebar(props) {
             <FaIcons.FaBars onClick={showSidebar} />
             <p style={{ color: "white" }}>{token}</p>
           </Style.NavIcon>
+          <UserBar />
         </Style.Nav>
 
         <Style.SidebarNav sidebar={sidebar}>
