@@ -5,15 +5,12 @@ import LoadingButton from "@mui/lab/LoadingButton";
 import useForm from "../../../hooks/useForm";
 import { loginUser } from "./../../../redux/slices/authSlice";
 import { useDispatch, useSelector } from "react-redux";
-import { Redirect } from "react-router";
 
 function Login() {
   const [registering, setRegistering] = useState(false);
   const [redirect, setRedirect] = useState(false);
 
   const dispatch = useDispatch();
-
-  const logged = useSelector((state) => state.auth.logged);
 
   const { handleFormSubmit, handleUserInput, formValues, errors } = useForm(
     {
@@ -25,8 +22,6 @@ function Login() {
       dispatch(loginUser({ email, password }));
     }
   );
-
-  if (logged) return <Redirect to="/" />;
 
   return (
     <Style.LoginForm>

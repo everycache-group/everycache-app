@@ -1,8 +1,17 @@
 version: "3.9"
+
 services:
-  web:
-    build: api 
+  frontend:
+    build: frontend
     ports:
-      - "5000:8080"
+      - 80:3000
+    depends_on:
+      - api
+  api:
+    build: api
+    ports:
+      - 5000:8080
+    depends_on:
+      - redis
   redis:
-    image: "redis:alpine"
+    image: redis:alpine

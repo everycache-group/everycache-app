@@ -20,8 +20,6 @@ const useForm = (initialFormValues, callback) => {
   };
 
   useEffect(() => {
-    console.log(errors);
-
     if (isInitialMount.current) {
       isInitialMount.current = false;
     } else {

@@ -2,6 +2,11 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import * as user from "./../../services/userService";
 import { loginUser } from "./authSlice";
 
+const initialState = {
+  username: "",
+  role: "",
+};
+
 export const createUser = createAsyncThunk(
   "user/createUser",
   async (userData, { dispatch }) => {
@@ -24,11 +29,19 @@ export const createUser = createAsyncThunk(
   }
 );
 
-const initialState = {
-  email: "",
-  username: "",
-  role: "",
-};
+export const getUser = createAsyncThunk(
+  "user/get",
+  async (userId, { dispatch }) => {
+    const response = await user.get(userId);
+    const json = await response.json();
+
+    if (!response.ok) {
+      return Promise.reject(json);
+    }
+
+    return Promise.resolve(json);
+  }
+);
 
 const userSlice = createSlice({
   name: "user",
@@ -41,10 +54,10 @@ const userSlice = createSlice({
     },
   },
   extraReducers: {
-    [createUser.fulfilled]: (state, action) => {
-      state.email = action.payload.email;
-      state.username = action.payload.username;
-      state.role = action.payload.role;
+    [getUser.fulfilled]: (state, action) => {
+      const { username, role } = action.payload.user;
+      state.username = username;
+      state.role = role;
     },
   },
 });

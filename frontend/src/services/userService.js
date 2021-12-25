@@ -8,7 +8,7 @@ export async function create(userData) {
 }
 
 //TODO check it
-export async function get(userId, email, password) {
+export async function get(userId) {
   return await api.get(userResource, userId);
 }
 
