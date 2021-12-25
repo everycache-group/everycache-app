@@ -9,7 +9,7 @@ export const Nav = styled.div`
   background: #15171c;
   height: 80px;
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: center;
   width: 100%;
   position: fixed;
