@@ -11,6 +11,7 @@ import {
 import Sidebar from "./components/navigation/Sidebar/Sidebar";
 import * as Page from "./pages/pagesExport";
 import ProtectedRoute from "./Routes/ProtectedRoute";
+import { PersistGate } from "redux-persist/integration/react";
 
 function App() {
   const logged = useSelector((state) => state.auth.logged);
