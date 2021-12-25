@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import * as authService from "./../../services/authService";
 import { getUser } from "../slices/userSlice";
 import jwt_decode from "jwt-decode";
+import { FaWindows } from "react-icons/fa";
 
 //obsluzyc prommisy w state
 export const loginUser = createAsyncThunk(
@@ -15,6 +16,8 @@ export const loginUser = createAsyncThunk(
     }
 
     const decodedToken = jwt_decode(json.access_token);
+    window.sessionStorage.setItem("user-access-token", json.access_token);
+    window.sessionStorage.setItem("user-refresh-token", json.refresh_token);
 
     dispatch(getUser(decodedToken.sub));
 
@@ -35,6 +38,9 @@ export const logoutUser = createAsyncThunk(
       const response = await authService.logoutUser(auth.access_token);
       console.log(response);
     }
+
+    window.sessionStorage.removeItem("user-access-token");
+    window.sessionStorage.removeItem("user-refresh-token");
 
     return Promise.resolve();
   }

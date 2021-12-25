@@ -3,23 +3,15 @@ import config from "./api-config.json";
 const { protocol, machine, port } = config.connection;
 const apiUrl = `${protocol}://${machine}:${port}`;
 
-export async function sendRequest(
-  action,
-  resource,
-  id = null,
-  params,
-  token = ""
-) {
+export async function sendRequest(action, resource, id = null, params) {
   const endpoint = createEndpoint(resource, id);
-  console.log("XD");
-  const fetchOptions = createfetchOptions(action, params, token);
 
-  console.log("access request");
+  const fetchOptions = createfetchOptions(action, params);
 
   return await fetch(endpoint, fetchOptions);
 }
 
-function createfetchOptions(action, params, token) {
+function createfetchOptions(action, params) {
   const options = {};
 
   if (action) options.method = action;
@@ -31,11 +23,12 @@ function createfetchOptions(action, params, token) {
   headers.append("Content-Type", "application/json");
   headers.append("Accept", "application/json");
 
+  const token = window.sessionStorage.getItem("user-access-token");
+
   if (token) {
     headers.append("Access-Control-Allow-Origin", "*");
     headers.append("Access-Control-Allow-Headers", "Authorization");
     headers.append("Authorization", `Bearer ${token}`);
-    console.log("XD!");
   }
 
   options.headers = headers;
@@ -48,7 +41,6 @@ function createEndpoint(resource, id = null) {
   if (id) {
     endpoint += `/${id}`;
   }
-  //console.log(endpoint);
 
   return endpoint;
 }
