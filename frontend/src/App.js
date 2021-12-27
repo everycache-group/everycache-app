@@ -1,5 +1,5 @@
 import "./reset.css";
-import React from "react";
+import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import Sidebar from "./components/navigation/Sidebar/Sidebar";
@@ -9,6 +9,12 @@ import ProtectedRoute from "./Routes/ProtectedRoute";
 function App() {
   const logged = useSelector((state) => state.auth.logged);
 
+  const lastPath = useSelector((state) => state.navigation.lastPath);
+
+  useEffect(() => {}, []);
+
+  useEffect(() => {}, []);
+
   return (
     <>
       <Router>
@@ -16,7 +22,7 @@ function App() {
         <Switch>
           <Route path="/auth" exact component={Page.Auth} />
           <ProtectedRoute path="/" exact component={Page.Home} />
-          <ProtectedRoute path="/submenu1" component={Page.SubMenu1} />
+          <ProtectedRoute path="/map" component={Page.Map} />
         </Switch>
       </Router>
     </>
