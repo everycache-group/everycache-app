@@ -13,11 +13,15 @@ export async function get(userId) {
 }
 
 //TODO check it
-export async function getAll(token) {
+export async function getAll() {
   return await api.get(userResource);
 }
 
+export async function update(userId, userData) {
+  return await api.update(userResource, userId, userData);
+}
+
 //TODO check it
-export async function deleteUser(userId, token) {
+export async function remove(userId) {
   return await api.remove(userResource, userId);
 }

@@ -3,9 +3,6 @@ import * as Style from "./style";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 
 const LeafletMap = () => {
-  const lat = 1;
-  const lng = 1;
-
   return (
     <Style.LeafletMapWrapper>
       <MapContainer
@@ -17,6 +14,7 @@ const LeafletMap = () => {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+        <Marker></Marker>
       </MapContainer>
     </Style.LeafletMapWrapper>
   );

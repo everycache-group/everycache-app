@@ -5,6 +5,5 @@ export async function loginUser(email, password, callback) {
 }
 
 export async function logoutUser(token) {
-  console.log(token);
   return await api.logout(token);
 }
