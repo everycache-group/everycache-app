@@ -1,8 +1,17 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { resources } from "./../../api/api-config.json";
 
 const getCaches = createAsyncThunk(
   "cache/getCaches",
-  async (userid, { dispatch }) => {}
+  async (_, { dispatch }) => {
+    const response = await cache.getAll();
+
+    const json = await response.json();
+
+    dispatch();
+
+    return await Promise.resolve();
+  }
 );
 
 const initialState = {

@@ -1,11 +1,14 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import * as user from "./../../services/userService";
+import ResourceConnector from "../../services/resourceService";
 import { loginUser } from "./authSlice";
+import { resources } from "./../../api/api-config.json";
 
 const initialState = {
   username: "",
   role: "",
 };
+
+const user = new ResourceConnector(resources.user);
 
 export const createUser = createAsyncThunk(
   "user/createUser",

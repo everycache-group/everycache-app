@@ -1,14 +1,13 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import * as authService from "./../../services/authService";
-import { getUser } from "../slices/userSlice";
 import jwt_decode from "jwt-decode";
-import { FaWindows } from "react-icons/fa";
+import { login, logout } from "../../api/api-core";
+import { getUser } from "../slices/userSlice";
 
-//obsluzyc prommisy w state
+//obsluzyc promisy w state
 export const loginUser = createAsyncThunk(
   "auth/loginUser",
   async ({ email, password }, { dispatch }) => {
-    const response = await authService.loginUser(email, password);
+    const response = await login(email, password);
     const json = await response.json();
 
     if (!response.ok) {
@@ -22,6 +21,7 @@ export const loginUser = createAsyncThunk(
     dispatch(getUser(decodedToken.sub));
 
     json.userId = decodedToken.sub;
+
     return Promise.resolve(json);
   }
 );
@@ -29,18 +29,14 @@ export const loginUser = createAsyncThunk(
 export const logoutUser = createAsyncThunk(
   "auth/logoutUser",
   async (_, { getState }) => {
-    //auth.logoutUser();
-
     const auth = getState().auth;
 
     if (auth.logged) {
-      console.log("logout start");
-      const response = await authService.logoutUser(auth.access_token);
-      console.log(response);
-    }
+      const response = await logout(auth.access_token);
 
-    window.sessionStorage.removeItem("user-access-token");
-    window.sessionStorage.removeItem("user-refresh-token");
+      window.sessionStorage.removeItem("user-access-token");
+      window.sessionStorage.removeItem("user-refresh-token");
+    }
 
     return Promise.resolve();
   }
@@ -56,14 +52,7 @@ const initialState = {
 const authSlice = createSlice({
   name: "auth",
   initialState,
-  reducers: {
-    logout(state, action) {
-      state.logged = false;
-      state.access_token = "";
-      state.refresh_token = "";
-      state.userId = "";
-    },
-  },
+  reducers: {},
   extraReducers: {
     [loginUser.fulfilled]: (state, action) => {
       state.logged = true;
@@ -79,7 +68,5 @@ const authSlice = createSlice({
     },
   },
 });
-
-export const { login, logout } = authSlice.actions;
 
 export default authSlice.reducer;

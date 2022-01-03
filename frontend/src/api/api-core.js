@@ -29,5 +29,5 @@ export async function login(email, password) {
 }
 
 export async function logout(token) {
-  return await sendRequest(methods.delete, resources.logout, null, {});
+  return await sendRequest(methods.delete, resources.logout, null);
 }

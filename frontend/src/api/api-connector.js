@@ -23,6 +23,7 @@ function createfetchOptions(action, params) {
   headers.append("Content-Type", "application/json");
   headers.append("Accept", "application/json");
 
+  //TODO poprawic
   const token = window.sessionStorage.getItem("user-access-token");
 
   if (token) {

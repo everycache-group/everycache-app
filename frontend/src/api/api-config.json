@@ -9,7 +9,6 @@
     "cache": "api/caches",
     "user": "api/users",
     "comments": "api/cache_comments",
-
     "login": "auth/login",
     "logout": "auth/revoke_access"
   },

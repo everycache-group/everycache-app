@@ -11,7 +11,9 @@ import Tooltip from "@mui/material/Tooltip";
 import PersonAdd from "@mui/icons-material/PersonAdd";
 import Settings from "@mui/icons-material/Settings";
 import Logout from "@mui/icons-material/Logout";
+import { useSelector } from "react-redux";
 import useCommand, { commands } from "../../../hooks/useCommand";
+import { Typography } from "@mui/material";
 
 const UserBar = () => {
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -24,6 +26,7 @@ const UserBar = () => {
   };
 
   const logoutCommand = useCommand(commands.logout);
+  const username = useSelector((state) => state.user.username);
 
   return (
     <Style.UserBarWrapper>
@@ -69,10 +72,8 @@ const UserBar = () => {
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
       >
         <MenuItem>
-          <Avatar /> Profile
-        </MenuItem>
-        <MenuItem>
-          <Avatar /> My account
+          <Avatar />
+          <Typography>{username}</Typography>
         </MenuItem>
         <Divider />
         <MenuItem>
