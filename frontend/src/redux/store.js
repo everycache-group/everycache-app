@@ -11,6 +11,8 @@ import {
 } from "redux-persist";
 import authReducer from "./slices/authSlice";
 import userReducer from "./slices/userSlice";
+import cacheReducer from "./slices/cacheSlice";
+import mapReducer from "./slices/mapSlice";
 import navigationReducer from "./slices/navigationSlice";
 import storage from "redux-persist/lib/storage";
 
@@ -24,6 +26,8 @@ const rootReducer = combineReducers({
   auth: authReducer,
   user: userReducer,
   navigation: navigationReducer,
+  cache: cacheReducer,
+  map: mapReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

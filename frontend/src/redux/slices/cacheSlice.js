@@ -1,29 +1,48 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { resources } from "./../../api/api-config.json";
+import ResourceConnector from "../../services/resourceService";
+import mockCache from "./../../Mock/MockCache.json";
+import getStoredState from "redux-persist/es/getStoredState";
 
-const getCaches = createAsyncThunk(
+const cache = new ResourceConnector(resources.cache);
+
+export const getCaches = createAsyncThunk(
   "cache/getCaches",
   async (_, { dispatch }) => {
-    const response = await cache.getAll();
+    // const response = await cache.getAll();
 
-    const json = await response.json();
+    // const json = await response.json();
 
-    dispatch();
-
-    return await Promise.resolve();
+    const json = mockCache;
+    return await Promise.resolve(json);
   }
 );
 
 const initialState = {
+  total: 0,
+  pages: 0,
+  pagination: {
+    next: "",
+    prev: "",
+  },
   caches: [],
+  loading: false,
 };
 
 const cacheSlice = createSlice({
   name: "cache",
   initialState,
-  reducers: {},
-  extraReducers: {},
+  extraReducers: {
+    [getCaches.fulfilled]: (state, action) => {
+      const { total } = action.payload;
+    },
+    [getCaches.rejected]: (state, action) => {
+      state = initialState;
+    },
+    [getCaches.pending]: (state, action) => {
+      state.loading = true;
+    },
+  },
 });
 
-export const {} = navigationSlice.actions;
-export default navigationSlice.reducer;
+export default cacheSlice.reducer;
