@@ -4,11 +4,15 @@ import * as Style from "./style.js";
 const SubMenu = ({ item }) => {
   const [subNav, setSubNav] = useState(false);
 
-  const showSubNav = () => setSubNav(!subNav);
+  const showSubNav = (open) => setSubNav(open);
 
   return (
     <>
-      <Style.SidebarLink to={item.path} onClick={item.subNav && showSubNav}>
+      <Style.SidebarLink
+        to={item.path}
+        onMouseEnter={item.subNav && (() => showSubNav(true))}
+        onMouseLeave={item.subNav && (() => showSubNav(false))}
+      >
         <div>
           {item.icon}
           <Style.SidebarLabel>{item.title}</Style.SidebarLabel>

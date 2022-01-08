@@ -2,6 +2,9 @@ import React, { useEffect } from "react";
 import * as Style from "./style";
 import { MapContainer, TileLayer } from "react-leaflet";
 import { useSelector } from "react-redux";
+import { compose } from "react-recompose";
+import withError from "../../../hoc/withHandleError";
+import withLoading from "../../../hoc/withHandleLoading";
 
 const LeafletMap = (props) => {
   const mapSettings = useSelector((state) => state.map.settings);
@@ -24,4 +27,4 @@ const LeafletMap = (props) => {
   );
 };
 
-export default LeafletMap;
+export default compose(withError, withLoading)(LeafletMap);

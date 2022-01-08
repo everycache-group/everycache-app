@@ -1,15 +1,16 @@
 import React from "react";
-import PageWrapper from "../../components/common/wrappers/PageWrapper";
+import { compose } from "react-recompose";
 import CacheCreator from "../../components/content/caches/cacheCreator/CacheCreator";
 import LeafletMap from "./../../components/content/map/LeafletMap";
 import SettingsMapTracker from "../../components/content/map/SettingsMapTracker";
 import { useSelector } from "react-redux";
+import withPageWrapper from "../../hoc/withPageWrapper";
 
 function Map() {
   const mapSettings = useSelector((state) => state.map.settings);
 
   return (
-    <PageWrapper>
+    <>
       <CacheCreator />
       <LeafletMap>
         <SettingsMapTracker
@@ -17,8 +18,8 @@ function Map() {
           center={mapSettings.center}
         />
       </LeafletMap>
-    </PageWrapper>
+    </>
   );
 }
 
-export default Map;
+export default compose(withPageWrapper)(Map);

@@ -1,8 +1,9 @@
 import React from "react";
-import PageWrapper from "../../components/common/wrappers/PageWrapper";
+import { compose } from "react-recompose";
+import withPageWrapper from "../../hoc/withPageWrapper";
 
 const Home = () => {
-  return <PageWrapper>XDD</PageWrapper>;
+  return <p>XDD</p>;
 };
 
-export default Home;
+export default compose(withPageWrapper)(Home);

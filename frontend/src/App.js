@@ -9,11 +9,11 @@ import ProtectedRoute from "./Routes/ProtectedRoute";
 function App() {
   const logged = useSelector((state) => state.auth.logged);
 
-  const lastPath = useSelector((state) => state.navigation.lastPath);
+  //const lastPath = useSelector((state) => state.navigation.lastPath);
 
-  useEffect(() => {}, []);
+  //useEffect(() => {}, []);
 
-  useEffect(() => {}, []);
+  // useEffect(() => {}, []);
 
   return (
     <>
