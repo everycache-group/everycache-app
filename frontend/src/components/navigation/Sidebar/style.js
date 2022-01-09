@@ -13,6 +13,8 @@ export const Nav = styled.div`
   align-items: center;
   width: 100%;
   position: fixed;
+
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.32);
   //poprawic to
 `;
 

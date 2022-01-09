@@ -4,12 +4,23 @@ import App from "./App.js";
 import { store, persistor } from "./redux/store";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
+import { SnackbarProvider } from "notistack";
+import Slide from "@material-ui/core/Slide";
 
 ReactDOM.render(
   <React.StrictMode>
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
-        <App />
+        <SnackbarProvider
+          maxSnack={3}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "right",
+          }}
+          TransitionComponent={Slide}
+        >
+          <App />
+        </SnackbarProvider>
       </PersistGate>
     </Provider>
   </React.StrictMode>,

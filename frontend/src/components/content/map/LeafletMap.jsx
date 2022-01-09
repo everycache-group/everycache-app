@@ -5,9 +5,14 @@ import { useSelector } from "react-redux";
 import { compose } from "react-recompose";
 import withError from "../../../hoc/withHandleError";
 import withLoading from "../../../hoc/withHandleLoading";
+import { useSnackbar } from "notistack";
 
 const LeafletMap = (props) => {
   const mapSettings = useSelector((state) => state.map.settings);
+
+  const { enqueueSnackbar } = useSnackbar();
+
+  enqueueSnackbar("this is test message", { variant: "success" });
 
   return (
     <Style.LeafletMapWrapper>
