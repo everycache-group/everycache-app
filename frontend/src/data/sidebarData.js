@@ -44,8 +44,8 @@ export const SideBarData = [
     iconOpened: iconOpened,
   },
   {
-    title: "Fook",
-    path: "/fook",
+    title: "Test3",
+    path: "/test3",
     icon: <AiIcons.AiFillAlipaySquare />,
     iconClosed: iconClosed,
     iconOpened: iconOpened,

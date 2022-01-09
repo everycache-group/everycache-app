@@ -52,7 +52,6 @@ const userSlice = createSlice({
   reducers: {
     logout(state, action) {
       state.email = "";
-
       state.username = "";
       state.role = "";
     },
