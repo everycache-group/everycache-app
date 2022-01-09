@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import ResourceConnector from "../../services/resourceService";
 import { loginUser } from "./authSlice";
-import { resources } from "./../../api/api-config.json";
+import resources from "./../../api/api-config.json";
 
 const initialState = {
   username: "",
@@ -52,6 +52,7 @@ const userSlice = createSlice({
   reducers: {
     logout(state, action) {
       state.email = "";
+
       state.username = "";
       state.role = "";
     },

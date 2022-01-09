@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { resources } from "./../../api/api-config.json";
+import resources from "./../../api/api-config.json";
 import ResourceConnector from "../../services/resourceService";
 import mockCache from "./../../data/mockCache.json";
 import getStoredState from "redux-persist/es/getStoredState";

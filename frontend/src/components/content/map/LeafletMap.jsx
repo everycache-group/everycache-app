@@ -12,8 +12,6 @@ const LeafletMap = (props) => {
 
   const { enqueueSnackbar } = useSnackbar();
 
-  enqueueSnackbar("this is test message", { variant: "success" });
-
   return (
     <Style.LeafletMapWrapper>
       <MapContainer

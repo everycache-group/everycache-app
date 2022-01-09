@@ -5,7 +5,7 @@ import { store, persistor } from "./redux/store";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { SnackbarProvider } from "notistack";
-import Slide from "@material-ui/core/Slide";
+import Slide from "@mui/material/Slide";
 
 ReactDOM.render(
   <React.StrictMode>
