@@ -25,7 +25,11 @@ const SubMenu = ({ item }) => {
             : null}
         </div>
       </Style.SidebarLink>
-      <Style.DropDownLinkWrapper subNav={subNav}>
+      <Style.DropDownLinkWrapper
+        onMouseEnter={item.subNav && (() => showSubNav(true))}
+        onMouseLeave={item.subNav && (() => showSubNav(false))}
+        subNav={subNav}
+      >
         {subNav &&
           item.subNav.map((item, index) => {
             return (
