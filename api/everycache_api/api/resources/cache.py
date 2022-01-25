@@ -104,13 +104,12 @@ class CacheResource(Resource):
 
         # decide which schema to use
         schema = None
-        if current_user and (
-            current_user == cache.owner or current_user.role == User.Role.Admin
-        ):
-            # owner or admin
+        if current_user:
+            # logged in user
             schema = CacheSchema()
+            schema.context = {"current_user": current_user}
         else:
-            # default user
+            # guest user
             schema = PublicCacheSchema()
 
         # return cache details
@@ -216,11 +215,12 @@ class CacheListResource(Resource):
 
         # decide which schema to use
         schema = None
-        if current_user and current_user.role == User.Role.Admin:
-            # admin
+        if current_user:
+            # logged in user
             schema = CacheSchema(many=True)
+            schema.context = {"current_user": current_user}
         else:
-            # default user
+            # guest user
             schema = PublicCacheSchema(many=True)
 
         return paginate(query, schema)
