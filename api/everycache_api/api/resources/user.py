@@ -62,7 +62,7 @@ class UserResource(Resource):
               schema:
                 type: object
                 properties:
-                  msg:
+                  message:
                     type: string
                     example: user updated
                   user:
@@ -86,7 +86,7 @@ class UserResource(Resource):
               schema:
                 type: object
                 properties:
-                  msg:
+                  message:
                     type: string
                     example: user deleted
         403:
@@ -134,7 +134,7 @@ class UserResource(Resource):
 
         db.session.commit()
 
-        return {"msg": "user updated", "user": schema.dump(user)}, 200
+        return {"message": "user updated", "user": schema.dump(user)}, 200
 
     def delete(self, user_id: str):
         # ensure current_user is authorized
@@ -151,7 +151,7 @@ class UserResource(Resource):
         # revoke any tokens for deleted user
         revoke_all_user_tokens(user)
 
-        return {"msg": "user deleted"}, 200
+        return {"message": "user deleted"}, 200
 
 
 class UserListResource(Resource):
@@ -205,7 +205,7 @@ class UserListResource(Resource):
               schema:
                 type: object
                 properties:
-                  msg:
+                  message:
                     type: string
                     example: user created
                   user:
@@ -238,21 +238,21 @@ class UserListResource(Resource):
     def post(self):
         # creating a new account
         if current_user and current_user.role != User.Role.Admin:
-            return {"msg": "user already logged in"}, 403
+            return {"message": "user already logged in"}, 403
 
         schema = UserSchema()
         user = schema.load(request.json)
 
         if User.query.filter_by(email=user.email).first():
-            return {"msg": "email is already taken"}, 400
+            return {"message": "email is already taken"}, 400
 
         if User.query.filter_by(username=user.username).first():
-            return {"msg": "username is already taken"}, 400
+            return {"message": "username is already taken"}, 400
 
         db.session.add(user)
         db.session.commit()
 
-        return {"msg": "user created", "user": schema.dump(user)}, 201
+        return {"message": "user created", "user": schema.dump(user)}, 201
 
 
 class UserCacheListResource(Resource):

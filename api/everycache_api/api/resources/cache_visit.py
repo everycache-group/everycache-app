@@ -50,7 +50,7 @@ class CacheVisitResource(Resource):
               schema:
                 type: object
                 properties:
-                  msg:
+                  message:
                     type: string
                     example: cache visit updated
                   cache_visit: CacheVisitSchema
@@ -71,7 +71,7 @@ class CacheVisitResource(Resource):
               schema:
                 type: object
                 properties:
-                  msg:
+                  message:
                     type: string
                     example: cache visit deleted
         404:
@@ -110,7 +110,10 @@ class CacheVisitResource(Resource):
         visit = schema.load(request.json, instance=visit)
         db.session.commit()
 
-        return {"msg": "cache visit updated", "cache_visit": schema.dump(visit)}, 200
+        return {
+            "message": "cache visit updated",
+            "cache_visit": schema.dump(visit),
+        }, 200
 
     def delete(self, cache_visit_id: str):
         # find visit
@@ -124,4 +127,4 @@ class CacheVisitResource(Resource):
         db.session.delete(visit)
         db.session.commit()
 
-        return {"msg": "cache visit deleted"}, 200
+        return {"message": "cache visit deleted"}, 200
