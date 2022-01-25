@@ -328,6 +328,9 @@ class CacheVisitListResource(Resource):
         # find cache with given id
         cache = Cache.query_ext_id(cache_id).first_or_404()
 
+        if cache.owner == current_user:
+            abort(403, message="not allowed to post a visit to owned cache")
+
         # create new visit
         schema = CacheVisitSchema()
         visit = schema.load(request.json)
