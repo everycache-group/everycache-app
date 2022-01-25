@@ -50,7 +50,7 @@ class CacheCommentResource(Resource):
               schema:
                 type: object
                 properties:
-                  msg:
+                  message:
                     type: string
                     example: cache comment updated
                   cache_comment: CacheCommentSchema
@@ -71,7 +71,7 @@ class CacheCommentResource(Resource):
               schema:
                 type: object
                 properties:
-                  msg:
+                  message:
                     type: string
                     example: cache comment deleted
         404:
@@ -111,7 +111,7 @@ class CacheCommentResource(Resource):
         db.session.commit()
 
         return {
-            "msg": "cache comment updated",
+            "message": "cache comment updated",
             "cache_comment": schema.dump(comment),
         }, 200
 
@@ -127,4 +127,4 @@ class CacheCommentResource(Resource):
         comment.deleted = True
         db.session.commit()
 
-        return {"msg": "cache comment deleted"}, 200
+        return {"message": "cache comment deleted"}, 200

@@ -1,6 +1,6 @@
-from flask import abort, request
+from flask import request
 from flask_jwt_extended import current_user, jwt_required
-from flask_restful import Resource
+from flask_restful import Resource, abort
 
 from everycache_api.api.schemas import (
     CacheCommentSchema,
@@ -24,7 +24,7 @@ class CacheResource(Resource):
         - in: path
           name: cache_id
           schema:
-            type: integer
+            type: string
       responses:
         200:
           content:
@@ -46,7 +46,7 @@ class CacheResource(Resource):
         - in: path
           name: cache_id
           schema:
-            type: integer
+            type: string
       requestBody:
         content:
           application/json:
@@ -59,7 +59,7 @@ class CacheResource(Resource):
               schema:
                 type: object
                 properties:
-                  msg:
+                  message:
                     type: string
                     example: cache updated
                   cache:
@@ -83,7 +83,7 @@ class CacheResource(Resource):
               schema:
                 type: object
                 properties:
-                  msg:
+                  message:
                     type: string
                     example: cache deleted
         403:
@@ -104,13 +104,12 @@ class CacheResource(Resource):
 
         # decide which schema to use
         schema = None
-        if current_user and (
-            current_user == cache.owner or current_user.role == User.Role.Admin
-        ):
-            # owner or admin
+        if current_user:
+            # logged in user
             schema = CacheSchema()
+            schema.context = {"current_user": current_user}
         else:
-            # default user
+            # guest user
             schema = PublicCacheSchema()
 
         # return cache details
@@ -130,7 +129,7 @@ class CacheResource(Resource):
         cache = schema.load(request.json, instance=cache)
         db.session.commit()
 
-        return {"msg": "cache updated", "result": schema.dump(cache)}, 200
+        return {"message": "cache updated", "result": schema.dump(cache)}, 200
 
     def delete(self, cache_id: int):
         # find cache
@@ -144,7 +143,7 @@ class CacheResource(Resource):
         cache.deleted = True
         db.session.commit()
 
-        return {"msg": "cache deleted"}, 200
+        return {"message": "cache deleted"}, 200
 
 
 class CacheListResource(Resource):
@@ -199,7 +198,7 @@ class CacheListResource(Resource):
               schema:
                 type: object
                 properties:
-                  msg:
+                  message:
                     type: string
                     example: cache created
                   cache:
@@ -216,11 +215,12 @@ class CacheListResource(Resource):
 
         # decide which schema to use
         schema = None
-        if current_user and current_user.role == User.Role.Admin:
-            # admin
+        if current_user:
+            # logged in user
             schema = CacheSchema(many=True)
+            schema.context = {"current_user": current_user}
         else:
-            # default user
+            # guest user
             schema = PublicCacheSchema(many=True)
 
         return paginate(query, schema)
@@ -237,7 +237,7 @@ class CacheListResource(Resource):
         db.session.add(cache)
         db.session.commit()
 
-        return {"msg": "cache created", "cache": schema.dump(cache)}, 201
+        return {"message": "cache created", "cache": schema.dump(cache)}, 201
 
 
 class CacheVisitListResource(Resource):
@@ -251,7 +251,7 @@ class CacheVisitListResource(Resource):
         - in: path
           name: cache_id
           schema:
-            type: integer
+            type: string
         - in: query
           name: order_by
           schema:
@@ -288,7 +288,7 @@ class CacheVisitListResource(Resource):
         - in: path
           name: cache_id
           schema:
-            type: integer
+            type: string
       requestBody:
         content:
           application/json:
@@ -301,7 +301,7 @@ class CacheVisitListResource(Resource):
               schema:
                 type: object
                 properties:
-                  msg:
+                  message:
                     type: string
                     example: cache visit created
                   cache:
@@ -328,6 +328,9 @@ class CacheVisitListResource(Resource):
         # find cache with given id
         cache = Cache.query_ext_id(cache_id).first_or_404()
 
+        if cache.owner == current_user:
+            abort(403, message="not allowed to post a visit to owned cache")
+
         # create new visit
         schema = CacheVisitSchema()
         visit = schema.load(request.json)
@@ -340,7 +343,10 @@ class CacheVisitListResource(Resource):
         db.session.add(visit)
         db.session.commit()
 
-        return {"msg": "cache visit created", "cache_visit": schema.dump(visit)}, 201
+        return {
+            "message": "cache visit created",
+            "cache_visit": schema.dump(visit),
+        }, 201
 
 
 class CacheCommentListResource(Resource):
@@ -354,7 +360,7 @@ class CacheCommentListResource(Resource):
         - in: path
           name: cache_id
           schema:
-            type: integer
+            type: string
         - in: query
           name: order_by
           schema:
@@ -391,7 +397,7 @@ class CacheCommentListResource(Resource):
         - in: path
           name: cache_id
           schema:
-            type: integer
+            type: string
       requestBody:
         content:
           application/json:
@@ -404,7 +410,7 @@ class CacheCommentListResource(Resource):
               schema:
                 type: object
                 properties:
-                  msg:
+                  message:
                     type: string
                     example: cache comment created
                   cache_comment:
@@ -444,6 +450,6 @@ class CacheCommentListResource(Resource):
         db.session.commit()
 
         return {
-            "msg": "cache comment created",
+            "message": "cache comment created",
             "cache_comment": schema.dump(comment),
         }, 201

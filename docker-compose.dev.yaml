@@ -12,8 +12,8 @@ services:
     environment:
       FLASK_ENV: development
       FRONTEND_APP_URL: frontend:3000
-      HASHIDS_SALT: dev-hashids-salt
-      SECRET_KEY: dev-secret-key
+      HASHIDS_SALT:
+      SECRET_KEY:
     command: flask run --host 0.0.0.0
     volumes:
       - ./api:/code
