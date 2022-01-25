@@ -24,7 +24,7 @@ class CacheResource(Resource):
         - in: path
           name: cache_id
           schema:
-            type: integer
+            type: string
       responses:
         200:
           content:
@@ -46,7 +46,7 @@ class CacheResource(Resource):
         - in: path
           name: cache_id
           schema:
-            type: integer
+            type: string
       requestBody:
         content:
           application/json:
@@ -251,7 +251,7 @@ class CacheVisitListResource(Resource):
         - in: path
           name: cache_id
           schema:
-            type: integer
+            type: string
         - in: query
           name: order_by
           schema:
@@ -288,7 +288,7 @@ class CacheVisitListResource(Resource):
         - in: path
           name: cache_id
           schema:
-            type: integer
+            type: string
       requestBody:
         content:
           application/json:
@@ -354,7 +354,7 @@ class CacheCommentListResource(Resource):
         - in: path
           name: cache_id
           schema:
-            type: integer
+            type: string
         - in: query
           name: order_by
           schema:
@@ -391,7 +391,7 @@ class CacheCommentListResource(Resource):
         - in: path
           name: cache_id
           schema:
-            type: integer
+            type: string
       requestBody:
         content:
           application/json:
