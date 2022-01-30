@@ -19,19 +19,13 @@ function Map() {
 
   const caches = useSelector((state) => state.cache.caches);
 
-  const tableHeader = PrepareDataSourceTableHeader();
-
   return (
     <>
-      <CacheTable title="Caches" header={tableHeader} data={caches} />
+      <CacheTable data={caches} />
       <LeafletMap>
-        {caches.map((cache) => {
+        {caches.map(({ id, lat, lng, description }) => {
           return (
-            <CacheMarker
-              key={cache.cacheId}
-              position={[cache.lat, cache.lon]}
-              title={cache.description}
-            />
+            <CacheMarker key={id} position={[lat, lng]} title={description} />
           );
         })}
         <SettingsMapTracker

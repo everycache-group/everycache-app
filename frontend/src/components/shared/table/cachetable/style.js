@@ -1,8 +1,8 @@
 import styled from "styled-components";
 
 export const StyledTableWrapper = styled.div`
-  max-width: 600px;
-  width: 100%;
+  min-width: 700px;
   height: 100%;
-  margin-right: 30px;
+
+  margin-right: 20px;
 `;

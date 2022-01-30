@@ -10,25 +10,39 @@ function createDataRow(
   creationDate
 ) {
   return {
-    cacheId,
-    owner,
+    id: cacheId,
     name,
-    lon,
+    description,
+    owner,
     lat,
-    details: [description, creationDate],
+    lng: lon,
+    creationDate: new Date(creationDate),
   };
 }
 
-export function PrepareDataSourceTableHeader() {
-  const { owner, name, lon, lat, createdTime, description } =
-    localization.cachetable;
-  return {
-    owner,
-    name,
-    lon,
-    lat,
-    details: [description, createdTime],
-  };
+export function PrepareCacheColumns() {
+  const coulmns = [
+    { field: "id", headerName: "ID", width: 70, hide: true },
+    { field: "name", headerName: "Name", width: 130 },
+    {
+      field: "description",
+      headerName: "Description",
+      width: 200,
+      sortable: false,
+      multiline: true,
+      filterable: false,
+    },
+    { field: "owner", headerName: "Owner", width: 130 },
+    { field: "lat", headerName: "Lat", width: 70, type: "number" },
+    { field: "lng", headerName: "Lng", width: 70, type: "number" },
+    {
+      field: "creationDate",
+      headerName: "Created at",
+      width: 200,
+      type: "date",
+    },
+  ];
+  return coulmns;
 }
 
 export const PrepareDataSourceTable = (cachesDto) => {

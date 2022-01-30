@@ -39,11 +39,19 @@ const initialState = {
   },
   caches: [],
   loading: false,
+  selectedCache: {},
 };
 
 const cacheSlice = createSlice({
   name: "cache",
   initialState,
+  reducers: {
+    selectRow: (state, action) => {
+      state.selectedCache = state.caches.find(
+        (cache) => cache.id === action.payload
+      );
+    },
+  },
   extraReducers: {
     [getCaches.fulfilled]: (state, action) => {
       const { total, pages, next, prev, datasource } = action.payload;
@@ -62,5 +70,7 @@ const cacheSlice = createSlice({
     },
   },
 });
+
+export const { selectRow } = cacheSlice.actions;
 
 export default cacheSlice.reducer;
