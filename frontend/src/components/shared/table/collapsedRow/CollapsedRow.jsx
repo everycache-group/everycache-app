@@ -19,8 +19,6 @@ function CollapsedRow(props) {
   const collapsedRowData = data.details;
   const cells = Object.values(data).filter((item) => !(item instanceof Array));
 
-  console.log(collapsedRowData);
-
   return (
     <>
       <TableRow sx={{ "& > *": { borderBottom: "unset" } }}>

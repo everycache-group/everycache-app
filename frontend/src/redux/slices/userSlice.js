@@ -35,7 +35,6 @@ export const createUser = createAsyncThunk(
 export const getUser = createAsyncThunk(
   "user/get",
   async (userId, { dispatch }) => {
-    console.log(userId);
     const response = await user.get(userId);
 
     const { data } = response;
@@ -44,7 +43,7 @@ export const getUser = createAsyncThunk(
       return Promise.reject();
     }
 
-    return Promise.resolve(data);
+    return Promise.resolve(data.user);
   }
 );
 

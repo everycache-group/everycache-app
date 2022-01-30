@@ -11,5 +11,5 @@ export default class ResourceConnector {
 
   update = async (id, data) => await api.update(this.resource, id, data);
 
-  get = async (id = null) => await api.get(this.resource, (id = null));
+  get = async (id) => await api.get(this.resource, id);
 }
