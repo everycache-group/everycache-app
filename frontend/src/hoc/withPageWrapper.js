@@ -6,6 +6,7 @@ export const PageWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-around;
+  flex-wrap: wrap;
   height: 90vh;
   margin-left: ${({ sidebar }) => (sidebar ? "250px" : "0")};
   transition: margin-left 300ms ease-in-out;

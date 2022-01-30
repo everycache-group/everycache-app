@@ -1,25 +1,25 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import ResourceConnector from "../../services/resourceService";
 import { loginUser } from "./authSlice";
-import resources from "./../../api/api-config.json";
+import config from "./../../api/api-config.json";
 
 const initialState = {
   username: "",
   role: "",
 };
 
-const user = new ResourceConnector(resources.user);
+const user = new ResourceConnector(config.resources.user);
 
 export const createUser = createAsyncThunk(
   "user/createUser",
   async (userData, { dispatch }) => {
     const response = await user.create(userData);
 
-    const json = await response.json();
-
-    if (!response.ok) {
-      return Promise.reject(json);
+    if (response.status !== 200) {
+      return Promise.reject();
     }
+
+    const { data } = response;
 
     dispatch(
       loginUser({
@@ -28,21 +28,23 @@ export const createUser = createAsyncThunk(
       })
     );
 
-    return Promise.resolve(json);
+    return Promise.resolve(data);
   }
 );
 
 export const getUser = createAsyncThunk(
   "user/get",
   async (userId, { dispatch }) => {
+    console.log(userId);
     const response = await user.get(userId);
-    const json = await response.json();
 
-    if (!response.ok) {
-      return Promise.reject(json);
+    const { data } = response;
+
+    if (response.status !== 200) {
+      return Promise.reject();
     }
 
-    return Promise.resolve(json);
+    return Promise.resolve(data);
   }
 );
 
@@ -58,7 +60,7 @@ const userSlice = createSlice({
   },
   extraReducers: {
     [getUser.fulfilled]: (state, action) => {
-      const { username, role } = action.payload.user;
+      const { username, role } = action.payload;
       state.username = username;
       state.role = role;
     },

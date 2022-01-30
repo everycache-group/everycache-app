@@ -6,6 +6,7 @@ import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { SnackbarProvider } from "notistack";
 import Slide from "@mui/material/Slide";
+import setupInterceptors from "./api/setupInterceptors";
 
 ReactDOM.render(
   <React.StrictMode>
@@ -26,3 +27,5 @@ ReactDOM.render(
   </React.StrictMode>,
   document.getElementById("root")
 );
+
+setupInterceptors(store);

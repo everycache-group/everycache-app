@@ -1,20 +1,32 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import resources from "./../../api/api-config.json";
+import config from "./../../api/api-config.json";
 import ResourceConnector from "../../services/resourceService";
 import mockCache from "./../../data/mockCache.json";
 import getStoredState from "redux-persist/es/getStoredState";
+import { PrepareDataSourceTable } from "../../services/dataSourceMapperService";
 
-const cache = new ResourceConnector(resources.cache);
+const cache = new ResourceConnector(config.resources.cache);
 
 export const getCaches = createAsyncThunk(
   "cache/getCaches",
-  async (_, { dispatch }) => {
-    // const response = await cache.getAll();
+  async (userId, { dispatch }) => {
+    const response = await cache.get(userId);
 
-    // const json = await response.json();
+    const { data } = response;
 
-    const json = mockCache;
-    return await Promise.resolve(json);
+    const datasource = PrepareDataSourceTable(data.results);
+
+    const { total, pages, next, prev } = data;
+
+    const payload = {
+      total,
+      pages,
+      next,
+      prev,
+      datasource,
+    };
+
+    return Promise.resolve(payload);
   }
 );
 
@@ -34,7 +46,13 @@ const cacheSlice = createSlice({
   initialState,
   extraReducers: {
     [getCaches.fulfilled]: (state, action) => {
-      const { total } = action.payload;
+      const { total, pages, next, prev, datasource } = action.payload;
+      state.total = total;
+      state.pages = pages;
+      state.next = next;
+      state.prev = prev;
+      state.caches = datasource;
+      state.loading = false;
     },
     [getCaches.rejected]: (state, action) => {
       state = initialState;

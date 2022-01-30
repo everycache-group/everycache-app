@@ -1,4 +1,4 @@
-import config from "./api-config";
+import config from "./api-config.json";
 import { sendRequest } from "./api-connector";
 
 export const resources = config.resources;
@@ -28,6 +28,10 @@ export async function login(email, password) {
   });
 }
 
-export async function logout(token) {
+export async function logout() {
   return await sendRequest(methods.delete, resources.logout, null);
+}
+
+export async function refresh() {
+  return await sendRequest(methods.post, resources.refresh);
 }

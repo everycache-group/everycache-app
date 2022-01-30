@@ -1,16 +1,13 @@
-import React, { useEffect } from "react";
+import React from "react";
 import * as Style from "./style";
-import { MapContainer, TileLayer } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { useSelector } from "react-redux";
 import { compose } from "react-recompose";
 import withError from "../../../hoc/withHandleError";
 import withLoading from "../../../hoc/withHandleLoading";
-import { useSnackbar } from "notistack";
 
 const LeafletMap = (props) => {
   const mapSettings = useSelector((state) => state.map.settings);
-
-  const { enqueueSnackbar } = useSnackbar();
 
   return (
     <Style.LeafletMapWrapper>
@@ -19,12 +16,12 @@ const LeafletMap = (props) => {
         center={mapSettings.center}
         zoom={mapSettings.zoom}
       >
-        {props.children}
-
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+
+        {props.children}
       </MapContainer>
     </Style.LeafletMapWrapper>
   );

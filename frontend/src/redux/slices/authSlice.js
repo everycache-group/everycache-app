@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import jwt_decode from "jwt-decode";
-import { login, logout } from "../../api/api-core";
+import { login, logout, refresh } from "../../api/api-core";
 import { getUser } from "../slices/userSlice";
 
 //obsluzyc promisy w state
@@ -8,21 +8,18 @@ export const loginUser = createAsyncThunk(
   "auth/loginUser",
   async ({ email, password }, { dispatch }) => {
     const response = await login(email, password);
-    const json = await response.json();
 
-    if (!response.ok) {
-      return Promise.reject(json);
+    if (response.status !== 200) {
+      return Promise.reject(response.data);
     }
 
-    const decodedToken = jwt_decode(json.access_token);
-    window.sessionStorage.setItem("user-access-token", json.access_token);
-    window.sessionStorage.setItem("user-refresh-token", json.refresh_token);
+    const { data } = response;
+    const decodedToken = jwt_decode(data.access_token);
 
     dispatch(getUser(decodedToken.sub));
+    data.userId = decodedToken.sub;
 
-    json.userId = decodedToken.sub;
-
-    return Promise.resolve(json);
+    return Promise.resolve(data);
   }
 );
 
@@ -33,9 +30,6 @@ export const logoutUser = createAsyncThunk(
 
     if (auth.logged) {
       const response = await logout(auth.access_token);
-
-      window.sessionStorage.removeItem("user-access-token");
-      window.sessionStorage.removeItem("user-refresh-token");
     }
 
     return Promise.resolve();
@@ -52,13 +46,23 @@ const initialState = {
 const authSlice = createSlice({
   name: "auth",
   initialState,
-  reducers: {},
+  reducers: {
+    refreshToken: (state, action) => {
+      state.access_token = action.payload;
+    },
+  },
   extraReducers: {
     [loginUser.fulfilled]: (state, action) => {
       state.logged = true;
       state.access_token = action.payload.access_token;
       state.refresh_token = action.payload.refresh_token;
       state.userId = action.payload.userId;
+    },
+    [logoutUser.rejected]: (state, action) => {
+      state.logged = false;
+      state.access_token = "";
+      state.refresh_token = "";
+      state.userId = "";
     },
     [logoutUser.fulfilled]: (state, action) => {
       state.logged = false;
@@ -68,5 +72,7 @@ const authSlice = createSlice({
     },
   },
 });
+
+export const { refreshToken } = authSlice.actions;
 
 export default authSlice.reducer;

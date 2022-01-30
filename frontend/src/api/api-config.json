@@ -10,7 +10,8 @@
     "user": "api/users",
     "comments": "api/cache_comments",
     "login": "auth/login",
-    "logout": "auth/revoke_access"
+    "logout": "auth/revoke_access",
+    "refresh": "auth/refresh"
   },
 
   "methods": {
