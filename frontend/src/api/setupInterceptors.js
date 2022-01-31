@@ -1,5 +1,5 @@
 import { axiosInstance } from "./api-connector";
-import { refreshToken } from "../redux/slices/authSlice";
+import { logoutUser, refreshToken } from "../redux/slices/authSlice";
 import config from "./api-config.json";
 import axios from "axios";
 
@@ -50,6 +50,8 @@ const setup = (store) => {
 
             return axiosInstance(originalConfig);
           } catch (_error) {
+            dispatch(logoutUser());
+
             return Promise.reject(_error);
           }
         }

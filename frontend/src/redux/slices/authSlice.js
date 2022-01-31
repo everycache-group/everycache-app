@@ -1,35 +1,33 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import jwt_decode from "jwt-decode";
-import { login, logout, refresh } from "../../api/api-core";
-import { getUser } from "../slices/userSlice";
+import { login, logout } from "../../api/api-core";
+import { getUser, logout as userLogout } from "../slices/userSlice";
 
-//obsluzyc promisy w state
 export const loginUser = createAsyncThunk(
   "auth/loginUser",
   async ({ email, password }, { dispatch }) => {
-    const response = await login(email, password);
+    try {
+      const response = await login(email, password);
+      const { data } = response;
+      const decodedToken = jwt_decode(data.access_token);
 
-    if (response.status !== 200) {
-      return Promise.reject(response.data);
+      dispatch(getUser(decodedToken.sub));
+      data.userId = decodedToken.sub;
+      return Promise.resolve(data);
+    } catch (_error) {
+      return Promise.reject();
     }
-
-    const { data } = response;
-    const decodedToken = jwt_decode(data.access_token);
-
-    dispatch(getUser(decodedToken.sub));
-    data.userId = decodedToken.sub;
-
-    return Promise.resolve(data);
   }
 );
 
 export const logoutUser = createAsyncThunk(
   "auth/logoutUser",
-  async (_, { getState }) => {
+  async (_, { getState, dispatch }) => {
     const auth = getState().auth;
 
     if (auth.logged) {
       const response = await logout(auth.access_token);
+      dispatch(userLogout());
     }
 
     return Promise.resolve();

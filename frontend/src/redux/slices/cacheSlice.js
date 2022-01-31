@@ -1,8 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import config from "./../../api/api-config.json";
 import ResourceConnector from "../../services/resourceService";
-import mockCache from "./../../data/mockCache.json";
-import getStoredState from "redux-persist/es/getStoredState";
 import { PrepareDataSourceTable } from "../../services/dataSourceMapperService";
 
 const cache = new ResourceConnector(config.resources.cache);
