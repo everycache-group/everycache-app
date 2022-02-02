@@ -4,7 +4,6 @@ import { Redirect } from "react-router";
 import { useSelector } from "react-redux";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
-import AppBar from "@mui/material/AppBar";
 import Register from "../../components/auth/register/Register";
 import Login from "../../components/auth/login/Login";
 
@@ -23,11 +22,11 @@ function AuthenticationPage() {
     <Style.AuthWrapper>
       <Style.AuthContainer>
         <Tabs value={selectedTab} onChange={handleChange}>
-          <Tab label="REGISTER" />
           <Tab label="LOGIN" />
+          <Tab label="REGISTER" />
         </Tabs>
-        {selectedTab === 0 && <Register />}
-        {selectedTab === 1 && <Login />}
+        {selectedTab === 0 && <Login />}
+        {selectedTab === 1 && <Register />}
       </Style.AuthContainer>
     </Style.AuthWrapper>
   );

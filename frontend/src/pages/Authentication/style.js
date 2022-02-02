@@ -1,5 +1,4 @@
 import styled from "styled-components";
-import Tab from "@mui/material/Tabs";
 
 export const AuthWrapper = styled.div`
   display: flex;
