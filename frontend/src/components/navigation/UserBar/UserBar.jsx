@@ -13,7 +13,7 @@ import Settings from "@mui/icons-material/Settings";
 import Logout from "@mui/icons-material/Logout";
 import { useSelector } from "react-redux";
 import useCommand, { commands } from "../../../hooks/useCommand";
-import { Typography } from "@mui/material";
+import Typography from "@mui/material/Typography";
 
 const UserBar = () => {
   const [anchorEl, setAnchorEl] = React.useState(null);

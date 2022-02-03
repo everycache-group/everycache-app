@@ -7,7 +7,6 @@ import withPageWrapper from "../../hoc/withPageWrapper";
 import { getCaches } from "../../redux/slices/cacheSlice";
 import CacheMarker from "../../components/content/cacheMarker/CacheMarker";
 import CacheTable from "../../components/shared/table/cachetable/CacheTable";
-import { PrepareDataSourceTableHeader } from "./../../services/dataSourceMapperService";
 
 function Map() {
   const dispatch = useDispatch();

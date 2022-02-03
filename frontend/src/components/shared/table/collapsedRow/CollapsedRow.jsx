@@ -1,12 +1,11 @@
-import {
-  TableRow,
-  TableCell,
-  IconButton,
-  Collapse,
-  Typography,
-  Box,
-  TextField,
-} from "@mui/material";
+import TableCell from "@mui/materialTableCell";
+import IconButton from "@mui/material/IconButton";
+import Collapse from "@mui/material/Collapse";
+import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
+import TextField from "@mui/material/TextField";
+
+import TableRow from "@mui/material/TableRow";
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";

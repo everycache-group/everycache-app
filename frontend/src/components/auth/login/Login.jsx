@@ -9,7 +9,6 @@ import { useSnackbar } from "notistack";
 
 function Login() {
   const [registering, setRegistering] = useState(false);
-  const [redirect, setRedirect] = useState(false);
 
   const dispatch = useDispatch();
   const snackBar = useSnackbar();
