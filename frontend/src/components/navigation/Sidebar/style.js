@@ -14,6 +14,7 @@ export const Nav = styled.div`
   width: 100%;
   position: fixed;
   box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.32);
+  z-index: 999;
   //poprawic to
 `;
 
@@ -27,7 +28,7 @@ export const SidebarNav = styled.nav`
   top: 0;
   left: ${({ sidebar }) => (sidebar ? "0" : "-100%")};
   transition: 300ms ease-in-out;
-  z-index: 10;
+  z-index: 999;
 `;
 
 export const NavIcon = styled(Link)`

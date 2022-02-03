@@ -5,4 +5,5 @@ export const StyledTableWrapper = styled.div`
   height: 100%;
 
   margin-right: 20px;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.32);
 `;

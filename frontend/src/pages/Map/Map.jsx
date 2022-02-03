@@ -21,7 +21,7 @@ function Map() {
   return (
     <>
       <CacheTable data={caches} />
-      <LeafletMap>
+      <LeafletMap width={1200}>
         {caches.map(({ id, lat, lng, description }) => {
           return (
             <CacheMarker key={id} position={[lat, lng]} title={description} />
