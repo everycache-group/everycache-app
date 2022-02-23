@@ -17,6 +17,7 @@
     "axios": "^0.25.0",
     "jwt-decode": "^3.1.2",
     "leaflet": "^1.7.1",
+    "leaflet.smooth_marker_bouncing": "^2.0.1",
     "notistack": "^2.0.3",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",

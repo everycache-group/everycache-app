@@ -10,20 +10,20 @@ const LeafletMap = (props) => {
   const [map, setMap] = useState(null);
 
   const mapSettings = useSelector((state) => state.map.settings);
-  const selectedRow = useSelector((state) => state.cache.selectedCache);
+  const selectedCache = useSelector((state) => state.cache.selectedCache);
 
   //jump to selected cache on map
   useEffect(() => {
     if (map) {
-      const { lat, lng } = selectedRow;
+      const { lat, lng } = selectedCache;
       map.flyTo({ lat, lng });
     }
-  }, [selectedRow]);
+  }, [selectedCache]);
 
   return (
-    <Style.LeafletMapWrapper>
+    <Style.LeafletMapWrapper width={props.width}>
       <MapContainer
-        style={{ height: "100%" }}
+        style={{ height: "100%", borderRadius: 20 }}
         center={mapSettings.center}
         zoom={mapSettings.zoom}
         whenCreated={(map) => setMap(map)}

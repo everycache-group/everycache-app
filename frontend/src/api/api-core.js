@@ -14,11 +14,11 @@ export async function create(resource, params) {
 }
 
 export async function update(resource, id, params) {
-  return await sendRequest(methods.put, id, params);
+  return await sendRequest(methods.put, resource, id, params);
 }
 
 export async function remove(resource, id) {
-  return await sendRequest(methods.delete, id);
+  return await sendRequest(methods.delete, resource, id);
 }
 
 export async function login(email, password) {

@@ -1,6 +1,6 @@
 import localization from "./../data/localization.json";
 
-function createDataRow(
+export function createDataRow(
   cacheId,
   name,
   lon,
@@ -16,7 +16,7 @@ function createDataRow(
     owner,
     lat,
     lng: lon,
-    creationDate: new Date(creationDate),
+    creationDate,
   };
 }
 

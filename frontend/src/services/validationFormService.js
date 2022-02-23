@@ -18,6 +18,22 @@ const validate = (values) => {
     "Both passwords must be equal."
   );
 
+  checkField(
+    values,
+    errors,
+    "lat",
+    values.lat >= -90 && values.lat <= 90,
+    "Latitude must be in range from -90 to 90 degrees"
+  );
+
+  checkField(
+    values,
+    errors,
+    "lng",
+    values.lng >= -180 && values.lng <= 180,
+    "Longitude must be in range from -180 to 180 degrees"
+  );
+
   return errors;
 };
 

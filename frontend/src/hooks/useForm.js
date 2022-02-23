@@ -9,7 +9,11 @@ const useForm = (initialFormValues, callback) => {
 
   const handleUserInput = (e) => {
     const name = e.target.name;
-    const value = e.target.value;
+    let value = e.target.value;
+
+    if (e.target.type === "number") {
+      value = parseFloat(e.target.value);
+    }
 
     setFormValues({ ...formValues, [name]: value });
   };
@@ -29,7 +33,14 @@ const useForm = (initialFormValues, callback) => {
     }
   }, [errors]);
 
-  return { handleFormSubmit, handleUserInput, errors, formValues, formValid };
+  return {
+    handleFormSubmit,
+    handleUserInput,
+    errors,
+    formValues,
+    formValid,
+    setFormValues,
+  };
 };
 
 export default useForm;

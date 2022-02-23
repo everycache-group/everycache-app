@@ -15,7 +15,6 @@ export const Nav = styled.div`
   position: fixed;
   box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.32);
   z-index: 999;
-  //poprawic to
 `;
 
 export const SidebarNav = styled.nav`

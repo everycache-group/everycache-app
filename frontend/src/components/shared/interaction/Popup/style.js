@@ -35,6 +35,6 @@ export const CloseIcon = styled(AiOutlineClose)`
 export const TitleText = styled(Typography)`
   position: absolute;
   top: 16px;
-  left: 48px;
+  left: 32px;
   font-size: 18px;
 `;

@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import ResourceConnector from "../../services/resourceService";
 import { loginUser } from "./authSlice";
 import config from "./../../api/api-config.json";
+import { create } from "../../api/api-core";
 
 const initialState = {
   username: "",

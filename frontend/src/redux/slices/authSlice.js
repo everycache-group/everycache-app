@@ -29,7 +29,6 @@ export const logoutUser = createAsyncThunk(
       const response = await logout(auth.access_token);
       dispatch(userLogout());
     }
-
     return Promise.resolve();
   }
 );

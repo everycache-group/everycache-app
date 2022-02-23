@@ -10,7 +10,7 @@ import CacheTable from "../../components/shared/table/cachetable/CacheTable";
 import * as Style from "./style";
 import CacheMenu from "../../components/navigation/CacheMenu/CacheMenu";
 
-function Map() {
+function MyMap() {
   const dispatch = useDispatch();
   const mapSettings = useSelector((state) => state.map.settings);
 
@@ -42,4 +42,4 @@ function Map() {
   );
 }
 
-export default compose(withPageWrapper)(Map);
+export default compose(withPageWrapper)(MyMap);

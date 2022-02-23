@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import config from "./../../api/api-config.json";
 import ResourceConnector from "../../services/resourceService";
 import { PrepareDataSourceTable } from "../../services/dataSourceMapperService";
-import { create } from "@mui/material/styles/createTransitions";
+import { createDataRow } from "../../services/dataSourceMapperService";
 
 const cache = new ResourceConnector(config.resources.cache);
 
@@ -35,7 +35,21 @@ export const createCache = createAsyncThunk(
     try {
       const response = await cache.create(cacheData);
 
-      return Promise.resolve(response.data);
+      const { id, created_on, lon, lat, owner, name, description } =
+        response.data.cache;
+      const { username } = owner;
+
+      const dataRow = createDataRow(
+        id,
+        name,
+        lon,
+        lat,
+        username,
+        description,
+        created_on
+      );
+
+      return Promise.resolve(dataRow);
     } catch (_error) {
       return Promise.reject();
     }
@@ -44,11 +58,30 @@ export const createCache = createAsyncThunk(
 
 export const updateCache = createAsyncThunk(
   "cache/updateCache",
-  async ({ id, ...cacheData }, thunkAPI) => {
+  async (cacheDto, thunkAPI) => {
     try {
-      const response = await cache.update(id, cacheData);
+      const response = await cache.update(cacheDto.id, {
+        description: cacheDto.description,
+        lat: cacheDto.lat,
+        lon: cacheDto.lon,
+        name: cacheDto.name,
+      });
 
-      return Promise.resolve();
+      const { id, created_on, lon, lat, owner, name, description } =
+        response.data.cache;
+      const { username } = owner;
+
+      const dataRow = createDataRow(
+        id,
+        name,
+        lon,
+        lat,
+        username,
+        description,
+        created_on
+      );
+
+      return Promise.resolve(dataRow);
     } catch (_error) {
       return Promise.reject();
     }
@@ -57,8 +90,9 @@ export const updateCache = createAsyncThunk(
 
 export const deleteCache = createAsyncThunk(
   "cache/deleteCache",
-  async ({ id }, thunkAPI) => {
+  async (id, thunkAPI) => {
     try {
+      console.log(id);
       const response = await cache.remove(id);
 
       return Promise.resolve(id);
@@ -114,7 +148,8 @@ const cacheSlice = createSlice({
       const index = state.caches.findIndex(
         (item) => item.id === action.payload.id
       );
-      state.caches[index] = action.payload;
+      state.caches = state.caches.splice(index, 1);
+      state.caches.push(action.payload);
     },
     [deleteCache.fulfilled]: (state, action) => {
       const index = state.caches.findIndex(

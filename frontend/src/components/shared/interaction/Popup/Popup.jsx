@@ -1,17 +1,16 @@
 import React, { useState } from "react";
 import * as Style from "./style";
 
-const Popup = ({ children, trigger, setTrigger }) => {
+const Popup = ({ title, children, trigger, setTrigger }) => {
   const handlePopupClick = (e) => {
     e.stopPropagation();
   };
 
-  const [open, setOpen] = useState(!!trigger); //convert any value to boolean
-
-  return open ? (
+  return trigger ? (
     <Style.Popup onClick={handlePopupClick}>
       <Style.PopupInner>
-        <Style.CloseIcon size={25} onClick={() => setOpen(false)} />
+        <Style.TitleText variant="h5">{title}</Style.TitleText>
+        <Style.CloseIcon size={25} onClick={() => setTrigger(false)} />
         {children}
       </Style.PopupInner>
     </Style.Popup>
