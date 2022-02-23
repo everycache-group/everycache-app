@@ -1,3 +1,5 @@
+from marshmallow import validate
+
 from everycache_api.extensions import db, ma
 from everycache_api.models import CacheVisit
 
@@ -12,6 +14,7 @@ class CacheVisitSchema(ma.SQLAlchemyAutoSchema):
     )
     user = ma.Nested(NestedUserSchema, dump_only=True)
     visited_on = ma.DateTime(dump_only=True)
+    rating = ma.Float(validate=validate.Range(0.5, 5.0))
 
     class Meta:
         model = CacheVisit

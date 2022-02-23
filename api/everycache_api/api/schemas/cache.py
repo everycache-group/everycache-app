@@ -20,6 +20,7 @@ class CacheSchema(ma.SQLAlchemyAutoSchema):
     )
     name = ma.String(validate=validate.Length(min=5), required=False)
     description = ma.String(validate=validate.Length(min=5), required=False)
+    rating = ma.Float(dump_only=True)
 
     class Meta:
         model = Cache
@@ -37,6 +38,7 @@ class PublicCacheSchema(ma.SQLAlchemyAutoSchema):
     lon = ma.Float()
     lat = ma.Float()
     owner = ma.Nested(NestedUserSchema, dump_only=True)
+    rating = ma.Float(dump_only=True)
 
     class Meta:
         model = Cache
