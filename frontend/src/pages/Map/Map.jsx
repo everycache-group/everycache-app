@@ -23,7 +23,6 @@ function Map() {
   return (
     <>
       <Style.CacheContent>
-        <CacheMenu />
         <CacheTable data={caches} />
       </Style.CacheContent>
 

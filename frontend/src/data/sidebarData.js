@@ -19,7 +19,7 @@ export const SideBarData = [
   },
   {
     title: "My Caches",
-    path: "/map",
+    path: "/mymap",
     icon: <FaIcons.FaMap />,
     iconClosed: iconClosed,
     iconOpened: iconOpened,

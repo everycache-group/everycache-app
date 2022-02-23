@@ -22,7 +22,7 @@ export function createDataRow(
 
 export function PrepareCacheColumns() {
   const coulmns = [
-    { field: "id", headerName: "ID", width: 70, hide: true },
+    { field: "id", headerName: "ID", width: 70, hide: true, hideable: false },
     { field: "name", headerName: "Name", width: 130 },
     {
       field: "description",
@@ -38,8 +38,12 @@ export function PrepareCacheColumns() {
     {
       field: "creationDate",
       headerName: "Created at",
-      width: 200,
+      width: 170,
       type: "date",
+      valueGetter: (params) => {
+        var date = new Date(params.value);
+        return `${date.toLocaleString()}`;
+      },
     },
   ];
   return coulmns;

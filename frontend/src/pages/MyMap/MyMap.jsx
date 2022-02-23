@@ -4,7 +4,7 @@ import LeafletMap from "./../../components/content/map/LeafletMap";
 import SettingsMapTracker from "../../components/content/map/SettingsMapTracker";
 import { useSelector, useDispatch } from "react-redux";
 import withPageWrapper from "../../hoc/withPageWrapper";
-import { getCaches } from "../../redux/slices/cacheSlice";
+import { getMyCaches } from "../../redux/slices/cacheSlice";
 import CacheMarker from "../../components/content/cacheMarker/CacheMarker";
 import CacheTable from "../../components/shared/table/cachetable/CacheTable";
 import * as Style from "./style";
@@ -15,7 +15,7 @@ function MyMap() {
   const mapSettings = useSelector((state) => state.map.settings);
 
   useEffect(() => {
-    dispatch(getCaches());
+    dispatch(getMyCaches());
   }, []);
 
   const caches = useSelector((state) => state.cache.caches);

@@ -3,6 +3,7 @@ import config from "./../../api/api-config.json";
 import ResourceConnector from "../../services/resourceService";
 import { PrepareDataSourceTable } from "../../services/dataSourceMapperService";
 import { createDataRow } from "../../services/dataSourceMapperService";
+import { axiosInstance } from "../../api/api-connector";
 
 const cache = new ResourceConnector(config.resources.cache);
 
@@ -10,6 +11,31 @@ export const getCaches = createAsyncThunk(
   "cache/getCaches",
   async (userId, { dispatch }) => {
     const response = await cache.get(userId);
+
+    const { data } = response;
+
+    const datasource = PrepareDataSourceTable(data.results);
+
+    const { total, pages, next, prev } = data;
+
+    const payload = {
+      total,
+      pages,
+      next,
+      prev,
+      datasource,
+    };
+
+    return Promise.resolve(payload);
+  }
+);
+
+export const getMyCaches = createAsyncThunk(
+  "cache/getMyCaches",
+  async (_, { getState }) => {
+    const userId = getState().auth.userId;
+
+    const response = await axiosInstance.get(`/api/users/${userId}/caches`);
 
     const { data } = response;
 
@@ -134,13 +160,27 @@ const cacheSlice = createSlice({
       state.caches = datasource;
       state.loading = false;
     },
+    [getMyCaches.fulfilled]: (state, action) => {
+      const { total, pages, next, prev, datasource } = action.payload;
+      state.total = total;
+      state.pages = pages;
+      state.next = next;
+      state.prev = prev;
+      state.caches = datasource;
+      state.loading = false;
+    },
     [getCaches.rejected]: (state, action) => {
       state = initialState;
     },
     [getCaches.pending]: (state, action) => {
       state.loading = true;
     },
-
+    [getMyCaches.rejected]: (state, action) => {
+      state = initialState;
+    },
+    [getMyCaches.pending]: (state, action) => {
+      state.loading = true;
+    },
     [createCache.fulfilled]: (state, action) => {
       state.caches.push(action.payload);
     },

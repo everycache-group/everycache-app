@@ -17,7 +17,9 @@ function App() {
         <Switch>
           <Route path="/auth" exact component={Page.Auth} />
           <ProtectedRoute path="/" exact component={Page.Home} />
+          <ProtectedRoute path="/mymap" exact component={Page.MyMap} />
           <ProtectedRoute path="/map" component={Page.Map} />
+
           <NotFoundRoute />
         </Switch>
       </Router>
