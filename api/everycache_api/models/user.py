@@ -26,13 +26,6 @@ class User(BaseMixin, db.Model):
     )
     verified = db.Column(db.Boolean, nullable=False, default=False)
 
-    # relationships
-    owned_caches = db.relationship("Cache", uselist=True, back_populates="owner")
-    cache_visits = db.relationship("CacheVisit", uselist=True, back_populates="user")
-    cache_comments = db.relationship(
-        "CacheComment", uselist=True, back_populates="author"
-    )
-
     @hybrid_property
     def password(self):
         return self._password
@@ -40,6 +33,13 @@ class User(BaseMixin, db.Model):
     @password.setter
     def password(self, value: str):
         self._password = pwd_context.hash(value)
+
+    # relationships
+    owned_caches = db.relationship("Cache", uselist=True, back_populates="owner")
+    cache_visits = db.relationship("CacheVisit", uselist=True, back_populates="user")
+    cache_comments = db.relationship(
+        "CacheComment", uselist=True, back_populates="author"
+    )
 
     def verify_password(self, password: str):
         return pwd_context.verify(password, self.password)
