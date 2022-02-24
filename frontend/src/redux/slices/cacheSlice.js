@@ -174,12 +174,14 @@ const cacheSlice = createSlice({
     },
     [getCaches.pending]: (state, action) => {
       state.loading = true;
+      state.caches = [];
     },
     [getMyCaches.rejected]: (state, action) => {
       state = initialState;
     },
     [getMyCaches.pending]: (state, action) => {
       state.loading = true;
+      state.caches = [];
     },
     [createCache.fulfilled]: (state, action) => {
       state.caches.push(action.payload);
@@ -188,14 +190,17 @@ const cacheSlice = createSlice({
       const index = state.caches.findIndex(
         (item) => item.id === action.payload.id
       );
-      state.caches = state.caches.splice(index, 1);
-      state.caches.push(action.payload);
+      const caches = state.caches.slice();
+      caches = caches.splice(index, 1, action.payload);
+      state.caches = caches;
     },
     [deleteCache.fulfilled]: (state, action) => {
       const index = state.caches.findIndex(
-        (item) => item.id === action.payload.id
+        (item) => item.id === action.payload
       );
-      state.caches = state.caches.splice(index, 1);
+      const caches = state.caches.slice();
+      caches = caches.splice(index, 1);
+      state.caches = caches;
     },
   },
 });
