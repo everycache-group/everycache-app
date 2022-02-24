@@ -24,7 +24,6 @@ function EditUserPopup({ OnActionClose }) {
 
 
   const OnFormSubmitHandler = (formData) => {
-    console.log("SUBMIT")
     const updateUserDto = {
       id: selectedUser.id,
       username: formData.username,

@@ -1,8 +1,6 @@
 const validate = (values) => {
   let errors = {};
 
-  // checkForEmptyFields(values, errors);
-
   for (const keyName of ["Email", "Name", "Username", "Description"]) {
     const key = keyName.toLowerCase();
     checkField(
@@ -80,20 +78,6 @@ const validate = (values) => {
 
   return errors;
 };
-
-// const checkForEmptyFields = (values, errors) => {
-//   for (const key in values) {
-//     const element = values[key];
-//
-//     if (!element) {
-//       Object.defineProperty(errors, key, {
-//         value: `${key} is required`,
-//         writable: true,
-//         enumerable: true, //FUNNY BUG WHEN REMOVING XD
-//       });
-//     }
-//   }
-// };
 
 const checkField = (values, errors, key, condition, msgOnFail) => {
   if (values.hasOwnProperty(key) && !errors[key]) {

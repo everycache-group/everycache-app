@@ -28,7 +28,6 @@ function UserForm({ User, OnFormSubmit, ButtonName }) {
       verified
     },
     () => {
-      console.log("form submitted");
       if (OnFormSubmit instanceof Function) {
         OnFormSubmit(formValues);
       }

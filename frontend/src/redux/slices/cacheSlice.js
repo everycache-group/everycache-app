@@ -118,7 +118,6 @@ export const deleteCache = createAsyncThunk(
   "cache/deleteCache",
   async (id, thunkAPI) => {
     try {
-      console.log(id);
       const response = await cache.remove(id);
 
       return Promise.resolve(id);
