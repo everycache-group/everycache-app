@@ -57,6 +57,7 @@ function UserForm({ User, OnFormSubmit, ButtonName }) {
               helperText={errors.email}
               placeholder="Enter email Here..."
               value={formValues.email}
+              disabled={currentUserRole != "Admin"}
             />
 
             <Style.UserTextField

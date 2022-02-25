@@ -11,6 +11,8 @@ import config from "./../../api/api-config.json";
 const initialState = {
   username: "",
   role: "",
+  id: "",
+  email: "",
   users: [],
   loading: false,
   selectedUser: null
@@ -90,6 +92,7 @@ export const getUser = createAsyncThunk(
       data
     } = response;
 
+
     if (response.status !== 200) {
       return Promise.reject();
     }
@@ -148,19 +151,22 @@ const userSlice = createSlice({
       );
     },
     selectSelf: (state, action) => {
-      state.selectedUser = state.users.find(
-        (user) => user.username === state.username
-      );
+      const {id, username, email, role} = state;
+      state.selectedUser = {id, username, email, role};
     },
   },
   extraReducers: {
     [getUser.fulfilled]: (state, action) => {
       const {
+        id,
         username,
-        role
+        role,
+        email
       } = action.payload;
+      state.id = id
       state.username = username;
       state.role = role;
+      state.email = email;
     },
     [getUsers.fulfilled]: (state, action) => {
       const {
