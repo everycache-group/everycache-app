@@ -1,4 +1,4 @@
-from marshmallow import validate
+from marshmallow import post_dump, validate
 
 from everycache_api.extensions import db, ma
 from everycache_api.models import Cache
@@ -22,6 +22,13 @@ class CacheSchema(ma.SQLAlchemyAutoSchema):
     description = ma.String(validate=validate.Length(min=5), required=False)
     rating = ma.Float(dump_only=True)
 
+    @post_dump
+    def fix_null_rating(self, data, many, **kwargs):
+        if data["rating"] is None:
+            data["rating"] = 0.0
+
+        return data
+
     class Meta:
         model = Cache
         sqla_session = db.session
@@ -39,6 +46,13 @@ class PublicCacheSchema(ma.SQLAlchemyAutoSchema):
     lat = ma.Float()
     owner = ma.Nested(NestedUserSchema, dump_only=True)
     rating = ma.Float(dump_only=True)
+
+    @post_dump
+    def fix_null_rating(self, data, many, **kwargs):
+        if data["rating"] is None:
+            data["rating"] = 0.0
+
+        return data
 
     class Meta:
         model = Cache
