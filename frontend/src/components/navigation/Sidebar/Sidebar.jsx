@@ -19,7 +19,7 @@ function Sidebar(props) {
 
   return (
     <>
-      <IconContext.Provider value={{ color: "#fff" }}>
+      <IconContext.Provider value={{ }}>
         <Style.Nav>
           <Style.NavIcon to="#">
             <FaIcons.FaBars onClick={showSidebar} />

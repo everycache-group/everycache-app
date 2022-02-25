@@ -10,6 +10,7 @@ function EditUserPopup({ OnActionClose }) {
   const [trigger, setTrigger] = useState(true);
 
   const selectedUser = useSelector((state) => state.user.selectedUser);
+  const currentUserRole = useSelector((state) => state.user.role)
 
   const snackBar = useSnackbar();
   const dispatch = useDispatch();
@@ -23,6 +24,7 @@ function EditUserPopup({ OnActionClose }) {
   }, [trigger]);
 
 
+
   const OnFormSubmitHandler = (formData) => {
     let updateUserDto = {
       id: selectedUser.id,
@@ -30,7 +32,7 @@ function EditUserPopup({ OnActionClose }) {
       email: formData.email,
     };
 
-    if (selectedUser.role == "Admin"){
+    if (currentUserRole == "Admin"){
       updateUserDto = {
         ...updateUserDto,
         role: formData.role,
