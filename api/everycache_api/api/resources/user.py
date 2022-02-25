@@ -15,6 +15,8 @@ from everycache_api.common.pagination import paginate
 from everycache_api.extensions import db
 from everycache_api.models import Cache, CacheComment, CacheVisit, User
 
+from sqlalchemy.exc import IntegrityError
+
 
 class UserResource(Resource):
     """Single object resource
@@ -126,15 +128,30 @@ class UserResource(Resource):
 
         # find user
         user = User.query_ext_id(user_id).filter_by(deleted=False).first_or_404()
+        initial_email = user.email
 
         schema = UserSchema()
 
         # update and return user details
-        user = schema.load(request.json, instance=user)
+        edited_user = schema.load(request.json, partial=True)
+        db.session.rollback()
+
+        email_user = User.query.filter_by(email=edited_user.email).first()
+        username_user = User.query.filter_by(username=edited_user.username).first()
+
+        if email_user and email_user.id_ != user.id_:
+            return {"message": "email is already taken"}, 400
+
+        if username_user and username_user.id_ != user.id_:
+            return {"message": "username is already taken"}, 400
+
+        edited_user = schema.load(request.json, instance=user, partial=True)
+        if current_user.role != User.Role.Admin:
+            edited_user.email = initial_email
 
         db.session.commit()
 
-        return {"message": "user updated", "user": schema.dump(user)}, 200
+        return {"message": "user updated", "user": schema.dump(edited_user)}, 200
 
     def delete(self, user_id: str):
         # ensure current_user is authorized
