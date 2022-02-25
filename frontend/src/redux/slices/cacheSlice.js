@@ -135,9 +135,8 @@ const initialState = {
     prev: "",
   },
   caches: [],
-  myCaches: [],
   loading: false,
-  selectedCache: {},
+  selectedCache: null,
 };
 
 const cacheSlice = createSlice({
@@ -159,6 +158,7 @@ const cacheSlice = createSlice({
       state.prev = prev;
       state.caches = datasource;
       state.loading = false;
+      state.selectedCache = initialState.selectedCache;
     },
     [getMyCaches.fulfilled]: (state, action) => {
       const { total, pages, next, prev, datasource } = action.payload;
@@ -166,8 +166,9 @@ const cacheSlice = createSlice({
       state.pages = pages;
       state.next = next;
       state.prev = prev;
-      state.myCaches = datasource;
+      state.caches = datasource;
       state.loading = false;
+      state.selectedCache = initialState.selectedCache;
     },
     [getCaches.rejected]: (state, action) => {
       state = initialState;
@@ -182,24 +183,25 @@ const cacheSlice = createSlice({
       state.loading = true;
     },
     [createCache.fulfilled]: (state, action) => {
-      state.myCaches.push(action.payload);
+      state.caches.push(action.payload);
     },
     [updateCache.fulfilled]: (state, action) => {
-      const index = state.myCaches.findIndex(
+      const index = state.caches.findIndex(
         (item) => item.id == action.payload.id
       );
-      const caches = state.myCaches.slice();
+      const caches = state.caches.slice();
       caches.splice(index, 1, action.payload);
-      state.myCaches = caches;
+      state.caches = caches;
     },
     [deleteCache.fulfilled]: (state, action) => {
       const id = action.payload;
-      const index = state.myCaches.findIndex(
+      const index = state.caches.findIndex(
         (item) => item.id == id
       );
-      const caches = state.myCaches.slice();
+      const caches = state.caches.slice();
       caches.splice(index, 1);
-      state.myCaches = caches;
+      state.caches = caches;
+      state.selectedCache = initialState.selectedCache;
     },
   },
 });

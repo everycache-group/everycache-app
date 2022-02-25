@@ -212,6 +212,7 @@ const userSlice = createSlice({
       const users = state.users.slice()
       users.splice(index, 1);
       state.users = users;
+      state.selectedUser = initialState.selectedUser;
     },
 
   },

@@ -2,6 +2,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import EditIcon from "@mui/icons-material/Edit";
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
+import { useSnackbar } from "notistack";
 import * as Style from "./style";
 import AddCachePopup from "./../../content/CachePopup/AddCachePopup/AddCachePopup";
 import EditCachePopup from "./../../content/CachePopup/EditCachePopup/EditCachePopup";
@@ -9,9 +11,16 @@ import DeleteCachePopup from "./../../content/CachePopup/DeleteCachePopup/Delete
 
 function CacheMenu() {
   const [action, setAction] = useState("");
+  const selectedCache = useSelector((state) => state.cache.selectedCache);
+  const snackBar = useSnackbar();
 
   const OnClickHandler = (e) => {
-    setAction(e.currentTarget.id);
+    let newAction = e.currentTarget.id;
+    if (newAction === "add" || selectedCache){
+      setAction(newAction);
+    } else {
+      snackBar.enqueueSnackbar("No cache selected for action!", {variant: "error"});
+    }
   };
 
   const OnActionClose = () => {

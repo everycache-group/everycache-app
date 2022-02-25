@@ -55,7 +55,6 @@ function RatingCommentCache({ ButtonName }) {
                   precision={0.5}
                   onChange={(event, newValue) => {
                     setValue(newValue);
-                    copnsole.log("normal change");
                   }}
                   onChangeActive={(event, newHover) => {
                     setHover(newHover);

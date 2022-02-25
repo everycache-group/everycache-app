@@ -24,15 +24,16 @@ function DeleteCachePopup({ OnActionClose }) {
 
   const OnDeleteHandler = (e) => {
     dispatch(deleteCache(selectedCache.id))
+      .unwrap()
       .then((result) => {
-        snackBar.enqueueSnackbar("Cache Deleted Succesfully!,", {
+        snackBar.enqueueSnackbar("Cache Deleted Succesfully!", {
           variant: "success",
         });
         setTrigger(false);
         OnActionClose();
       })
       .catch((error) => {
-        snackBar.enqueueSnackbar("Cache couldn't be deleted. Try Again.,", {
+        snackBar.enqueueSnackbar("Cache couldn't be deleted. Try Again.", {
           variant: "error",
         });
       });
