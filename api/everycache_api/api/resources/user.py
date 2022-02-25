@@ -15,8 +15,6 @@ from everycache_api.common.pagination import paginate
 from everycache_api.extensions import db
 from everycache_api.models import Cache, CacheComment, CacheVisit, User
 
-from sqlalchemy.exc import IntegrityError
-
 
 class UserResource(Resource):
     """Single object resource
