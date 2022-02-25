@@ -4,7 +4,8 @@ import TextField from "@mui/material/TextField";
 import LoadingButton from "@mui/lab/LoadingButton";
 import useForm from "../../../hooks/useForm";
 import { loginUser } from "./../../../redux/slices/authSlice";
-import { useDispatch } from "react-redux";
+import { getUser } from "./../../../redux/slices/userSlice";
+import { useDispatch, useSelector } from "react-redux";
 import { useSnackbar } from "notistack";
 
 function Login() {
@@ -20,13 +21,18 @@ function Login() {
     },
     () => {
       const { email, password } = formValues;
-      dispatch(loginUser({ email, password })).then(({ meta }) => {
-        if (meta.requestStatus === "rejected") {
+      dispatch(loginUser({ email, password }))
+        .unwrap()
+        .then((result) => {
+          const {userId} = result;
+          console.log(result, userId);
+          dispatch(getUser(userId));
+        })
+        .catch((rejectedResult) => {
           snackBar.enqueueSnackbar("Invalid Email or Password. Try Again,", {
             variant: "error",
           });
-        }
-      });
+        });
     }
   );
 

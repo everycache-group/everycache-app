@@ -36,7 +36,6 @@ function CacheForm({ Cache, OnFormSubmit, ButtonName }) {
       lat,
     },
     () => {
-      console.log("form submitted");
       if (OnFormSubmit instanceof Function) {
         OnFormSubmit(formValues);
       }

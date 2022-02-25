@@ -11,7 +11,6 @@ export const loginUser = createAsyncThunk(
       const { data } = response;
       const decodedToken = jwt_decode(data.access_token);
 
-      dispatch(getUser(decodedToken.sub));
       data.userId = decodedToken.sub;
       return Promise.resolve(data);
     } catch (_error) {
