@@ -19,7 +19,7 @@ function MyMap() {
     dispatch(getMyCaches());
   }, []);
 
-  const caches = useSelector((state) => state.cache.caches);
+  const caches = useSelector((state) => state.cache.myCaches);
 
   return (
     <>

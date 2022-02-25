@@ -24,7 +24,7 @@ function DeleteCachePopup({ OnActionClose }) {
 
   const OnDeleteHandler = (e) => {
     dispatch(deleteCache(selectedCache.id))
-      .then(() => {
+      .then((result) => {
         snackBar.enqueueSnackbar("Cache Deleted Succesfully!,", {
           variant: "success",
         });
@@ -49,7 +49,7 @@ function DeleteCachePopup({ OnActionClose }) {
           <Button variant="contained" onClick={OnDeleteHandler}>
             Yes
           </Button>
-          <Button variant="contained">Cancel</Button>
+          <Button variant="contained" onClick={OnActionClose}>Cancel</Button>
         </Style.ButtonContainer>
       </Style.PopupContainer>
     </Popup>

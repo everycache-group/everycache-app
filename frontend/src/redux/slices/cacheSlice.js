@@ -94,7 +94,7 @@ export const updateCache = createAsyncThunk(
       });
 
       const { id, created_on, lon, lat, owner, name, description } =
-        response.data.cache;
+        response.data.result;
       const { username } = owner;
 
       const dataRow = createDataRow(
@@ -115,14 +115,14 @@ export const updateCache = createAsyncThunk(
 );
 
 export const deleteCache = createAsyncThunk(
-  "cache/deleteCache",
+  "cache/delete",
   async (id, thunkAPI) => {
-    try {
-      const response = await cache.remove(id);
+    const response = await cache.remove(id);
 
+    if (response.status == 200){
       return Promise.resolve(id);
-    } catch (error) {
-      return Promise.reject(id);
+    } else {
+      return Promise.reject();
     }
   }
 );
@@ -135,6 +135,7 @@ const initialState = {
     prev: "",
   },
   caches: [],
+  myCaches: [],
   loading: false,
   selectedCache: {},
 };
@@ -165,7 +166,7 @@ const cacheSlice = createSlice({
       state.pages = pages;
       state.next = next;
       state.prev = prev;
-      state.caches = datasource;
+      state.myCaches = datasource;
       state.loading = false;
     },
     [getCaches.rejected]: (state, action) => {
@@ -173,33 +174,32 @@ const cacheSlice = createSlice({
     },
     [getCaches.pending]: (state, action) => {
       state.loading = true;
-      state.caches = [];
     },
     [getMyCaches.rejected]: (state, action) => {
       state = initialState;
     },
     [getMyCaches.pending]: (state, action) => {
       state.loading = true;
-      state.caches = [];
     },
     [createCache.fulfilled]: (state, action) => {
-      state.caches.push(action.payload);
+      state.myCaches.push(action.payload);
     },
     [updateCache.fulfilled]: (state, action) => {
-      const index = state.caches.findIndex(
-        (item) => item.id === action.payload.id
+      const index = state.myCaches.findIndex(
+        (item) => item.id == action.payload.id
       );
-      const caches = state.caches.slice();
-      caches = caches.splice(index, 1, action.payload);
-      state.caches = caches;
+      const caches = state.myCaches.slice();
+      caches.splice(index, 1, action.payload);
+      state.myCaches = caches;
     },
     [deleteCache.fulfilled]: (state, action) => {
-      const index = state.caches.findIndex(
-        (item) => item.id === action.payload
+      const id = action.payload;
+      const index = state.myCaches.findIndex(
+        (item) => item.id == id
       );
-      const caches = state.caches.slice();
-      caches = caches.splice(index, 1);
-      state.caches = caches;
+      const caches = state.myCaches.slice();
+      caches.splice(index, 1);
+      state.myCaches = caches;
     },
   },
 });
