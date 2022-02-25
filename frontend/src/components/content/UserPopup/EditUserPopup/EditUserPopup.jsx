@@ -24,18 +24,37 @@ function EditUserPopup({ OnActionClose }) {
 
 
   const OnFormSubmitHandler = (formData) => {
-    const updateUserDto = {
+    let updateUserDto = {
       id: selectedUser.id,
       username: formData.username,
-      role: formData.role,
       email: formData.email,
-      verified: formData.verified,
     };
 
+    if (selectedUser.role == "Admin"){
+      updateUserDto = {
+        ...updateUserDto,
+        role: formData.role,
+        verified: formData.verified
+      };
+    }
+
+    if ("password" in formData) {
+      updateUserDto["password"] = formData.password;
+    }
+
     dispatch(updateUser(updateUserDto)).then(({ meta }) => {
-      snackBar.enqueueSnackbar("User Updated Succesfully!", {
-        variant: "success",
-      });
+      const {requestStatus} = meta;
+      console.log(meta);
+      if (requestStatus == "fulfilled"){
+        snackBar.enqueueSnackbar("User Updated Succesfully!", {
+          variant: "success",
+        });
+      }
+      else {
+        snackBar.enqueueSnackbar("User Update has Failed!", {
+          variant: "error",
+        });
+      }
       setTrigger(false);
       OnActionClose();
     });

@@ -1,5 +1,6 @@
 import * as Style from "./style";
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
 import useForm from "./../../../hooks/useForm";
 import Box from '@mui/material/Box';
 import MenuItem from '@mui/material/MenuItem';
@@ -13,6 +14,8 @@ import SendIcon from "@mui/icons-material/Send";
 function UserForm({ User, OnFormSubmit, ButtonName }) {
   const { username, role, email, verified } = User;
   const [loading, setLoading] = useState(false);
+
+  const currentUserRole = useSelector((state) => state.user.role);
 
   const {
     handleFormSubmit,
@@ -55,7 +58,19 @@ function UserForm({ User, OnFormSubmit, ButtonName }) {
               placeholder="Enter email Here..."
               value={formValues.email}
             />
-            <Style.SelectWrapper>
+
+            <Style.UserTextField
+              id="password"
+              label="Password"
+              onChange={handleUserInput}
+              name="password"
+              type="password"
+              error={!!errors.password}
+              helperText={errors.password}
+              placeholder="Enter password Here..."
+            />
+
+            {currentUserRole == "Admin" && (<Style.SelectWrapper>
               <Style.UserFormControl fullWidth>
                 <InputLabel id="roleL">Role</InputLabel>
                 <Select
@@ -85,7 +100,7 @@ function UserForm({ User, OnFormSubmit, ButtonName }) {
                   <MenuItem value={"true"}>Verified</MenuItem>
                 </Select>
               </Style.UserFormControl>
-            </Style.SelectWrapper>
+            </Style.SelectWrapper>)}
             <LoadingButton
               onClick={handleFormSubmit}
               endIcon={<SendIcon />}

@@ -147,6 +147,11 @@ const userSlice = createSlice({
         (user) => user.id === action.payload
       );
     },
+    selectSelf: (state, action) => {
+      state.selectedUser = state.users.find(
+        (user) => user.username === state.username
+      );
+    },
   },
   extraReducers: {
     [getUser.fulfilled]: (state, action) => {
@@ -177,7 +182,17 @@ const userSlice = createSlice({
       const index = state.users.findIndex(
         (item) => item.id === action.payload.id
       );
+
+      const currIndex = state.users.findIndex(
+        (item) => item.username === state.username
+      );
+
       const users = state.users.slice()
+      if (index == currIndex){
+        state.username = action.payload.username;
+        state.role = action.payload.role;
+      }
+
       users.splice(index, 1, action.payload);
       state.users = users;
       state.selectedUser = action.payload;
@@ -197,7 +212,8 @@ const userSlice = createSlice({
 
 export const {
   logout,
-  selectRow
+  selectRow,
+  selectSelf
 } = userSlice.actions;
 
 export default userSlice.reducer;

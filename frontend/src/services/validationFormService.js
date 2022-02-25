@@ -1,7 +1,7 @@
 const validate = (values) => {
   let errors = {};
 
-  for (const keyName of ["Email", "Name", "Username", "Description"]) {
+  for (const keyName of ["Email", "Name", "Username", "Description", "Password"]) {
     const key = keyName.toLowerCase();
     checkField(
       values,

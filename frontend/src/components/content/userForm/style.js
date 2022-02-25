@@ -5,7 +5,7 @@ import FormControl from '@mui/material/FormControl';
 
 export const UserFormWrapper = styled.div`
   border: 1px solid #ccc;
-  height: 400px;
+  height: 350px;
   padding: 16px;
   border-radius: 25px;
   display: grid;
