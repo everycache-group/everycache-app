@@ -1,4 +1,6 @@
 import localization from "./../data/localization.json";
+import React from "react";
+import Typography from "@mui/material/Typography";
 
 export function createDataRow(
   cacheId,
@@ -20,7 +22,7 @@ export function createDataRow(
   };
 }
 
-export function PrepareCacheColumns() {
+export function PrepareCacheColumns(myCache = false) {
   const coulmns = [
     { field: "id", headerName: "ID", width: 70, hide: true, hideable: false },
     { field: "name", headerName: "Name", width: 130 },
@@ -29,10 +31,21 @@ export function PrepareCacheColumns() {
       headerName: "Description",
       width: 200,
       sortable: false,
-      multiline: true,
+
       filterable: false,
+      renderCell: (params) => {
+        <div>
+          <Typography>{params.value}</Typography>
+        </div>;
+      },
     },
-    { field: "owner", headerName: "Owner", width: 130 },
+    {
+      field: "owner",
+      headerName: "Owner",
+      width: 120,
+      hide: myCache,
+      hideable: !myCache,
+    },
     { field: "lat", headerName: "Lat", width: 70, type: "number" },
     { field: "lng", headerName: "Lng", width: 70, type: "number" },
     {

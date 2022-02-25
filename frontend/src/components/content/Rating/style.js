@@ -1,5 +1,13 @@
 import styled from "styled-components";
 
+export const RatingWrapper = styled.div`
+  width: 250px;
+  height: 100px;
+  top: 100px;
+
+  border: 2px solid red;
+`;
+
 export const CacheFormWrapper = styled.div`
   border: 1px solid #ccc;
   height: 600px;

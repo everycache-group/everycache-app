@@ -7,6 +7,8 @@ export const CacheActionContainer = styled.div`
   flex-direction: row;
   align-items: center;
   justify-content: flex-end;
+  position: absolute;
+  right: 0px;
 `;
 
 export const TransformIconButton = styled(IconButton)`

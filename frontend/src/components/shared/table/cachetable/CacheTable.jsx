@@ -5,8 +5,8 @@ import { PrepareCacheColumns } from "../../../../services/dataSourceMapperServic
 import * as Style from "./style";
 import { selectRow } from "./../../../../redux/slices/cacheSlice";
 
-function CacheTable({ title, data }) {
-  const columns = PrepareCacheColumns();
+function CacheTable({ title, data, hideOwner }) {
+  const columns = PrepareCacheColumns(hideOwner);
 
   const dispatch = useDispatch();
 

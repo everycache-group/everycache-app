@@ -9,6 +9,7 @@ import CacheMarker from "../../components/content/cacheMarker/CacheMarker";
 import CacheTable from "../../components/shared/table/cachetable/CacheTable";
 import * as Style from "./style";
 import CacheMenu from "../../components/navigation/CacheMenu/CacheMenu";
+import { Typography } from "@mui/material";
 
 function MyMap() {
   const dispatch = useDispatch();
@@ -23,8 +24,10 @@ function MyMap() {
   return (
     <>
       <Style.CacheContent>
+        <Typography variant="h4">My Caches</Typography>
+        <br />
         <CacheMenu />
-        <CacheTable data={caches} />
+        <CacheTable data={caches} hideOwner={true} />
       </Style.CacheContent>
 
       <LeafletMap width={1200}>

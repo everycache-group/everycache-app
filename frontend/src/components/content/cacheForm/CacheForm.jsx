@@ -9,7 +9,6 @@ import { MdMyLocation } from "react-icons/md/";
 import SettingsMapTracker from "./../map/SettingsMapTracker";
 import CacheMarker from "./../cacheMarker/CacheMarker";
 import { useSelector } from "react-redux";
-import { fromRenderProps } from "react-recompose";
 
 function CacheForm({ Cache, OnFormSubmit, ButtonName }) {
   const { zoom, center } = useSelector((state) => state.map.settings);
