@@ -130,7 +130,7 @@ class UserResource(Resource):
         schema = UserSchema()
 
         # update and return user details
-        user = schema.load(request.json, instance=user)
+        user = schema.load(request.json, instance=user, partial=True)
 
         db.session.commit()
 

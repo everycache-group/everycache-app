@@ -62,6 +62,24 @@ export function PrepareCacheColumns(myCache = false) {
   return coulmns;
 }
 
+function getVerified(columnField){
+  const {value: verified} = columnField;
+  return (verified) ? "Verified" : "Not Verified";
+}
+
+export function PrepareUserColumns(userRole) {
+  const columns = [
+    { field: "username", headerName: "Userame", width: 130 },
+    { field: "role", headerName: "Role", width: 70 },
+  ];
+
+  if (userRole == "Admin") {
+      columns.push({field: "email", headerName: "Email", width: 190});
+      columns.push({field: "verified", headerName: "Verified", width: 110, valueGetter: getVerified});
+  }
+  return columns;
+}
+
 export const PrepareDataSourceTable = (cachesDto) => {
   const dataSource = [];
 
@@ -76,6 +94,7 @@ export const PrepareDataSourceTable = (cachesDto) => {
       name,
       description,
     } = cache;
+
     dataSource.push(
       createDataRow(id, name, lon, lat, username, description, created_on)
     );
