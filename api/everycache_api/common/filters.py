@@ -42,7 +42,7 @@ def apply_query_filters(query: Query, schema: Schema) -> Query:
             continue
 
         if isinstance(schema_field, Function):
-            # skip functio fields; impossible to filter in database query
+            # skip function fields; impossible to filter in database query
             continue
 
         db_model_field = getattr(schema.Meta.model, field_name)
