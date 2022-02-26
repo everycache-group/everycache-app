@@ -23,7 +23,6 @@ function EditCachePopup({ OnActionClose }) {
   }, [trigger]);
 
   const OnFormSubmitHandler = (formData) => {
-    console.log(selectedCache.id);
     const updateCacheDto = {
       id: selectedCache.id,
       description: formData.description,
