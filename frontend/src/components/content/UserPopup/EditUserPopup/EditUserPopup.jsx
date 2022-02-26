@@ -5,6 +5,7 @@ import { updateUser } from "./../../../../redux/slices/userSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { selector } from "react-redux";
 import { useSnackbar } from "notistack";
+import { alertGenericErrors, alertFormErrors } from "../../../../services/errorMessagesService"
 
 function EditUserPopup({ OnActionClose }) {
   const [trigger, setTrigger] = useState(true);
@@ -25,7 +26,7 @@ function EditUserPopup({ OnActionClose }) {
 
 
 
-  const OnFormSubmitHandler = (formData) => {
+  const OnFormSubmitHandler = (formData, setErrors) => {
     let updateUserDto = {
       id: selectedUser.id,
       username: formData.username,
@@ -48,15 +49,12 @@ function EditUserPopup({ OnActionClose }) {
       snackBar.enqueueSnackbar("User Updated Succesfully!", {
         variant: "success",
       });
-    }).catch(({ payload }) => {
-
-      snackBar.enqueueSnackbar(payload, {
-        variant: "error",
-      });
+      OnActionClose();
+      setTrigger(false);
+    }).catch((payload) => {
+      alertFormErrors(payload, setErrors);
+      alertGenericErrors(payload, snackBar);
     });
-
-    setTrigger(false);
-    OnActionClose();
   };
 
   return (

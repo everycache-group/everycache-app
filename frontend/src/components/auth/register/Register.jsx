@@ -6,13 +6,16 @@ import useForm from "../../../hooks/useForm";
 import { createUser } from "./../../../redux/slices/userSlice";
 import { useDispatch } from "react-redux";
 import { create } from "../../../api/api-core";
+import { alertGenericErrors, prepareErrors, alertFormErrors } from "../../../services/errorMessagesService"
+import { useSnackbar } from "notistack";
 
 function Register() {
   const [registering, setRegistering] = useState(false);
 
   const dispatch = useDispatch();
+  const snackBar = useSnackbar();
 
-  const { handleFormSubmit, handleUserInput, formValues, errors } = useForm(
+  const { handleFormSubmit, handleUserInput, formValues, errors, setErrors } = useForm(
     {
       username: "",
       email: "",
@@ -22,13 +25,24 @@ function Register() {
     () => {
       const { username, email, password } = formValues;
 
-      dispatch(
-        createUser({
-          username,
-          email,
-          password,
-        })
-      );
+      if(formValues.password !== formValues.password2) {
+        setErrors({password2: ["Passwords should match!"]});
+      }
+      else{
+        dispatch( createUser({
+            username,
+            email,
+            password,
+          })
+        )
+        .unwrap()
+        .then(()=>{})
+        .catch((payload) => {
+            alertFormErrors(payload, setErrors);
+            alertGenericErrors(payload, snackBar);
+        });
+      }
+
     }
   );
 
@@ -39,7 +53,7 @@ function Register() {
           size="small"
           id="username"
           error={!!errors.username}
-          helperText={errors.username}
+          helperText={prepareErrors(errors.username)}
           onChange={handleUserInput}
           type="username"
           name="username"
@@ -49,7 +63,7 @@ function Register() {
           size="small"
           id="email"
           error={!!errors.email}
-          helperText={errors.email}
+          helperText={prepareErrors(errors.email)}
           onChange={handleUserInput}
           type="email"
           name="email"
@@ -59,7 +73,7 @@ function Register() {
           size="small"
           id="password"
           error={!!errors.password}
-          helperText={errors.password}
+          helperText={prepareErrors(errors.password)}
           onChange={handleUserInput}
           type="password"
           name="password"
@@ -69,7 +83,7 @@ function Register() {
           size="small"
           id="password2"
           error={!!errors.password2}
-          helperText={errors.password2}
+          helperText={prepareErrors(errors.password2)}
           onChange={handleUserInput}
           type="password"
           name="password2"

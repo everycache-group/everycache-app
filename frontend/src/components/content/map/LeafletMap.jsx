@@ -15,8 +15,8 @@ const LeafletMap = (props) => {
   //jump to selected cache on map
   useEffect(() => {
     if (map) {
-      const { lat, lng } = selectedCache;
-      map.flyTo({ lat, lng });
+      const { lat, lon } = selectedCache;
+      map.flyTo({ lat, lon });
     }
   }, [selectedCache]);
 

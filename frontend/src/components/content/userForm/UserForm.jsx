@@ -5,11 +5,13 @@ import useForm from "./../../../hooks/useForm";
 import Box from '@mui/material/Box';
 import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
+import FormHelperText from '@mui/material/FormHelperText';
 import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import LoadingButton from "@mui/lab/LoadingButton";
 import SendIcon from "@mui/icons-material/Send";
+import {prepareErrors} from "../../../services/errorMessagesService"
 
 function UserForm({ User, OnFormSubmit, ButtonName }) {
   const { username, role, email, verified } = User;
@@ -23,6 +25,7 @@ function UserForm({ User, OnFormSubmit, ButtonName }) {
     formValues,
     errors,
     setFormValues,
+    setErrors
   } = useForm(
     {
       username,
@@ -32,10 +35,11 @@ function UserForm({ User, OnFormSubmit, ButtonName }) {
     },
     () => {
       if (OnFormSubmit instanceof Function) {
-        OnFormSubmit(formValues);
+        OnFormSubmit(formValues, setErrors);
       }
     }
   );
+
 
   return <Style.UserFormWrapper>
             <Style.UserTextField
@@ -44,7 +48,7 @@ function UserForm({ User, OnFormSubmit, ButtonName }) {
               onChange={handleUserInput}
               name="username"
               error={!!errors.username}
-              helperText={errors.username}
+              helperText={prepareErrors(errors.username)}
               placeholder="Enter Username Here..."
               value={formValues.username}
             />
@@ -54,7 +58,7 @@ function UserForm({ User, OnFormSubmit, ButtonName }) {
               onChange={handleUserInput}
               name="email"
               error={!!errors.email}
-              helperText={errors.email}
+              helperText={prepareErrors(errors.email)}
               placeholder="Enter email Here..."
               value={formValues.email}
               disabled={currentUserRole != "Admin"}
@@ -67,7 +71,7 @@ function UserForm({ User, OnFormSubmit, ButtonName }) {
               name="password"
               type="password"
               error={!!errors.password}
-              helperText={errors.password}
+              helperText={prepareErrors(errors.password)}
               placeholder="Enter password Here..."
             />
 

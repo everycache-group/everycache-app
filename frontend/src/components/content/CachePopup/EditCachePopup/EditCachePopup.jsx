@@ -5,6 +5,7 @@ import { updateCache } from "./../../../../redux/slices/cacheSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { selector } from "react-redux";
 import { useSnackbar } from "notistack";
+import { alertGenericErrors, alertFormErrors } from "../../../../services/errorMessagesService"
 
 function EditCachePopup({ OnActionClose }) {
   const [trigger, setTrigger] = useState(true);
@@ -22,24 +23,29 @@ function EditCachePopup({ OnActionClose }) {
     }
   }, [trigger]);
 
-  const OnFormSubmitHandler = (formData) => {
+  const OnFormSubmitHandler = (formData, setErrors) => {
     console.log(selectedCache.id);
     const updateCacheDto = {
       id: selectedCache.id,
       description: formData.description,
       lat: formData.lat,
-      lon: formData.lng,
+      lon: formData.lon,
       name: formData.name,
     };
 
-    dispatch(updateCache(updateCacheDto)).then(({ meta }) => {
-      console.log(meta.requestStatus);
-      snackBar.enqueueSnackbar("Cache Updated Succesfully!,", {
-        variant: "info",
+    dispatch(updateCache(updateCacheDto))
+      .unwrap()
+      .then(() => {
+        snackBar.enqueueSnackbar("Cache Updated Succesfully!,", {
+          variant: "info",
+        });
+        setTrigger(false);
+        OnActionClose();
+      })
+      .catch((payload) => {
+        alertFormErrors(payload, setErrors);
+        alertGenericErrors(payload, snackBar);
       });
-      setTrigger(false);
-      OnActionClose();
-    });
   };
 
   return (

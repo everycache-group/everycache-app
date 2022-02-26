@@ -6,6 +6,7 @@ import * as Style from "./style";
 import { useDispatch, useSelector } from "react-redux";
 import { deleteUser } from "./../../../../redux/slices/userSlice";
 import { useSnackbar } from "notistack";
+import { alertGenericErrors } from "../../../../services/errorMessagesService"
 
 function DeleteUserPopup({ OnActionClose }) {
   const [trigger, setTrigger] = useState(true);
@@ -24,17 +25,15 @@ function DeleteUserPopup({ OnActionClose }) {
 
   const OnDeleteHandler = (e) => {
     dispatch(deleteUser(selectedUser.id))
+      .unwrap()
       .then(() => {
         snackBar.enqueueSnackbar("User Deleted Succesfully!", {
           variant: "success",
         });
         setTrigger(false);
         OnActionClose();
-      })
-      .catch((error) => {
-        snackBar.enqueueSnackbar("User couldn't be deleted. Try Again.,", {
-          variant: "error",
-        });
+      }).catch((payload) => {
+        alertGenericErrors(payload, snackBar);
       });
   };
 

@@ -4,6 +4,7 @@ import CacheForm from "../../cacheForm/CacheForm";
 import { createCache } from "./../../../../redux/slices/cacheSlice";
 import { useDispatch } from "react-redux";
 import { useSnackbar } from "notistack";
+import { alertFormErrors, alertGenericErrors } from "../../../../services/errorMessagesService"
 
 function AddCachePopup({ OnActionClose }) {
   const dispatch = useDispatch();
@@ -18,22 +19,27 @@ function AddCachePopup({ OnActionClose }) {
     }
   }, [trigger]);
 
-  const OnFormSubmitHandler = (formData) => {
+  const OnFormSubmitHandler = (formData, setErrors) => {
     const createCacheDto = {
       description: formData.description,
       lat: formData.lat,
-      lon: formData.lng,
+      lon: formData.lon,
       name: formData.name,
     };
 
-    dispatch(createCache(createCacheDto)).then(({ meta }) => {
-      console.log(meta.requestStatus);
-      snackBar.enqueueSnackbar("Cache Added Succesfully!,", {
-        variant: "success",
+    dispatch(createCache(createCacheDto))
+      .unwrap()
+      .then(() => {
+        snackBar.enqueueSnackbar("Cache Added Succesfully!,", {
+          variant: "success",
+        });
+        setTrigger(false);
+        OnActionClose();
+      })
+      .catch((payload) => {
+        alertFormErrors(payload, setErrors);
+        alertGenericErrors(payload, snackBar);
       });
-      setTrigger(false);
-      OnActionClose();
-    });
   };
 
   return (
@@ -42,7 +48,7 @@ function AddCachePopup({ OnActionClose }) {
         Cache={{
           name: "",
           lat: 0,
-          lng: 0,
+          lon: 0,
           description: "",
         }}
         OnFormSubmit={OnFormSubmitHandler}

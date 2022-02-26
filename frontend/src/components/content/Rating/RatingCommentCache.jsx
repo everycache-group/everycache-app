@@ -25,8 +25,8 @@ const labels = {
 };
 
 function RatingCommentCache({ ButtonName }) {
-  const { name, lng, lat, description } = Cache;
-  const [showMarker, setShowMarker] = useState(!!(lng && lat));
+  const { name, lon, lat, description } = Cache;
+  const [showMarker, setShowMarker] = useState(!!(lon && lat));
 
   const [value, setValue] = useState(2);
   const [hover, setHover] = useState(-1);
@@ -92,7 +92,7 @@ function RatingCommentCache({ ButtonName }) {
               draggable={true}
               eventHandlers={{
                 dragend: (e) => {
-                  const position = e.target.getLatLng();
+                  const position = e.target.getLatLon();
                 },
               }}
             />
