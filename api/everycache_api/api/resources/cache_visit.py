@@ -18,7 +18,7 @@ class CacheVisitResource(Resource):
         - in: path
           name: cache_visit_id
           schema:
-            type: integer
+            type: string
       responses:
         200:
           content:
@@ -37,7 +37,7 @@ class CacheVisitResource(Resource):
         - in: path
           name: cache_visit_id
           schema:
-            type: integer
+            type: string
       requestBody:
         content:
           application/json:
@@ -63,7 +63,7 @@ class CacheVisitResource(Resource):
         - in: path
           name: cache_visit_id
           schema:
-            type: integer
+            type: string
       responses:
         200:
           content:
@@ -124,7 +124,7 @@ class CacheVisitResource(Resource):
             abort(403)
 
         # delete visit
-        db.session.delete(visit)
+        visit.deleted = True
         db.session.commit()
 
         return {"message": "cache visit deleted"}, 200

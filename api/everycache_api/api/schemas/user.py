@@ -1,3 +1,4 @@
+from collections import Counter
 from string import ascii_letters, digits
 
 from marshmallow import validate, validates
@@ -19,17 +20,24 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
 
     @validates("username")
     def validate_username(self, value):
-        def _validate_username_three_letters(value):
-            if sum((value.count(let) for let in ascii_letters if let in value)) < 3:
+        def validate_first_letter(value):
+            if value[0] not in ascii_letters:
+                raise ValidationError("Must begin with a letter.")
+
+        def validate_three_letters(value):
+            counter = Counter(value)
+
+            if sum(counter.get(s, 0) for s in ascii_letters) < 3:
                 raise ValidationError("Must contain at least three letters.")
 
         return validate.And(
+            validate_first_letter,
             validate.ContainsOnly(
                 ascii_letters + "_" + digits,
                 error="Must consist only of letters, digits and '_'.",
             ),
             validate.Length(5, 255),
-            _validate_username_three_letters,
+            validate_three_letters,
         )(value)
 
     @validates("email")

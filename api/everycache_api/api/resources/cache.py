@@ -124,6 +124,7 @@ class CacheResource(Resource):
             abort(403)
 
         schema = CacheSchema()
+        schema.context = {"current_user": current_user}
 
         # update and return cache details
         cache = schema.load(request.json, instance=cache)
@@ -229,6 +230,7 @@ class CacheListResource(Resource):
         # creating a new cache
 
         schema = CacheSchema()
+        schema.context = {"current_user": current_user}
         cache = schema.load(request.json)
 
         # append current_user as owner to newly created cache

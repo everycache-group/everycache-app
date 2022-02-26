@@ -1,10 +1,13 @@
 from datetime import datetime
 
-from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.sql.expression import cast, func
+from sqlalchemy.types import Float
+from sqlalchemy_utils.aggregates import aggregated
 
 from everycache_api.extensions import db
 
 from .base import BaseMixin
+from .cache_visit import CacheVisit
 
 
 class Cache(BaseMixin, db.Model):
@@ -17,14 +20,9 @@ class Cache(BaseMixin, db.Model):
     lon = db.Column(db.Numeric(scale=4, asdecimal=True), nullable=False)
     lat = db.Column(db.Numeric(scale=4, asdecimal=True), nullable=False)
 
-    @hybrid_property  # read-only
+    @aggregated("visits", db.Column(db.Float))
     def rating(self):
-        visits = list(filter(lambda visit: visit.rating is not None, self.visits))
-
-        if not visits:
-            return 0.0
-
-        return sum(map(lambda visit: visit.rating, visits)) / len(visits)
+        return cast(func.sum(CacheVisit.rating), Float) / func.count(CacheVisit.id_)
 
     # foreign keys
     owner_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
