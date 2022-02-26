@@ -1,32 +1,10 @@
-import datetime
 import operator
 from functools import partial
 
 from flask import request
 from marshmallow import Schema
 from marshmallow.exceptions import ValidationError
-from marshmallow.fields import Boolean, DateTime, Field, Float, Integer
-from marshmallow_enum import EnumField
 from sqlalchemy.orm import Query
-
-
-def _parse_value(value: str, schema_field_cls: Field):
-    if schema_field_cls == Boolean:
-        value = value.lower() in ("1", "true")
-    elif schema_field_cls == Integer:
-        try:
-            value = int(value)
-        except ValueError:
-            return None
-    elif schema_field_cls == Float:
-        try:
-            value = float(value)
-        except ValueError:
-            return None
-    elif schema_field_cls == DateTime:
-        value = datetime.strptime(value, r"%d-%m-%y")
-
-    return value
 
 
 def _like_operator_helper(model_field, value: str, like: bool = True):
@@ -77,16 +55,9 @@ def apply_query_filters(query: Query, schema: Schema) -> Query:
             if not operation:
                 continue
 
-            if isinstance(schema_field, EnumField):
-                # map api field value to database model value
-                try:
-                    value = schema_field.deserialize(value)
-                except ValidationError:
-                    continue
-
-            value = _parse_value(value, type(schema_field))
-
-            if value is None:
+            try:
+                schema_field.deserialize(value)
+            except ValidationError:
                 continue
 
             query = query.filter(operation(db_model_field, value))
