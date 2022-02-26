@@ -1,4 +1,4 @@
-from flask import Blueprint, current_app, request
+from flask import Blueprint, abort, current_app, request
 from flask_jwt_extended import current_user, get_jwt, jwt_required
 
 from everycache_api.auth.helpers import (
@@ -55,17 +55,17 @@ def login():
       security: []
     """
     if not request.is_json:
-        return {"msg": "Missing JSON payload in request"}, 400
+        abort(400, "Missing JSON payload in request.")
 
     email = request.json.get("email", None)
     password = request.json.get("password", None)
 
     if email is None or password is None:
-        return {"msg": "Missing e-mail address or password"}, 400
+        abort(400, "Missing email address or password.")
 
     user = User.query.filter_by(email=email).first()
     if user is None or not user.verify_password(password):
-        return {"msg": "Incorrect email and password combination"}, 400
+        abort(400, "Incorrect email and password combination.")
 
     access_token = create_user_access_token(user)
     refresh_token = create_user_refresh_token(user)
@@ -106,7 +106,7 @@ def refresh():
           description: unauthorized
     """
     if not current_user:
-        return {"msg": "User in refresh token does not exist"}, 401
+        abort(401, "Invalid or expired refresh token.")
 
     access_token = create_user_access_token(current_user)
     save_encoded_token(access_token)
@@ -132,7 +132,7 @@ def revoke_access_token():
                 properties:
                   message:
                     type: string
-                    example: token revoked
+                    example: Access token revoked.
         400:
           description: bad request
         401:
@@ -140,7 +140,7 @@ def revoke_access_token():
     """
     revoke_token(get_jwt())
 
-    return {"message": "token revoked"}, 200
+    return {"message": "Access token revoked."}, 200
 
 
 @blueprint.route("/revoke_refresh", methods=["DELETE"])
@@ -161,7 +161,7 @@ def revoke_refresh_token():
                 properties:
                   message:
                     type: string
-                    example: token revoked
+                    example: Refresh token revoked.
         400:
           description: bad request
         401:
@@ -169,7 +169,7 @@ def revoke_refresh_token():
     """
     revoke_token(get_jwt())
 
-    return {"message": "token revoked"}, 200
+    return {"message": "Refresh token revoked."}, 200
 
 
 @blueprint.route("/revoke_all", methods=["DELETE"])
@@ -190,7 +190,7 @@ def revoke_all_tokens():
                 properties:
                   message:
                     type: string
-                    example: all tokens revoked
+                    example: All user tokens revoked.
         400:
           description: bad request
         401:
@@ -198,7 +198,7 @@ def revoke_all_tokens():
     """
     revoke_all_user_tokens(current_user)
 
-    return {"message": "all tokens revoked"}, 200
+    return {"message": "All user tokens revoked."}, 200
 
 
 @jwt.user_lookup_loader

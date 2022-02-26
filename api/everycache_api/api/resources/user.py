@@ -1,4 +1,4 @@
-from flask import abort, request
+from flask import abort, jsonify, request
 from flask_jwt_extended import current_user, jwt_required
 from flask_restful import Resource
 
@@ -6,8 +6,8 @@ from everycache_api.api.schemas import (
     CacheCommentSchema,
     CacheSchema,
     CacheVisitSchema,
-    PublicCacheSchema,
-    PublicUserSchema,
+    UserAdminSchema,
+    UserPublicSchema,
     UserSchema,
 )
 from everycache_api.auth.helpers import revoke_all_user_tokens
@@ -38,7 +38,7 @@ class UserResource(Resource):
                   user:
                     oneOf:
                       - UserSchema
-                      - PublicUserSchema
+                      - UserPublicSchema
         404:
           description: user not found
       security: []
@@ -64,9 +64,9 @@ class UserResource(Resource):
                 properties:
                   message:
                     type: string
-                    example: user updated
+                    example: User updated.
                   user:
-                    UserSchema
+                    UserUpdateSchema
         403:
           description: forbidden
         404:
@@ -88,7 +88,7 @@ class UserResource(Resource):
                 properties:
                   message:
                     type: string
-                    example: user deleted
+                    example: User deleted.
         403:
           description: forbidden
         404:
@@ -114,7 +114,7 @@ class UserResource(Resource):
             schema = UserSchema()
         else:
             # user is not logged in or is querying other user's account info
-            schema = PublicUserSchema()
+            schema = UserPublicSchema()
 
         # return user details
         return {"user": schema.dump(user)}, 200
@@ -122,24 +122,37 @@ class UserResource(Resource):
     def put(self, user_id: str):
         # ensure current_user is authorized
         if current_user.ext_id != user_id and current_user.role != User.Role.Admin:
-            abort(403)
+            abort(403, "Unauthorized to modify other users.")
 
         # find user
         user = User.query_ext_id(user_id).filter_by(deleted=False).first_or_404()
 
-        schema = UserSchema()
+        if current_user.role == User.Role.Admin:
+            # admin changing other user's data
+            schema = UserAdminSchema(partial=True)
+        else:
+            # user changing own data; ensure current password is correct
+            current_password = request.json.pop("current_password", False)
 
-        # update and return user details
+            if not current_password:
+                abort(400, "Current password is required for updating user data.")
+
+            if not user.verify_password(current_password):
+                abort(403, "Current password is incorrect.")
+
+            schema = UserSchema(partial=True)
+
+        # update and return user data
         user = schema.load(request.json, instance=user)
 
         db.session.commit()
 
-        return {"message": "user updated", "user": schema.dump(user)}, 200
+        return {"message": "User updated.", "user": schema.dump(user)}, 200
 
     def delete(self, user_id: str):
         # ensure current_user is authorized
         if current_user.ext_id != user_id and current_user.role != User.Role.Admin:
-            abort(403)
+            abort(403, "Unauthorized to delete other users.")
 
         # find user
         user = User.query_ext_id(user_id).filter_by(deleted=False).first_or_404()
@@ -151,7 +164,7 @@ class UserResource(Resource):
         # revoke any tokens for deleted user
         revoke_all_user_tokens(user)
 
-        return {"message": "user deleted"}, 200
+        return {"message": "User deleted."}, 200
 
 
 class UserListResource(Resource):
@@ -188,8 +201,8 @@ class UserListResource(Resource):
                         type: array
                         items:
                           oneOf:
+                            - $ref: '#/components/schemas/UserPublicSchema'
                             - $ref: '#/components/schemas/UserSchema'
-                            - $ref: '#/components/schemas/PublicUserSchema'
     post:
       tags:
         - api
@@ -207,11 +220,11 @@ class UserListResource(Resource):
                 properties:
                   message:
                     type: string
-                    example: user created
+                    example: User created.
                   user:
                     UserSchema
         400:
-          description: username or email is already taken
+          description: bad request
         403:
           description: user already logged in
       security: []
@@ -231,28 +244,41 @@ class UserListResource(Resource):
         else:
             # user is not logged in or not an admin
             query = query.filter_by(verified=True)
-            schema = PublicUserSchema(many=True)
+            schema = UserPublicSchema(many=True)
 
         return paginate(query, schema), 200
 
     def post(self):
         # creating a new account
-        if current_user and current_user.role != User.Role.Admin:
-            return {"message": "user already logged in"}, 403
+        schema = None
 
-        schema = UserSchema()
+        if current_user:
+            if current_user.role == User.Role.Admin:
+                schema = UserAdminSchema()
+            else:
+                abort(403, "User already logged in.")
+        else:
+            schema = UserSchema()
+
         user = schema.load(request.json)
 
+        errors = {}
+
         if User.query.filter_by(email=user.email).first():
-            return {"message": "email is already taken"}, 400
+            errors["email"] = ["Email is already taken."]
 
         if User.query.filter_by(username=user.username).first():
-            return {"message": "username is already taken"}, 400
+            errors["username"] = ["Username is already taken."]
+
+        if errors:
+            response = jsonify(errors=errors)
+            response.status_code = 400
+            abort(response)
 
         db.session.add(user)
         db.session.commit()
 
-        return {"message": "user created", "user": schema.dump(user)}, 201
+        return {"message": "User created.", "user": schema.dump(user)}, 201
 
 
 class UserCacheListResource(Resource):
@@ -294,7 +320,7 @@ class UserCacheListResource(Resource):
                         items:
                           oneOf:
                             - $ref: '#/components/schemas/CacheSchema'
-                            - $ref: '#/components/schemas/PublicCacheSchema'
+                            - $ref: '#/components/schemas/CachePublicSchema'
         404:
           description: user not found
       security: []
@@ -311,14 +337,16 @@ class UserCacheListResource(Resource):
         # decide which schema to use
         query = Cache.query.filter_by(owner=user, deleted=False)
         schema = None
-        if current_user and (
-            current_user == user or current_user.role == User.Role.Admin
-        ):
-            # owner or admin
-            schema = CacheSchema(many=True)
+        if current_user:
+            # logged in user
+            if current_user == user:
+                schema = CacheSchema(many=True, exclude=["visited"])
+            else:
+                schema = CacheSchema(many=True)
+                schema.context = {"current_user": current_user}
         else:
-            # default user
-            schema = PublicCacheSchema(many=True)
+            # guest user
+            schema = UserPublicSchema(many=True)
 
         return paginate(query, schema), 200
 
