@@ -1,6 +1,7 @@
-from flask import abort, jsonify, request
+from flask import abort, request
 from flask_jwt_extended import current_user, jwt_required
 from flask_restful import Resource
+from marshmallow import ValidationError
 
 from everycache_api.api.schemas import (
     CacheCommentSchema,
@@ -142,6 +143,28 @@ class UserResource(Resource):
 
             schema = UserSchema(partial=True)
 
+        # ensure new email and/or new username are not already taken
+        email = request.json.get("email")
+        username = request.json.get("username")
+        errors = {}
+
+        if (
+            email
+            and User.query.filter(User.email == email, User != current_user).first()
+        ):
+            errors["email"] = ["Email is already taken."]
+
+        if (
+            username
+            and User.query.filter(
+                User.username == username, User != current_user
+            ).first()
+        ):
+            errors["username"] = ["Username is already taken."]
+
+        if errors:
+            raise ValidationError(errors)
+
         # update and return user data
         user = schema.load(request.json, instance=user)
 
@@ -271,9 +294,7 @@ class UserListResource(Resource):
             errors["username"] = ["Username is already taken."]
 
         if errors:
-            response = jsonify(errors=errors)
-            response.status_code = 400
-            abort(response)
+            raise ValidationError(errors)
 
         db.session.add(user)
         db.session.commit()
