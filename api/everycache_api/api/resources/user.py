@@ -132,16 +132,15 @@ class UserResource(Resource):
 
         # update and return user details
         edited_user = schema.load(request.json, partial=True)
-        db.session.rollback()
 
-        email_user = User.query.filter_by(email=edited_user.email).first()
-        username_user = User.query.filter_by(username=edited_user.username).first()
+        email_user = User.query.filter(User.email==edited_user.email, User.id_ != user.id_).first()
+        username_user = User.query.filter(User.username==edited_user.username, User.id_ != user.id_).first()
 
-        if email_user and email_user.id_ != user.id_:
-            return {"message": "email is already taken"}, 400
+        if email_user:
+            return {"message": "Given email is already taken."}, 400
 
-        if username_user and username_user.id_ != user.id_:
-            return {"message": "username is already taken"}, 400
+        if username_user:
+            return {"message": "Given username is already taken."}, 400
 
         edited_user = schema.load(request.json, instance=user, partial=True)
         if current_user.role != User.Role.Admin:
