@@ -1,5 +1,4 @@
 from collections import Counter
-from itertools import takewhile
 from string import ascii_letters, digits
 
 from marshmallow import validate, validates
