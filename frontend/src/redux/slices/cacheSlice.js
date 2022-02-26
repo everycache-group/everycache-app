@@ -131,8 +131,6 @@ export const deleteCache = createAsyncThunk(
   async (id, { rejectWithValue }) => {
     try {
       const response = await cache.remove(id);
-
-    if (response.status == 200){
       return Promise.resolve(id);
     } catch (e) {
       return rejectWithValue(prepareErrorPayload(e, "Could not delete cache!"))
