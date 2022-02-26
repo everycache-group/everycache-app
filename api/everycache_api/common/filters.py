@@ -4,6 +4,7 @@ from functools import partial
 from flask import request
 from marshmallow import Schema
 from marshmallow.exceptions import ValidationError
+from marshmallow.fields import Function
 from sqlalchemy.orm import Query
 
 
@@ -38,6 +39,10 @@ def apply_query_filters(query: Query, schema: Schema) -> Query:
 
         if schema_field.data_key or schema_field.attribute:
             # skip fields with different name in database model, eg. id/ext_id
+            continue
+
+        if isinstance(schema_field, Function):
+            # skip functio fields; impossible to filter in database query
             continue
 
         db_model_field = getattr(schema.Meta.model, field_name)
