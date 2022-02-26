@@ -27,7 +27,7 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
         def validate_three_letters(value):
             counter = Counter(value)
 
-            if sum(counter.get(s) for s in ascii_letters) < 3:
+            if sum(counter.get(s, 0) for s in ascii_letters) < 3:
                 raise ValidationError("Must contain at least three letters.")
 
         return validate.And(
