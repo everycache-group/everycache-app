@@ -81,6 +81,7 @@ function Register() {
           loading={registering}
           variant="contained"
           color="success"
+          type="submit"
         >
           Register
         </LoadingButton>

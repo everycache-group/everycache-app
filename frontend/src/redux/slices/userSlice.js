@@ -103,19 +103,16 @@ export const getUser = createAsyncThunk(
 
 export const updateUser = createAsyncThunk(
   "user/update",
-  async (userData, {
-    dispatch
-  }) => {
+  async (userData, {rejectWithValue}) => {
     const {id, ...data} = userData;
-    const response = await user.update(id, data);
-
-    const {data: outData} = response;
-
-    if (response.status !== 200) {
-      return Promise.reject();
+    try{
+      const response = await user.update(id, data);
+      const {data: outData} = response;
+      return Promise.resolve(outData.user);
     }
-
-    return Promise.resolve(outData.user);
+    catch(e) {
+      return rejectWithValue({"payload": e.response?.data?.msg ?? "Could not update user due to an error!"});
+    }
   }
 );
 

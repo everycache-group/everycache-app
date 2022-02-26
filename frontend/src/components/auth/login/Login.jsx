@@ -25,7 +25,6 @@ function Login() {
         .unwrap()
         .then((result) => {
           const {userId} = result;
-          console.log(result, userId);
           dispatch(getUser(userId));
         })
         .catch((rejectedResult) => {
@@ -64,6 +63,7 @@ function Login() {
         loading={registering}
         variant="contained"
         color="success"
+        type="submit"
       >
         Log in
       </LoadingButton>

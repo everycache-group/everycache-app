@@ -109,6 +109,7 @@ function UserForm({ User, OnFormSubmit, ButtonName }) {
               loading={loading}
               variant="contained"
               color="success"
+              type="submit"
             >
               {ButtonName}
             </LoadingButton>

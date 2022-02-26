@@ -3,7 +3,7 @@ import TextField from '@mui/material/TextField';
 import FormControl from '@mui/material/FormControl';
 
 
-export const UserFormWrapper = styled.div`
+export const UserFormWrapper = styled.form`
   border: 1px solid #ccc;
   height: 350px;
   padding: 16px;

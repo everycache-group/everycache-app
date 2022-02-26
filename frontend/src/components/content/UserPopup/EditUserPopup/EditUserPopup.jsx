@@ -44,22 +44,19 @@ function EditUserPopup({ OnActionClose }) {
       updateUserDto["password"] = formData.password;
     }
 
-    dispatch(updateUser(updateUserDto)).then(({ meta }) => {
-      const {requestStatus} = meta;
-      console.log(meta);
-      if (requestStatus == "fulfilled"){
-        snackBar.enqueueSnackbar("User Updated Succesfully!", {
-          variant: "success",
-        });
-      }
-      else {
-        snackBar.enqueueSnackbar("User Update has Failed!", {
-          variant: "error",
-        });
-      }
-      setTrigger(false);
-      OnActionClose();
+    dispatch(updateUser(updateUserDto)).unwrap().then((result) => {
+      snackBar.enqueueSnackbar("User Updated Succesfully!", {
+        variant: "success",
+      });
+    }).catch(({ payload }) => {
+
+      snackBar.enqueueSnackbar(payload, {
+        variant: "error",
+      });
     });
+
+    setTrigger(false);
+    OnActionClose();
   };
 
   return (
