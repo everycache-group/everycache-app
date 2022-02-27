@@ -5,6 +5,7 @@ import { PrepareDataSourceTable } from "../../services/dataSourceMapperService";
 import { createDataRow } from "../../services/dataSourceMapperService";
 import { axiosInstance } from "../../api/api-connector";
 import {prepareErrorPayload} from "../../services/errorMessagesService"
+import { getComments } from "./commentSlice"
 
 const cache = new ResourceConnector(config.resources.cache);
 

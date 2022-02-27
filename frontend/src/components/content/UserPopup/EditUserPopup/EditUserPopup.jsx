@@ -12,6 +12,7 @@ function EditUserPopup({ OnActionClose }) {
 
   const selectedUser = useSelector((state) => state.user.selectedUser);
   const currentUserRole = useSelector((state) => state.user.role)
+  const currentUserId = useSelector((state) => state.user.id)
 
   const snackBar = useSnackbar();
   const dispatch = useDispatch();
@@ -32,6 +33,10 @@ function EditUserPopup({ OnActionClose }) {
       username: formData.username,
       email: formData.email,
     };
+
+    if (formData.current_password) {
+      updateUserDto["current_password"] = formData.current_password
+    }
 
     if (currentUserRole == "Admin"){
       updateUserDto = {
