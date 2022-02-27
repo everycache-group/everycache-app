@@ -1,81 +1,70 @@
-from datetime import datetime
+import operator
+from functools import partial
 
 from flask import request
-from functools import partial
-from marshmallow import fields
-import operator
+from marshmallow import Schema
+from marshmallow.exceptions import ValidationError
+from marshmallow.fields import Function
+from sqlalchemy.orm import Query
 
 
-def _parse_value(value, schema_field_type):
-    if schema_field_type == fields.Boolean:
-        value = value.lower() in ("1", "true")
-    elif schema_field_type == fields.Integer:
-        try:
-            value = int(value)
-        except ValueError:
-            return None
-    elif schema_field_type == fields.Float:
-        try:
-            value = float(value)
-        except ValueError:
-            return None
-    elif schema_field_type == fields.DateTime:
-        try:
-            value = datetime.strptime(value, "%d-%m-%Y")
-        except ValueError:
-            return None
-
-    return value
+def _like_operator_helper(model_field, value: str, like: bool = True):
+    return (model_field.like if like else model_field.notlike)(f"%{value}%")
 
 
-def _like_helper(model_field, value, like=True):
-    if like:
-        return model_field.like(f"%{value}%")
-    return model_field.notlike(f"%{value}%")
-
-
-def _filter_query(query, operation_code, model_field, value):
+def apply_query_filters(query: Query, schema: Schema) -> Query:
     operations = {
-        None: operator.eq,
+        "": operator.eq,
         "lte": operator.le,
         "lt": operator.lt,
         "gte": operator.ge,
         "gt": operator.gt,
         "not": operator.ne,
-        "like": _like_helper,
-        "not-like": partial(_like_helper, like=False),
+        "like": _like_operator_helper,
+        "not-like": partial(_like_operator_helper, like=False),
     }
-    operation = operations.get(operation_code)
-    if operation:
-        query = query.filter(operation(model_field, value))
 
-    return query
-
-
-def _apply_filter(query, schema, field_name, filter_url_value):
-    split_result = filter_url_value.split(":")
-    try:
-        operation, value_string, *_ = split_result
-    except ValueError:
-        operation, value_string = None, next(iter(split_result))
-
-    schema_field_type = type(schema.fields[field_name])
-    value = _parse_value(value_string, schema_field_type)
-    if value is None:
-        return query
-
-    model_field = getattr(schema.Meta.model, field_name)
-    return _filter_query(query, operation, model_field, value)
-
-
-def apply_query_filters(query, schema):
     args = request.args.to_dict(flat=False)
 
-    for key, values_list in args.items():
-        if key not in schema.fields:
+    for field_name, filters in args.items():
+        if field_name not in schema.fields:
+            # skip incorrect/illegal fields
             continue
 
-        for value in values_list:
-            query = _apply_filter(query, schema, key, value)
+        schema_field = schema.fields[field_name]
+
+        if schema_field.load_only:
+            # skip load_only fields
+            continue
+
+        if schema_field.data_key or schema_field.attribute:
+            # skip fields with different name in database model, eg. id/ext_id
+            continue
+
+        if isinstance(schema_field, Function):
+            # skip function fields; impossible to filter in database query
+            continue
+
+        db_model_field = getattr(schema.Meta.model, field_name)
+
+        for filter_string in filters:
+            if ":" in filter_string:
+                # pattern: <field>=<operation>:<value>
+                operation_str, value = filter_string.split(":")
+            else:
+                # pattern: <field>=<value>
+                operation_str, value = "", filter_string
+
+            operation = operations.get(operation_str)
+
+            if not operation:
+                continue
+
+            try:
+                schema_field.deserialize(value)
+            except ValidationError:
+                continue
+
+            query = query.filter(operation(db_model_field, value))
 
     return query
