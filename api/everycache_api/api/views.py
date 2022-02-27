@@ -1,5 +1,6 @@
 from flask import Blueprint, current_app, jsonify
 from flask_restful import Api as BaseApi
+from marshmallow.exceptions import SCHEMA as SCHEMA_ERROR
 from marshmallow.exceptions import ValidationError
 
 from everycache_api.api.resources import (
@@ -107,4 +108,9 @@ def handle_marshmallow_error(e):
     correct JSON response with associated HTTP 400 Status
     (https://tools.ietf.org/html/rfc7231#section-6.5.1)
     """
-    return jsonify(errors=e.messages), 400
+    if SCHEMA_ERROR in e.messages:
+        # schema-level error; return as message in response
+        return jsonify(message=e.messages[SCHEMA_ERROR][0]), 400
+    else:
+        # field-level error(s); return as dict of lists of errors
+        return jsonify(errors=e.messages), 400
