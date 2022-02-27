@@ -19,9 +19,10 @@ class UserSchema(BaseSchema):
     email = ma.String(required=True, validate=validate.Email())
     password = ma.String(
         load_only=True,
-        validate=validate.ContainsNoneOf(
-            whitespace, error="Must not contain any whitespace"
-        ),
+        validate=[
+            validate.ContainsNoneOf(
+                whitespace, error="Must not contain any whitespace"),
+            validate.Length(8, 255)],
         required=True,
     )
     role = EnumField(User.Role, dump_only=True)

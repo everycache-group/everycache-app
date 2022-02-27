@@ -122,7 +122,7 @@ function CacheForm({ Cache, OnFormSubmit, ButtonName }) {
             draggable={true}
             eventHandlers={{
               dragend: (e) => {
-                const position = e.target.getLatLng();
+                const position = e.target.getLatLon();
                 setFormValues({
                   ...formValues,
                   lon: position.lon,

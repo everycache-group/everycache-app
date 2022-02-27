@@ -128,36 +128,40 @@ class UserResource(Resource):
         # find user
         user = User.query_ext_id(user_id).filter_by(deleted=False).first_or_404()
 
+        # update and return user details
+        errors = {}
+
+        if user == current_user:
+            # user changing own data; ensure current password is correct
+            current_password = request.json.pop("current_password", "")
+
+            if not len(current_password):
+                errors["current_password"] = ["Current password is required for updating user data."]
+
+            elif not user.verify_password(current_password):
+                errors["current_password"] = ["Current password is incorrect."]
+
+
         if current_user.role == User.Role.Admin:
             # admin changing other user's data
             schema = UserAdminSchema(partial=True)
         else:
-            # user changing own data; ensure current password is correct
-            current_password = request.json.pop("current_password", False)
-
-            if not current_password:
-                abort(400, "Current password is required for updating user data.")
-
-            if not user.verify_password(current_password):
-                abort(403, "Current password is incorrect.")
-
             schema = UserSchema(partial=True)
 
         # ensure new email and/or new username are not already taken
         email = request.json.get("email")
         username = request.json.get("username")
-        errors = {}
 
         if (
             email
-            and User.query.filter(User.email == email, User != current_user).first()
+            and User.query.filter(User.email == email, User.id_ != user.id_).first()
         ):
             errors["email"] = ["Email is already taken."]
 
         if (
             username
             and User.query.filter(
-                User.username == username, User != current_user
+                User.username == username, User.id_ != user.id_
             ).first()
         ):
             errors["username"] = ["Username is already taken."]

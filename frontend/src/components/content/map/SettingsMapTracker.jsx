@@ -14,7 +14,7 @@ function SettingsMapTracker(props) {
       setZoom(map.getZoom());
     },
     mouseup: (e) => {
-      const { lat, lon } = map.getCenter();
+      const { lat, lng: lon } = map.getCenter();
       setCenter([lat, lon]);
     },
   });

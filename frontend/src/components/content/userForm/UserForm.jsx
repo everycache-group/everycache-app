@@ -17,7 +17,9 @@ function UserForm({ User, OnFormSubmit, ButtonName }) {
   const { username, role, email, verified } = User;
   const [loading, setLoading] = useState(false);
 
+  const selectedUser = useSelector((state) => state.user.selectedUser);
   const currentUserRole = useSelector((state) => state.user.role);
+  const currentUserId = useSelector((state) => state.user.id);
 
   const {
     handleFormSubmit,
@@ -74,6 +76,17 @@ function UserForm({ User, OnFormSubmit, ButtonName }) {
               helperText={prepareErrors(errors.password)}
               placeholder="Enter password Here..."
             />
+
+            {currentUserId == selectedUser.id && <Style.UserTextField
+              id="current_password"
+              label="Current Password"
+              onChange={handleUserInput}
+              name="current_password"
+              type="password"
+              error={!!errors.current_password}
+              helperText={prepareErrors(errors.current_password)}
+              placeholder="Enter current password Here..."
+            />}
 
             {currentUserRole == "Admin" && (<Style.SelectWrapper>
               <Style.UserFormControl fullWidth>
