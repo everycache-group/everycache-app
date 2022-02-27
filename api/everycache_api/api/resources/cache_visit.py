@@ -18,7 +18,7 @@ class CacheVisitResource(Resource):
         - in: path
           name: cache_visit_id
           schema:
-            type: integer
+            type: string
       responses:
         200:
           content:
@@ -37,7 +37,7 @@ class CacheVisitResource(Resource):
         - in: path
           name: cache_visit_id
           schema:
-            type: integer
+            type: string
       requestBody:
         content:
           application/json:
@@ -50,10 +50,12 @@ class CacheVisitResource(Resource):
               schema:
                 type: object
                 properties:
-                  msg:
+                  message:
                     type: string
-                    example: cache visit updated
+                    example: Cache visit updated.
                   cache_visit: CacheVisitSchema
+        403:
+          description: forbidden
         404:
           description: cache visit not found
     delete:
@@ -63,7 +65,7 @@ class CacheVisitResource(Resource):
         - in: path
           name: cache_visit_id
           schema:
-            type: integer
+            type: string
       responses:
         200:
           content:
@@ -71,9 +73,11 @@ class CacheVisitResource(Resource):
               schema:
                 type: object
                 properties:
-                  msg:
+                  message:
                     type: string
-                    example: cache visit deleted
+                    example: Cache visit deleted.
+        403:
+          description: forbidden
         404:
           description: cache visit not found
     """
@@ -102,7 +106,7 @@ class CacheVisitResource(Resource):
 
         # ensure current_user is authorized
         if current_user != visit.user and current_user.role != User.Role.Admin:
-            abort(403)
+            abort(403, "Unauthorized to modify other users' cache visits.")
 
         schema = CacheVisitSchema()
 
@@ -110,7 +114,10 @@ class CacheVisitResource(Resource):
         visit = schema.load(request.json, instance=visit)
         db.session.commit()
 
-        return {"msg": "cache visit updated", "cache_visit": schema.dump(visit)}, 200
+        return {
+            "message": "Cache visit updated.",
+            "cache_visit": schema.dump(visit),
+        }, 200
 
     def delete(self, cache_visit_id: str):
         # find visit
@@ -118,10 +125,10 @@ class CacheVisitResource(Resource):
 
         # ensure current_user is authorized
         if current_user != visit.user and current_user.role != User.Role.Admin:
-            abort(403)
+            abort(403, "Unauthorized to delete other users' cache visits.")
 
         # delete visit
-        db.session.delete(visit)
+        visit.deleted = True
         db.session.commit()
 
-        return {"msg": "cache visit deleted"}, 200
+        return {"message": "Cache visit deleted."}, 200
