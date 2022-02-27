@@ -55,7 +55,7 @@ class UserResource(Resource):
         content:
           application/json:
             schema:
-              UserSchema
+              UserUpdateSchema
       responses:
         200:
           content:
@@ -126,51 +126,54 @@ class UserResource(Resource):
             abort(403, "Unauthorized to modify other users.")
 
         # find user
-        user = User.query_ext_id(user_id).filter_by(deleted=False).first_or_404()
+        user = User.query_ext_id(user_id).first_or_404()
 
-        if current_user.role == User.Role.Admin:
-            # admin changing other user's data
-            schema = UserAdminSchema(partial=True)
-        else:
+        errors = {}
+
+        if user == current_user:
             # user changing own data; ensure current password is correct
             current_password = request.json.pop("current_password", False)
 
             if not current_password:
-                abort(400, "Current password is required for updating user data.")
-
-            if not user.verify_password(current_password):
-                abort(403, "Current password is incorrect.")
-
-            schema = UserSchema(partial=True)
+                errors["current_password"] = [
+                    "Current password is required for updating user data."
+                ]
+            elif not user.verify_password(current_password):
+                errors["current_password"] = ["Current password is incorrect."]
 
         # ensure new email and/or new username are not already taken
-        email = request.json.get("email")
-        username = request.json.get("username")
-        errors = {}
+        new_email = request.json.get("email")
 
         if (
-            email
-            and User.query.filter(User.email == email, User != current_user).first()
+            new_email
+            and new_email != user.email
+            and User.query.filter_by(email=new_email).first()
         ):
             errors["email"] = ["Email is already taken."]
 
+        new_username = request.json.get("username")
         if (
-            username
-            and User.query.filter(
-                User.username == username, User != current_user
-            ).first()
+            new_username
+            and new_username != user.username
+            and User.query.filter_by(username=new_username).first()
         ):
             errors["username"] = ["Username is already taken."]
 
         if errors:
             raise ValidationError(errors)
 
+        if current_user.role == User.Role.Admin:
+            load_schema = UserAdminSchema(partial=True)
+            dump_schema = UserSchema()
+        else:
+            load_schema = dump_schema = UserSchema(partial=True)
+
         # update and return user data
-        user = schema.load(request.json, instance=user)
+        user = load_schema.load(request.json, instance=user)
 
         db.session.commit()
 
-        return {"message": "User updated.", "user": schema.dump(user)}, 200
+        return {"message": "User updated.", "user": dump_schema.dump(user)}, 200
 
     def delete(self, user_id: str):
         # ensure current_user is authorized

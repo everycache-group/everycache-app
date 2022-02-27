@@ -77,6 +77,9 @@ def login():
     if user is None or not user.verify_password(password):
         abort(401, "Incorrect email and password combination.")
 
+    if user.deleted:
+        abort(401, "Account deleted.")
+
     access_token = create_user_access_token(user)
     refresh_token = create_user_refresh_token(user)
 
