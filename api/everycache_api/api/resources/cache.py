@@ -4,9 +4,9 @@ from flask_restful import Resource
 
 from everycache_api.api.schemas import (
     CacheCommentSchema,
+    CachePublicSchema,
     CacheSchema,
     CacheVisitSchema,
-    PublicCacheSchema,
 )
 from everycache_api.common.pagination import paginate
 from everycache_api.extensions import db
@@ -24,7 +24,7 @@ class CacheResource(Resource):
         - in: path
           name: cache_id
           schema:
-            type: integer
+            type: string
       responses:
         200:
           content:
@@ -35,7 +35,7 @@ class CacheResource(Resource):
                   cache:
                     oneOf:
                       - CacheSchema
-                      - PublicUserSchema
+                      - CachePublicSchema
         404:
           description: cache not found
       security: []
@@ -46,7 +46,7 @@ class CacheResource(Resource):
         - in: path
           name: cache_id
           schema:
-            type: integer
+            type: string
       requestBody:
         content:
           application/json:
@@ -59,9 +59,9 @@ class CacheResource(Resource):
               schema:
                 type: object
                 properties:
-                  msg:
+                  message:
                     type: string
-                    example: cache updated
+                    example: Cache updated.
                   cache:
                     CacheSchema
         403:
@@ -83,9 +83,9 @@ class CacheResource(Resource):
               schema:
                 type: object
                 properties:
-                  msg:
+                  message:
                     type: string
-                    example: cache deleted
+                    example: Cache deleted.
         403:
           description: forbidden
         404:
@@ -104,14 +104,13 @@ class CacheResource(Resource):
 
         # decide which schema to use
         schema = None
-        if current_user and (
-            current_user == cache.owner or current_user.role == User.Role.Admin
-        ):
-            # owner or admin
+        if current_user:
+            # logged in user
             schema = CacheSchema()
+            schema.context = {"current_user": current_user}
         else:
-            # default user
-            schema = PublicCacheSchema()
+            # guest user
+            schema = CachePublicSchema()
 
         # return cache details
         return {"cache": schema.dump(cache)}
@@ -122,15 +121,17 @@ class CacheResource(Resource):
 
         # ensure current_user is authorized
         if current_user != cache.owner and current_user.role != User.Role.Admin:
-            abort(403)
+            abort(403, "Unauthorized to modify other users' caches.")
 
-        schema = CacheSchema()
+        schema = CacheSchema(exclude=["visited"])
 
         # update and return cache details
-        cache = schema.load(request.json, instance=cache)
+        cache = schema.load(request.json, instance=cache, partial=True)
         db.session.commit()
 
-        return {"msg": "cache updated", "result": schema.dump(cache)}, 200
+        # schema.context = {"current_user": current_user}
+
+        return {"message": "Cache updated.", "cache": schema.dump(cache)}, 200
 
     def delete(self, cache_id: int):
         # find cache
@@ -138,13 +139,13 @@ class CacheResource(Resource):
 
         # ensure current_user is authorized
         if current_user != cache.owner and current_user.role != User.Role.Admin:
-            abort(403)
+            abort(403, "Unauthorized to delete other users' caches.")
 
         # mark cache as deleted
         cache.deleted = True
         db.session.commit()
 
-        return {"msg": "cache deleted"}, 200
+        return {"message": "Cache deleted."}, 200
 
 
 class CacheListResource(Resource):
@@ -181,7 +182,7 @@ class CacheListResource(Resource):
                         type: array
                         items:
                           oneOf:
-                            - $ref: '#/components/schemas/PublicCacheSchema'
+                            - $ref: '#/components/schemas/CachePublicSchema'
                             - $ref: '#/components/schemas/CacheSchema'
       security: []
     post:
@@ -199,13 +200,15 @@ class CacheListResource(Resource):
               schema:
                 type: object
                 properties:
-                  msg:
+                  message:
                     type: string
-                    example: cache created
+                    example: Cache created.
                   cache:
                     CacheSchema
         400:
           description: bad request payload
+        403:
+          description: forbidden
     """
 
     method_decorators = {"get": [jwt_required(optional=True)], "post": [jwt_required()]}
@@ -216,19 +219,20 @@ class CacheListResource(Resource):
 
         # decide which schema to use
         schema = None
-        if current_user and current_user.role == User.Role.Admin:
-            # admin
+        if current_user:
+            # logged in user
             schema = CacheSchema(many=True)
+            schema.context = {"current_user": current_user}
         else:
-            # default user
-            schema = PublicCacheSchema(many=True)
+            # guest user
+            schema = CachePublicSchema(many=True)
 
         return paginate(query, schema)
 
     def post(self):
         # creating a new cache
 
-        schema = CacheSchema()
+        schema = CacheSchema(exclude=["visited"])
         cache = schema.load(request.json)
 
         # append current_user as owner to newly created cache
@@ -237,7 +241,7 @@ class CacheListResource(Resource):
         db.session.add(cache)
         db.session.commit()
 
-        return {"msg": "cache created", "cache": schema.dump(cache)}, 201
+        return {"message": "Cache created.", "cache": schema.dump(cache)}, 201
 
 
 class CacheVisitListResource(Resource):
@@ -251,7 +255,7 @@ class CacheVisitListResource(Resource):
         - in: path
           name: cache_id
           schema:
-            type: integer
+            type: string
         - in: query
           name: order_by
           schema:
@@ -288,7 +292,7 @@ class CacheVisitListResource(Resource):
         - in: path
           name: cache_id
           schema:
-            type: integer
+            type: string
       requestBody:
         content:
           application/json:
@@ -301,13 +305,15 @@ class CacheVisitListResource(Resource):
               schema:
                 type: object
                 properties:
-                  msg:
+                  message:
                     type: string
-                    example: cache visit created
+                    example: Cache visit created.
                   cache:
                     CacheVisitSchema
         400:
           description: bad request
+        403:
+          description: forbidden
         404:
           description: cache not found
     """
@@ -328,8 +334,11 @@ class CacheVisitListResource(Resource):
         # find cache with given id
         cache = Cache.query_ext_id(cache_id).first_or_404()
 
+        if cache.owner == current_user:
+            abort(403, "Creating a visit to own cache is forbidden.")
+
         # create new visit
-        schema = CacheVisitSchema()
+        schema = CacheVisitSchema(exclude=["visited"])
         visit = schema.load(request.json)
 
         # append cache and user to the visit
@@ -340,7 +349,10 @@ class CacheVisitListResource(Resource):
         db.session.add(visit)
         db.session.commit()
 
-        return {"msg": "cache visit created", "cache_visit": schema.dump(visit)}, 201
+        return {
+            "message": "Cache visit created.",
+            "cache_visit": schema.dump(visit),
+        }, 201
 
 
 class CacheCommentListResource(Resource):
@@ -354,7 +366,7 @@ class CacheCommentListResource(Resource):
         - in: path
           name: cache_id
           schema:
-            type: integer
+            type: string
         - in: query
           name: order_by
           schema:
@@ -391,7 +403,7 @@ class CacheCommentListResource(Resource):
         - in: path
           name: cache_id
           schema:
-            type: integer
+            type: string
       requestBody:
         content:
           application/json:
@@ -404,9 +416,9 @@ class CacheCommentListResource(Resource):
               schema:
                 type: object
                 properties:
-                  msg:
+                  message:
                     type: string
-                    example: cache comment created
+                    example: Cache comment created.
                   cache_comment:
                     CacheCommentSchema
         400:
@@ -433,7 +445,7 @@ class CacheCommentListResource(Resource):
 
         # create new comment
         schema = CacheCommentSchema()
-        comment: CacheComment = schema.load(request.json)
+        comment = schema.load(request.json)
 
         # append cache and user to the visit
         comment.cache = cache
@@ -444,6 +456,6 @@ class CacheCommentListResource(Resource):
         db.session.commit()
 
         return {
-            "msg": "cache comment created",
+            "message": "Cache comment created.",
             "cache_comment": schema.dump(comment),
         }, 201

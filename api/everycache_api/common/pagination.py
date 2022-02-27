@@ -20,19 +20,27 @@ def paginate(query, schema):
 
     page, per_page, other_request_args = extract_pagination(**request.args)
     page_obj = query.paginate(page=page, per_page=per_page)
-    next_ = url_for(
-        request.endpoint,
-        page=page_obj.next_num if page_obj.has_next else page_obj.page,
-        per_page=per_page,
-        **other_request_args,
-        **request.view_args,
+    next_ = (
+        url_for(
+            request.endpoint,
+            page=page_obj.next_num,
+            per_page=per_page,
+            **other_request_args,
+            **request.view_args,
+        )
+        if page_obj.has_next
+        else False
     )
-    prev = url_for(
-        request.endpoint,
-        page=page_obj.prev_num if page_obj.has_prev else page_obj.page,
-        per_page=per_page,
-        **other_request_args,
-        **request.view_args,
+    prev = (
+        url_for(
+            request.endpoint,
+            page=page_obj.prev_num,
+            per_page=per_page,
+            **other_request_args,
+            **request.view_args,
+        )
+        if page_obj.has_prev
+        else False
     )
 
     return {
