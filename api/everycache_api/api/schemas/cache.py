@@ -28,8 +28,9 @@ class CacheSchema(BaseSchema):
 
     @post_dump
     def fix_null_rating(self, data, many, **kwargs):
-        if data["rating"] is None:
-            data["rating"] = 0.0
+        if "rating" in self.fields and "rating" not in self.exclude:
+            if data.get("rating") is None:
+                data["rating"] = 0.0
 
         return data
 
