@@ -1,4 +1,4 @@
-from flask import Blueprint, current_app, request
+from flask import Blueprint, abort, current_app, jsonify, request
 from flask_jwt_extended import current_user, get_jwt, jwt_required
 
 from everycache_api.auth.helpers import (
@@ -52,20 +52,30 @@ def login():
                     example: myrefreshtoken
         400:
           description: bad request
+        401:
+          description: incorrect credentials
       security: []
     """
     if not request.is_json:
-        return {"msg": "Missing JSON payload in request"}, 400
+        abort(400, "Missing JSON payload in request.")
 
     email = request.json.get("email", None)
     password = request.json.get("password", None)
 
-    if email is None or password is None:
-        return {"msg": "Missing e-mail address or password"}, 400
+    errors = {}
+
+    if email is None:
+        errors["email"] = ["Missing data for required field."]
+
+    if password is None:
+        errors["password"] = ["Missing data for required field."]
+
+    if errors:
+        return jsonify(errors=errors), 400
 
     user = User.query.filter_by(email=email).first()
     if user is None or not user.verify_password(password):
-        return {"msg": "Incorrect email and password combination"}, 400
+        abort(401, "Incorrect email and password combination.")
 
     access_token = create_user_access_token(user)
     refresh_token = create_user_refresh_token(user)
@@ -106,7 +116,7 @@ def refresh():
           description: unauthorized
     """
     if not current_user:
-        return {"msg": "User in refresh token does not exist"}, 401
+        abort(401, "Invalid or expired token.")
 
     access_token = create_user_access_token(current_user)
     save_encoded_token(access_token)
@@ -132,7 +142,7 @@ def revoke_access_token():
                 properties:
                   message:
                     type: string
-                    example: token revoked
+                    example: Access token revoked.
         400:
           description: bad request
         401:
@@ -140,7 +150,7 @@ def revoke_access_token():
     """
     revoke_token(get_jwt())
 
-    return {"message": "token revoked"}, 200
+    return {"message": "Access token revoked."}, 200
 
 
 @blueprint.route("/revoke_refresh", methods=["DELETE"])
@@ -161,7 +171,7 @@ def revoke_refresh_token():
                 properties:
                   message:
                     type: string
-                    example: token revoked
+                    example: Refresh token revoked.
         400:
           description: bad request
         401:
@@ -169,7 +179,7 @@ def revoke_refresh_token():
     """
     revoke_token(get_jwt())
 
-    return {"message": "token revoked"}, 200
+    return {"message": "Refresh token revoked."}, 200
 
 
 @blueprint.route("/revoke_all", methods=["DELETE"])
@@ -190,7 +200,7 @@ def revoke_all_tokens():
                 properties:
                   message:
                     type: string
-                    example: all tokens revoked
+                    example: All user tokens revoked.
         400:
           description: bad request
         401:
@@ -198,19 +208,47 @@ def revoke_all_tokens():
     """
     revoke_all_user_tokens(current_user)
 
-    return {"message": "all tokens revoked"}, 200
+    return {"message": "All user tokens revoked."}, 200
+
+
+@blueprint.errorhandler(400)
+def handle_400_error(e):
+    return {"message": e.description}, 400
+
+
+@blueprint.errorhandler(401)
+def handle_401_error(e):
+    return {"message": e.description}, 401
 
 
 @jwt.user_lookup_loader
 def user_loader_callback(jwt_headers, jwt_payload):
     user_id = jwt_payload["sub"]
+    user = User.query_ext_id(user_id, False).first()
 
-    return User.query_ext_id(user_id).one_or_none()
+    if not user:
+        # token is valid but user is no longer in database; return generic reason
+        abort(401, "Invalid or expired token.")
+
+    if user.deleted:
+        # user is deleted and this token should have been revoked; revoke all tokens
+        revoke_all_user_tokens(user)
+        abort(401, "Token has been revoked.")
+
+    return user
 
 
 @jwt.token_in_blocklist_loader
 def check_if_token_revoked(jwt_headers, jwt_payload):
-    return is_token_revoked(jwt_payload)
+    if is_token_revoked(jwt_payload):
+        abort(401, "Token has been revoked.")
+
+    return False
+
+
+@jwt.expired_token_loader
+def expired_token_callback(jwt_headers, jwt_payload):
+    abort(401, "Token has expired.")
 
 
 @blueprint.before_app_first_request

@@ -18,7 +18,7 @@ class CacheCommentResource(Resource):
         - in: path
           name: cache_comment_id
           schema:
-            type: integer
+            type: string
       responses:
         200:
           content:
@@ -37,7 +37,7 @@ class CacheCommentResource(Resource):
         - in: path
           name: cache_comment_id
           schema:
-            type: integer
+            type: string
       requestBody:
         content:
           application/json:
@@ -52,8 +52,10 @@ class CacheCommentResource(Resource):
                 properties:
                   message:
                     type: string
-                    example: cache comment updated
+                    example: Cache comment updated.
                   cache_comment: CacheCommentSchema
+        403:
+          description: forbidden
         404:
           description: cache comment not found
     delete:
@@ -63,7 +65,7 @@ class CacheCommentResource(Resource):
         - in: path
           name: cache_comment_id
           schema:
-            type: integer
+            type: string
       responses:
         200:
           content:
@@ -73,7 +75,9 @@ class CacheCommentResource(Resource):
                 properties:
                   message:
                     type: string
-                    example: cache comment deleted
+                    example: Cache comment deleted.
+        403:
+          description: forbidden
         404:
           description: cache comment not found
     """
@@ -102,7 +106,7 @@ class CacheCommentResource(Resource):
 
         # ensure current_user is authorized
         if current_user != comment.author and current_user.role != User.Role.Admin:
-            abort(403)
+            abort(403, "Unauthorized to modify other users' cache comments.")
 
         schema = CacheCommentSchema()
 
@@ -111,7 +115,7 @@ class CacheCommentResource(Resource):
         db.session.commit()
 
         return {
-            "message": "cache comment updated",
+            "message": "Cache comment updated.",
             "cache_comment": schema.dump(comment),
         }, 200
 
@@ -121,10 +125,10 @@ class CacheCommentResource(Resource):
 
         # ensure current_user is authorized
         if current_user != comment.author and current_user.role != User.Role.Admin:
-            abort(403)
+            abort(403, "Unauthorized to delete other users' cache comments.")
 
         # mark comment as deleted
         comment.deleted = True
         db.session.commit()
 
-        return {"message": "cache comment deleted"}, 200
+        return {"message": "Cache comment deleted."}, 200
