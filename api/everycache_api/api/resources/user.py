@@ -6,6 +6,7 @@ from marshmallow import ValidationError
 from everycache_api.api.schemas import (
     CacheCommentSchema,
     CacheSchema,
+    CachePublicSchema,
     CacheVisitSchema,
     UserAdminSchema,
     UserPublicSchema,
@@ -370,7 +371,7 @@ class UserCacheListResource(Resource):
                 schema.context = {"current_user": current_user}
         else:
             # guest user
-            schema = UserPublicSchema(many=True)
+            schema = CachePublicSchema(many=True)
 
         return paginate(query, schema), 200
 
