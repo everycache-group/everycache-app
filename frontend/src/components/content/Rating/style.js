@@ -1,11 +1,13 @@
 import styled from "styled-components";
 
 export const RatingWrapper = styled.div`
-  width: 250px;
-  height: 100px;
-  top: 100px;
-
-  border: 2px solid red;
+  height: 70px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  border: 1px solid #ccc;
+  padding: 16px;
 `;
 
 export const CacheFormWrapper = styled.div`
@@ -34,7 +36,7 @@ export const CacheInputWrapper = styled.div`
   flex-wrap: nowrap;
   flex-direction: column;
   height: 50%;
-  row-gap: 25px;
+  row-gap: 15px;
 `;
 
 export const CacheCoordsWrapper = styled.div`

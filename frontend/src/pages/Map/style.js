@@ -6,4 +6,5 @@ export const CacheContent = styled.div`
   height: 100%;
   display: flex;
   flex-direction: column;
+  position: relative;
 `;

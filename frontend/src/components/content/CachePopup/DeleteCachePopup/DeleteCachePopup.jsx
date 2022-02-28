@@ -25,7 +25,7 @@ function DeleteCachePopup({ OnActionClose }) {
   const OnDeleteHandler = (e) => {
     dispatch(deleteCache(selectedCache.id))
       .then(() => {
-        snackBar.enqueueSnackbar("Cache Deleted Succesfully!,", {
+        snackBar.enqueueSnackbar("Cache Deleted Succesfully!", {
           variant: "success",
         });
         setTrigger(false);

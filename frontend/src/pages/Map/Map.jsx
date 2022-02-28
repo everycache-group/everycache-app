@@ -26,6 +26,7 @@ function Map() {
       <Style.CacheContent>
         <Typography variant="h4">All Caches</Typography>
         <br />
+        <CacheMenu personal={false} />
         <CacheTable data={caches} hideOwner={false} />
       </Style.CacheContent>
 

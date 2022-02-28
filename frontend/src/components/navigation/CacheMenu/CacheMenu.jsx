@@ -6,8 +6,10 @@ import * as Style from "./style";
 import AddCachePopup from "./../../content/CachePopup/AddCachePopup/AddCachePopup";
 import EditCachePopup from "./../../content/CachePopup/EditCachePopup/EditCachePopup";
 import DeleteCachePopup from "./../../content/CachePopup/DeleteCachePopup/DeleteCachePopup";
+import ReviewsIcon from "@mui/icons-material/Reviews";
+import RatingCommentCache from "../../content/Rating/RatingCommentCache";
 
-function CacheMenu() {
+function CacheMenu({ personal }) {
   const [action, setAction] = useState("");
 
   const OnClickHandler = (e) => {
@@ -20,26 +22,43 @@ function CacheMenu() {
 
   return (
     <Style.CacheActionContainer>
-      <div onClick={OnClickHandler} id="add">
-        <Style.TransformIconButton aria-label="Add Cache">
-          <AddCircleOutlineIcon fontSize="medium" color="success" />
-        </Style.TransformIconButton>
-        {action === "add" && <AddCachePopup OnActionClose={OnActionClose} />}
-      </div>
-      <div onClick={OnClickHandler} id="edit">
-        <Style.TransformIconButton aria-label="Edit Cache">
-          <EditIcon fontSize="medium" color="info" />
-        </Style.TransformIconButton>
-        {action === "edit" && <EditCachePopup OnActionClose={OnActionClose} />}
-      </div>
-      <div onClick={OnClickHandler} id="delete">
-        <Style.TransformIconButton aria-label="Delete Cache">
-          <DeleteIcon fontSize="medium" color="error" />
-        </Style.TransformIconButton>
-        {action === "delete" && (
-          <DeleteCachePopup OnActionClose={OnActionClose} />
-        )}
-      </div>
+      {personal ? (
+        <>
+          <div onClick={OnClickHandler} id="add">
+            <Style.TransformIconButton aria-label="Add Cache">
+              <AddCircleOutlineIcon fontSize="medium" color="success" />
+            </Style.TransformIconButton>
+            {action === "add" && (
+              <AddCachePopup OnActionClose={OnActionClose} />
+            )}
+          </div>
+          <div onClick={OnClickHandler} id="edit">
+            <Style.TransformIconButton aria-label="Edit Cache">
+              <EditIcon fontSize="medium" color="info" />
+            </Style.TransformIconButton>
+            {action === "edit" && (
+              <EditCachePopup OnActionClose={OnActionClose} />
+            )}
+          </div>
+          <div onClick={OnClickHandler} id="delete">
+            <Style.TransformIconButton aria-label="Delete Cache">
+              <DeleteIcon fontSize="medium" color="error" />
+            </Style.TransformIconButton>
+            {action === "delete" && (
+              <DeleteCachePopup OnActionClose={OnActionClose} />
+            )}
+          </div>
+        </>
+      ) : (
+        <div onClick={OnClickHandler} id="review">
+          <Style.TransformIconButton aria-label="Review Cache">
+            <ReviewsIcon fontSize="medium" color="primary" />
+          </Style.TransformIconButton>
+          {action === "review" && (
+            <RatingCommentCache OnActionClose={OnActionClose} />
+          )}
+        </div>
+      )}
     </Style.CacheActionContainer>
   );
 }
