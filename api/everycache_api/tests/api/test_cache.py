@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from everycache_api.api.schemas.cache import CacheSchema, PublicCacheSchema
+from everycache_api.api.schemas.cache import CacheSchema, CachePublicSchema
 from everycache_api.api.schemas.cache_comment import CacheCommentSchema
 from everycache_api.api.schemas.cache_visit import CacheVisitSchema
 from everycache_api.extensions import db
@@ -29,18 +29,15 @@ class TestCacheGet:
 
         assert response.status_code == 404
 
-    @pytest.mark.parametrize("is_user_logged_in", (True, False))
     def test_get_cache_other_user_public(
-        self, is_user_logged_in, client, logged_in_user
+        self, client
     ):
         cache = CacheFactory()
-        role = User.Role.Default if is_user_logged_in else None
-        headers = get_headers_for_user(logged_in_user, role)
 
-        response = client.get(f"/api/caches/{cache.ext_id}", headers=headers)
+        response = client.get(f"/api/caches/{cache.ext_id}")
 
         cache = Cache.query.filter_by(id_=cache.id_).first()
-        cache_deserialized = json.loads(PublicCacheSchema().dumps(cache))
+        cache_deserialized = json.loads(CachePublicSchema().dumps(cache))
         assert response.status_code == 200
         assert response.json["cache"] == cache_deserialized
 
@@ -234,21 +231,16 @@ class TestCacheDelete:
 
 
 class TestCacheListGet:
-    @pytest.mark.parametrize("is_user_logged_in", (False, True))
-    def test_get_public_list(self, is_user_logged_in, client, logged_in_user):
-        user, access_token, _ = logged_in_user
+    def test_get_public_list(self, client):
         cache = CacheFactory()
         for _ in range(5):
             CacheFactory()
 
         headers = {}
-        if is_user_logged_in:
-            headers = get_auth_header(access_token)
-
         response = client.get("/api/caches", headers=headers)
 
         caches = Cache.query.all()
-        caches_expected = json.loads(PublicCacheSchema().dumps(caches, many=True))
+        caches_expected = json.loads(CachePublicSchema().dumps(caches, many=True))
         assert cache in caches
         assert response.json["results"] == caches_expected
         assert response.status_code == 200

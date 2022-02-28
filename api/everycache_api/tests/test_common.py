@@ -15,8 +15,8 @@ def test_request_list_empty_database(client, endpoint):
     assert response.json == {
         "total": 0,
         "pages": 0,
-        "next": f"{endpoint}?page=1&per_page=50",
-        "prev": f"{endpoint}?page=1&per_page=50",
+        "next": False,
+        "prev": False,
         "results": [],
     }
 
@@ -30,5 +30,5 @@ def test_marshmallow_error(client, mocker):
     )
 
     response = client.get("/api/users")
-    assert response.json == [msg]
+    assert response.json == {"errors": [msg]}
     assert response.status_code == 400

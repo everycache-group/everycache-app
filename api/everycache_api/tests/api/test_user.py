@@ -2,10 +2,10 @@ import json
 
 import pytest
 
-from everycache_api.api.schemas.cache import CacheSchema, PublicCacheSchema
+from everycache_api.api.schemas.cache import CacheSchema, CachePublicSchema
 from everycache_api.api.schemas.cache_comment import CacheCommentSchema
 from everycache_api.api.schemas.cache_visit import CacheVisitSchema
-from everycache_api.api.schemas.user import PublicUserSchema, UserSchema
+from everycache_api.api.schemas.user import UserSchema, UserPublicSchema
 from everycache_api.extensions import db
 from everycache_api.models import Cache, CacheComment, CacheVisit, User
 from everycache_api.tests.factories.cache_comment_factory import CacheCommentFactory
@@ -20,7 +20,7 @@ class TestUserGet:
         user = UserFactory()
         response = client.get(f"/api/users/{user.ext_id}")
 
-        assert response.json == {"user": json.loads(PublicUserSchema().dumps(user))}
+        assert response.json == {"user": json.loads(UserPublicSchema().dumps(user))}
         assert response.status_code == 200
 
     def test_get_other_user(self, client, logged_in_user):
@@ -33,7 +33,7 @@ class TestUserGet:
             headers=headers,
         )
 
-        assert response.json == {"user": json.loads(PublicUserSchema().dumps(user_1))}
+        assert response.json == {"user": json.loads(UserPublicSchema().dumps(user_1))}
         assert response.status_code == 200
 
     def test_get_self(self, client, logged_in_user):
@@ -83,14 +83,29 @@ class TestUserGet:
 
 
 class TestUserPut:
+    current_password = None
+    overwrite_current_password = False
+    include_current_password = True
+
+    @pytest.fixture(scope="class", autouse=True)
+    def ensure_initial_settings(self):
+        self.current_password = None
+        self.overwrite_current_password = False
+        self.include_current_password = True
+
     def _get_user_edit_data(self, user):
-        return json.dumps(
-            {
+        data = {
                 "username": "changed_username",
                 "email": user.email,
                 "password": f"testpass{user.id_}",
             }
-        )
+
+        if self.overwrite_current_password:
+            data["current_password"] = self.current_password
+        elif self.include_current_password:
+            data["current_password"] = f"testpass{user.id_}"
+
+        return json.dumps(data)
 
     def _validate_put_successful(self, response, user):
         assert response.status_code == 200
@@ -112,6 +127,23 @@ class TestUserPut:
         response = self._send_put_request(client, user, access_token)
         self._validate_put_successful(response, user)
 
+    def test_put_self_no_current_password(self, client, logged_in_user):
+        user, access_token, _ = logged_in_user
+        self.overwrite_current_password = True
+
+        response = self._send_put_request(client, user, access_token)
+        assert response.status_code == 400
+        assert "Current password is required for updating user data." in response.json["errors"]["current_password"]
+
+    def test_put_self_wrong_current_password(self, client, logged_in_user):
+        user, access_token, _ = logged_in_user
+        self.overwrite_current_password = True
+        self.current_password = "nooo"
+
+        response = self._send_put_request(client, user, access_token)
+        assert response.status_code == 400
+        assert "Current password is incorrect." in response.json["errors"]["current_password"]
+
     def test_put_other_user(self, client, logged_in_user):
         user, access_token, _ = logged_in_user
         user_2 = UserFactory()
@@ -124,6 +156,7 @@ class TestUserPut:
         user, access_token, _ = logged_in_user
         user.role = User.Role.Admin
         user_2 = UserFactory()
+        self.include_current_password = False
 
         response = self._send_put_request(client, user_2, access_token)
         self._validate_put_successful(response, user_2)
@@ -223,7 +256,7 @@ class TestUserListGet:
         response = client.get("/api/users", headers=headers)
 
         users = User.query.filter_by(verified=True)
-        users_expected = json.loads(PublicUserSchema().dumps(users, many=True))
+        users_expected = json.loads(UserPublicSchema().dumps(users, many=True))
         assert user in users.all()
         assert response.json["results"] == users_expected
         assert response.status_code == 200
@@ -304,7 +337,6 @@ class TestUserListPost:
             "username": "testowy",
             "password": "testpass",
             "email": "testowy@example.com",
-            "role": "Default",
         }
 
     @pytest.fixture()
@@ -319,7 +351,7 @@ class TestUserListPost:
         )
 
         assert response.status_code == 201
-        assert "user created" in response.data.decode()
+        assert "User created." in response.data.decode()
         user_query = User.query.filter_by(username="testowy")
         assert user_query.count() == 1
         user = user_query.first()
@@ -339,7 +371,7 @@ class TestUserListPost:
         )
 
         assert response.status_code == 403
-        assert "user already logged in" in response.data.decode()
+        assert "User already logged in." in response.data.decode()
 
     def test_post_logged_in_as_admin(self, client, user_to_create_data, logged_in_user):
         user, access_token, _ = logged_in_user
@@ -353,7 +385,7 @@ class TestUserListPost:
         )
 
         assert response.status_code == 201
-        assert "user created" in response.data.decode()
+        assert "User created." in response.data.decode()
         assert User.query.count() == 2
 
     @pytest.mark.parametrize("is_issued_by_admin", (True, False))
@@ -384,23 +416,20 @@ class TestUserListPost:
         )
 
         assert response.status_code == 400
-        assert f"{unique_field_name} is already taken" in response.data.decode()
+        assert f"{unique_field_name[0].upper()}{unique_field_name[1:]} is already taken." in response.data.decode()
         assert User.query.count() == 1
 
 
 class TestUserCacheListGet:
-    @pytest.mark.parametrize("is_user_logged_in", (True, False))
-    def test_get_public_list(self, is_user_logged_in, client, logged_in_user):
-        user, access_token, _ = logged_in_user
+    def test_get_public_list(self, client):
         cache = CacheFactory()
         CacheFactory()
         owner = cache.owner
 
-        headers = get_auth_header(access_token) if is_user_logged_in else {}
-        response = client.get(f"/api/users/{owner.ext_id}/caches", headers=headers)
+        response = client.get(f"/api/users/{owner.ext_id}/caches")
 
         caches = Cache.query.filter_by(owner_id=owner.id_)
-        expected_caches = json.loads(PublicCacheSchema().dumps(caches, many=True))
+        expected_caches = json.loads(CachePublicSchema().dumps(caches, many=True))
 
         assert response.status_code == 200
         assert cache in caches.all()
@@ -468,7 +497,7 @@ class TestUserCacheListGet:
         response = client.get(f"/api/users/{user.ext_id}/caches", headers=headers)
 
         caches = Cache.query.filter_by(owner_id=user.id_)
-        expected_caches = json.loads(CacheSchema().dumps(caches, many=True))
+        expected_caches = json.loads(CacheSchema(exclude=["visited"]).dumps(caches, many=True))
         assert response.status_code == 200
         assert cache in caches.all()
         assert response.json["results"] == expected_caches

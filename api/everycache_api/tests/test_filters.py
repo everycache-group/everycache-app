@@ -3,166 +3,110 @@ from datetime import datetime
 import pytest
 from marshmallow import fields
 
-from everycache_api.common.filters import (
-    _apply_filter,
-    _filter_query,
-    _like_helper,
-    _parse_value,
-    apply_query_filters,
-)
+from everycache_api.common.filters import apply_query_filters
+from types import SimpleNamespace
+
+from collections import OrderedDict
 
 
-class TestParseValue:
-
-    bool_data = (
-        ("1", True),
-        ("true", True),
-        ("True", True),
-        ("", False),
-        ("0", False),
-        ("false", False),
-        ("False", False),
-        ("", False),
-    )
-
-    int_data = (
-        ("lolo", None),
-        ("", None),
-        ("a1230", None),
-        ("1230as", None),
-        ("123.0", None),
-        ("1", 1),
-        ("120", 120),
-        ("6060", 6060),
-    )
-
-    float_data = (
-        ("1.0", 1.0),
-        ("12.0", 12.0),
-        ("2", 2.0),
-        ("", None),
-        ("as1.2", None),
-        ("1.2as", None),
-    )
-
-    date_data = (
-        ("", None),
-        ("1", None),
-        ("1.0", None),
-        ("1-2-1997", datetime(1997, 2, 1, 0, 0)),
-        ("2-3-1993", datetime(1993, 3, 2, 0, 0)),
-    )
-
-    @pytest.mark.parametrize("value, expected", bool_data)
-    def test_boolean(self, value, expected):
-        assert _parse_value(value, fields.Boolean) == expected
-
-    @pytest.mark.parametrize("value, expected", int_data)
-    def test_int(self, value, expected):
-        assert _parse_value(value, fields.Integer) == expected
-
-    @pytest.mark.parametrize("value, expected", float_data)
-    def test_float(self, value, expected):
-        assert _parse_value(value, fields.Float) == expected
-
-    @pytest.mark.parametrize("value, expected", date_data)
-    def test_date(self, value, expected):
-        assert _parse_value(value, fields.DateTime) == expected
-
-
-@pytest.mark.parametrize("like", (True, False))
-def test_like_helper(like, mocker):
-    mock = mocker.MagicMock()
-    _like_helper(mock, "test_value", like)
-
-    method_name = "like" if like else "notlike"
-
-    getattr(mock, method_name).assert_called_once_with("%test_value%")
-
-
-@pytest.mark.parametrize(
-    "op_code", (None, "lte", "lt", "gte", "gt", "not", "like", "not-like")
-)
-def test_filter_query(op_code, mocker):
-    query_mock = mocker.MagicMock()
-    field_mock = mocker.MagicMock()
-    dunder_method = {
-        None: field_mock.__eq__,
-        "lte": field_mock.__le__,
-        "lt": field_mock.__lt__,
-        "gte": field_mock.__gt__,
-        "gt": field_mock.__ge__,
-        "not": field_mock.__ne__,
-        "like": field_mock.like,
-        "not-like": field_mock.notlike,
-    }.get(op_code)
-
-    if op_code == "lt":
-        dunder_method = field_mock.__lt__ = mocker.MagicMock()
-    elif op_code == "lte":
-        dunder_method = field_mock.__le__ = mocker.MagicMock()
-    elif op_code == "gte":
-        dunder_method = field_mock.__ge__ = mocker.MagicMock()
-    elif op_code == "gt":
-        dunder_method = field_mock.__gt__ = mocker.MagicMock()
-
-    _filter_query(query_mock, op_code, field_mock, "value")
-
-    query_mock.filter.assert_called_once()
-    expected_value = "value" if op_code not in ("like", "not-like") else "%value%"
-    dunder_method.assert_called_once_with(expected_value)
-
-
-@pytest.mark.parametrize("field_name", ("name1", "name2", "field_name"))
-@pytest.mark.parametrize("expected_parsed_value", ("val1", "val2", None))
-@pytest.mark.parametrize("expected_result", ("res1", "res2"))
-@pytest.mark.parametrize("url_value", ("operation:value", "value"))
-def test_apply_filter(
-    field_name, expected_parsed_value, expected_result, url_value, mocker
-):
+@pytest.fixture()
+def prepare_mocks(app, mocker):
     query_mock = mocker.MagicMock()
     schema_mock = mocker.MagicMock()
-    expected_operation = "operation" if "operation" in url_value else None
-    _parse_value_mock = mocker.patch("everycache_api.common.filters._parse_value")
-    _parse_value_mock.return_value = expected_parsed_value
-    _filter_query_mock = mocker.patch("everycache_api.common.filters._filter_query")
-    _filter_query_mock.return_value = expected_result
-
-    result = _apply_filter(query_mock, schema_mock, field_name, url_value)
-
-    _parse_value_mock.assert_called_once_with(
-        "value", type(schema_mock.fields[field_name])
-    )
-
-    if expected_parsed_value is None:
-        assert result == query_mock
-    else:
-        _filter_query_mock.assert_called_once_with(
-            query_mock,
-            expected_operation,
-            getattr(schema_mock.Meta.model, field_name),
-            expected_parsed_value,
-        )
-
-        assert result == expected_result
-
-
-def test_apply_query_filter(app, mocker):
-    query_mock = mocker.MagicMock()
-    schema_mock = mocker.MagicMock()
-    schema_mock.fields = ["key"]
-    args = {"some_key": ["some_value"], "key": ["value"]}
 
     with app.test_request_context():
         request_mock = mocker.patch("everycache_api.common.filters.request")
-    args_mock = request_mock.args = mocker.MagicMock()
-    args_mock.to_dict.return_value = args
-    request_mock.args = args_mock
 
-    _apply_filter_mock = mocker.patch("everycache_api.common.filters._apply_filter")
-    _apply_filter_mock.return_value = "query"
+    operator_mock = mocker.patch("everycache_api.common.filters.operator")
+    request_mock.args.to_dict = mocker.MagicMock()
+    query_mock.filter = mocker.MagicMock()
 
-    result = apply_query_filters(query_mock, schema_mock)
+    return (
+        query_mock, schema_mock, request_mock, operator_mock
+    )
 
-    assert result == "query"
-    _apply_filter_mock.assert_called_once_with(query_mock, schema_mock, "key", "value")
+
+class TestFilters:
+
+    @pytest.fixture()
+    def mocks(self, prepare_mocks):
+        mocks = SimpleNamespace()
+        (mocks.query_mock, mocks.schema_mock, mocks.request_mock,
+         mocks.operator_mock) = prepare_mocks
+        return mocks
+
+    happy_path_filters = (
+        ("field_name_1", "eq", "dominik"),
+        ("field_name_2", "gt", 3),
+        ("field_name_3", "ge", 2),
+        ("field_name_4", "lt", 2),
+        ("field_name_5", "le", 3),
+        ("field_name_6", "ne", "asdf"),
+        ("field_name_7", "like", "asdf"),
+        ("field_name_8", "notlike", "asdf"),
+    )
+
+    def _get_mocks_for_filters(self, filters, mocker):
+        field_mocks = {}
+        model_mocks = {}
+        for field_name, *_ in filters:
+            schema_field_mock = mocker.MagicMock()
+            model_mock = mocker.MagicMock()
+            schema_field_mock.data_key = False
+            schema_field_mock.load_only = False
+            schema_field_mock.attribute = False
+            field_mocks[field_name] = schema_field_mock
+            model_mocks[field_name] = model_mock
+        return field_mocks, model_mocks
+
+    def _get_filter_args(self, filters):
+        operator_name_mapping = {"ge": "gte", "le": "lte", "ne": "not",
+                                       "notlike": "not-like"}
+        filter_args = OrderedDict()
+        for field_name, operator_name, value in filters:
+            query_operator_name = operator_name_mapping.get(
+                operator_name, operator_name)
+
+            value_string = str(value)
+            if operator_name != "eq":
+                value_string = f"{query_operator_name}:{value}"
+
+            filter_args[field_name] = [value_string]
+
+        return filter_args
+
+    def _get_params(self, filters, mocks, field_mocks, model_mocks):
+        params = {}
+        for field_name, operator_name, value in filters:
+            operator_source = mocks.operator_mock
+            if operator_name in ("like", "notlike"):
+                operator_source = model_mocks[field_name]
+
+            operator = getattr(operator_source, operator_name)
+            param = operator(field_mocks[field_name], value)
+            params[field_name] = param
+
+        return params
+
+    def test_filters_happy_path(self, mocks, mocker):
+        field_mocks, model_mocks = self._get_mocks_for_filters(
+            self.happy_path_filters, mocker)
+
+        mocks.schema_mock.fields = dict(field_mocks)
+        for field_name, model_mock in model_mocks.items():
+            setattr(mocks.schema_mock.Meta.model, field_name, model_mock)
+
+        mocks.request_mock.args.to_dict.return_value = self._get_filter_args(
+            self.happy_path_filters)
+
+        result = apply_query_filters(mocks.query_mock, mocks.schema_mock)
+
+        params = self._get_params(self.happy_path_filters, mocks, field_mocks,
+                                  model_mocks)
+
+        for field_name, *_ in self.happy_path_filters:
+            param = params[field_name]
+            mocks.query_mock.filter.assert_called_once_with(param)
+            mocks.query_mock = mocks.query_mock.filter(param)
+
+        assert result == mocks.query_mock

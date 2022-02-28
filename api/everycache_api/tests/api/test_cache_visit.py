@@ -222,8 +222,7 @@ class TestCacheVisitDelete:
         )
 
         assert response.status_code == 200
-        with pytest.raises(InvalidRequestError):
-            db.session.refresh(cache_visit)
+        assert cache_visit.deleted == True
 
     @pytest.mark.parametrize("logged_in_user_role", list(User.Role))
     def test_delete(self, logged_in_user_role, client, logged_in_user):
@@ -236,8 +235,7 @@ class TestCacheVisitDelete:
         )
 
         assert response.status_code == 200
-        with pytest.raises(InvalidRequestError):
-            db.session.refresh(cache_visit)
+        assert cache_visit.deleted == True
 
     @pytest.mark.parametrize("logged_in_user_role", list(User.Role))
     def test_delete_by_deleted_user(self, logged_in_user_role, client, logged_in_user):
