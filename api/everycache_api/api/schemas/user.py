@@ -1,72 +1,78 @@
-from string import ascii_letters, digits
+from collections import Counter
+from string import ascii_letters, digits, whitespace
 
 from marshmallow import validate, validates
 from marshmallow.exceptions import ValidationError
+from marshmallow.fields import String
 from marshmallow_enum import EnumField
 
-from everycache_api.extensions import db, ma
+from everycache_api.extensions import ma
 from everycache_api.models import User
 
+from .base import BaseSchema
 
-class UserSchema(ma.SQLAlchemyAutoSchema):
-    id = ma.String(attribute="ext_id", dump_only=True)
-    username = ma.String(required=False)
-    email = ma.String(required=False)
+
+class UserSchema(BaseSchema):
+    """Read-write schema used by admins and users querying themselves"""
+
+    username = ma.String(required=True)
+    email = ma.String(required=True, validate=validate.Email())
     password = ma.String(
-        load_only=True, required=True, validate=validate.Length(8, 255)
+        load_only=True,
+        validate=validate.ContainsNoneOf(
+            whitespace, error="Must not contain any whitespace"
+        ),
+        required=True,
     )
-    role = EnumField(User.Role)
+    role = EnumField(User.Role, dump_only=True)
+    verified = ma.Boolean(dump_only=True)
 
     @validates("username")
-    def validate_username(self, value):
-        def _validate_username_three_letters(value):
-            if sum((value.count(let) for let in ascii_letters if let in value)) < 3:
+    def validate_username(self, value: str):
+        def validate_first_letter(value: str):
+            if value[0] not in ascii_letters:
+                raise ValidationError("Must start with a letter.")
+
+        def validate_three_letters(value: str):
+            counter = Counter(value)
+
+            if sum(counter.get(s, 0) for s in ascii_letters) < 3:
                 raise ValidationError("Must contain at least three letters.")
 
         return validate.And(
+            validate.Length(5, 255),
+            validate_first_letter,
             validate.ContainsOnly(
                 ascii_letters + "_" + digits,
                 error="Must consist only of letters, digits and '_'.",
             ),
-            validate.Length(5, 255),
-            _validate_username_three_letters,
+            validate_three_letters,
         )(value)
 
-    @validates("email")
-    def validate_email(self, value):
-        return validate.Email()(value)
-
-    class Meta:
+    class Meta(BaseSchema.Meta):
         model = User
-        sqla_session = db.session
-        load_instance = True
-        ordered = True
-        exclude = ("id_", "deleted", "_password")
+        exclude = BaseSchema.Meta.exclude + ["_password"]
 
 
-class PublicUserSchema(ma.SQLAlchemyAutoSchema):
-    """Read-only schema"""
+class UserUpdateSchema(UserSchema):
+    """
+    Schema used for updating current user's data; never actually loaded, but specifies
+    current_password field for /api/users/<user_id> PUT endpoint in api specification
+    """
 
-    id = ma.String(attribute="ext_id", dump_only=True)
+    current_password: String = ma.String(load_only=True, required=True)
+
+
+class UserPublicSchema(UserSchema):
+    """Read-only schema used by guests and default users querying others"""
+
+    class Meta(UserSchema.Meta):
+        exclude = []
+        fields = ["id", "username"]  # whitelist
+
+
+class UserAdminSchema(UserSchema):
+    """Read-write schema used by admins for changing other users' data"""
+
     role = EnumField(User.Role)
-
-    class Meta:
-        model = User
-        sqla_session = db.session
-        load_instance = True
-        ordered = True
-        fields = ("id", "role", "username")  # whitelist
-
-
-class NestedUserSchema(ma.SQLAlchemyAutoSchema):
-    """Used in other schemas"""
-
-    id = ma.String(attribute="ext_id", dump_only=True)
-    username = ma.String(dump_only=True)
-
-    class Meta:
-        model = User
-        sqla_session = db.session
-        load_instance = True
-        ordered = True
-        fields = ("id", "username")  # whitelist
+    verified = ma.Boolean()

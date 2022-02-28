@@ -1,5 +1,6 @@
 from flask import Blueprint, current_app, jsonify
 from flask_restful import Api as BaseApi
+from marshmallow.exceptions import SCHEMA as SCHEMA_ERROR
 from marshmallow.exceptions import ValidationError
 
 from everycache_api.api.resources import (
@@ -15,14 +16,17 @@ from everycache_api.api.resources import (
     UserListResource,
     UserResource,
 )
-from everycache_api.api.schemas import (
-    CacheCommentSchema,
-    CacheSchema,
-    CacheVisitSchema,
-    PublicCacheSchema,
-    PublicUserSchema,
-    UserSchema,
-)
+
+# from everycache_api.api.schemas import (
+#     CacheCommentSchema,
+#     CachePublicSchema,
+#     CacheSchema,
+#     CacheVisitSchema,
+#     UserAdminSchema,
+#     UserPublicSchema,
+#     UserSchema,
+#     UserUpdateSchema,
+# )
 from everycache_api.extensions import apispec
 
 handled_exceptions = [ValidationError]
@@ -73,7 +77,7 @@ for resource, route, endpoint in resources:
 @blueprint.before_app_first_request
 def register_views():
     # apispec.spec.components.schema("CacheSchema", schema=CacheSchema)
-    apispec.spec.components.schema("PublicCacheSchema", schema=PublicCacheSchema)
+    # apispec.spec.components.schema("CachePublicSchema", schema=CachePublicSchema)
     apispec.spec.path(view=CacheResource, app=current_app)
     apispec.spec.path(view=CacheListResource, app=current_app)
     apispec.spec.path(view=CacheVisitListResource, app=current_app)
@@ -86,7 +90,9 @@ def register_views():
     apispec.spec.path(view=CacheCommentResource, app=current_app)
 
     # apispec.spec.components.schema("UserSchema", schema=UserSchema)
-    # apispec.spec.components.schema("PublicUserSchema", schema=PublicUserSchema)
+    # apispec.spec.components.schema("UserUpdateSchema", schema=UserSchema)
+    # apispec.spec.components.schema("UserPublicSchema", schema=UserPublicSchema)
+    # apispec.spec.components.schema("UserAdminSchema", schema=UserSchema)
     apispec.spec.path(view=UserResource, app=current_app)
     apispec.spec.path(view=UserListResource, app=current_app)
     apispec.spec.path(view=UserCacheListResource, app=current_app)
@@ -99,6 +105,12 @@ def handle_marshmallow_error(e):
     """Return json error for marshmallow validation errors.
 
     This will avoid having to try/catch ValidationErrors in all endpoints, returning
-    correct JSON response with associated HTTP 400 Status (https://tools.ietf.org/html/rfc7231#section-6.5.1)
+    correct JSON response with associated HTTP 400 Status
+    (https://tools.ietf.org/html/rfc7231#section-6.5.1)
     """
-    return jsonify(e.messages), 400
+    if SCHEMA_ERROR in e.messages:
+        # schema-level error; return as message in response
+        return jsonify(message=e.messages[SCHEMA_ERROR][0]), 400
+    else:
+        # field-level error(s); return as dict of lists of errors
+        return jsonify(errors=e.messages), 400

@@ -126,7 +126,7 @@ export const updateCache = createAsyncThunk(
       });
 
       const { id, created_on, lon, lat, owner, name, description } =
-        response.data.cache;
+        response.data.result;
       const { username } = owner;
 
       const dataRow = createDataRow(
@@ -147,14 +147,14 @@ export const updateCache = createAsyncThunk(
 );
 
 export const deleteCache = createAsyncThunk(
-  "cache/deleteCache",
+  "cache/delete",
   async (id, thunkAPI) => {
-    try {
-      const response = await cache.remove(id);
+    const response = await cache.remove(id);
 
+    if (response.status == 200){
       return Promise.resolve(id);
-    } catch (error) {
-      return Promise.reject(id);
+    } else {
+      return Promise.reject();
     }
   }
 );
@@ -168,7 +168,7 @@ const initialState = {
   },
   caches: [],
   loading: false,
-  selectedCache: {},
+  selectedCache: null,
 };
 
 const cacheSlice = createSlice({
@@ -190,6 +190,7 @@ const cacheSlice = createSlice({
       state.prev = prev;
       state.caches = datasource;
       state.loading = false;
+      state.selectedCache = initialState.selectedCache;
     },
     [getMyCaches.fulfilled]: (state, action) => {
       const { total, pages, next, prev, datasource } = action.payload;
@@ -199,39 +200,40 @@ const cacheSlice = createSlice({
       state.prev = prev;
       state.caches = datasource;
       state.loading = false;
+      state.selectedCache = initialState.selectedCache;
     },
     [getCaches.rejected]: (state, action) => {
       state = initialState;
     },
     [getCaches.pending]: (state, action) => {
       state.loading = true;
-      state.caches = [];
     },
     [getMyCaches.rejected]: (state, action) => {
       state = initialState;
     },
     [getMyCaches.pending]: (state, action) => {
       state.loading = true;
-      state.caches = [];
     },
     [createCache.fulfilled]: (state, action) => {
       state.caches.push(action.payload);
     },
     [updateCache.fulfilled]: (state, action) => {
       const index = state.caches.findIndex(
-        (item) => item.id === action.payload.id
+        (item) => item.id == action.payload.id
       );
       const caches = state.caches.slice();
-      caches = caches.splice(index, 1, action.payload);
+      caches.splice(index, 1, action.payload);
       state.caches = caches;
     },
     [deleteCache.fulfilled]: (state, action) => {
+      const id = action.payload;
       const index = state.caches.findIndex(
-        (item) => item.id === action.payload
+        (item) => item.id == id
       );
       const caches = state.caches.slice();
-      caches = caches.splice(index, 1);
+      caches.splice(index, 1);
       state.caches = caches;
+      state.selectedCache = initialState.selectedCache;
     },
   },
 });

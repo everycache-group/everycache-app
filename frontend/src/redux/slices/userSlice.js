@@ -197,6 +197,8 @@ const userSlice = createSlice({
       if (index == currIndex){
         state.username = action.payload.username;
         state.role = action.payload.role;
+        state.email = action.payload.email;
+        state.id = action.payload.id;
       }
 
       users.splice(index, 1, action.payload);
@@ -210,7 +212,7 @@ const userSlice = createSlice({
       const users = state.users.slice()
       users.splice(index, 1);
       state.users = users;
-      //state.selectedUser = initialState.selectedUser;
+      state.selectedUser = initialState.selectedUser;
     },
 
   },
