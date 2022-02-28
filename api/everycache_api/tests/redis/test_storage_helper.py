@@ -1,6 +1,7 @@
+from datetime import datetime, timedelta
+
 from everycache_api.auth.storage_helper import load_tokens_from_database_to_storage
 from everycache_api.tests.factories.token_factory import TokenFactory
-from datetime import datetime, timedelta
 
 
 def test_db_to_storage(redis_client):

@@ -2,10 +2,10 @@ import json
 
 import pytest
 
-from everycache_api.api.schemas.cache import CacheSchema, CachePublicSchema
+from everycache_api.api.schemas.cache import CachePublicSchema, CacheSchema
 from everycache_api.api.schemas.cache_comment import CacheCommentSchema
 from everycache_api.api.schemas.cache_visit import CacheVisitSchema
-from everycache_api.api.schemas.user import UserSchema, UserPublicSchema
+from everycache_api.api.schemas.user import UserPublicSchema, UserSchema
 from everycache_api.extensions import db
 from everycache_api.models import Cache, CacheComment, CacheVisit, User
 from everycache_api.tests.factories.cache_comment_factory import CacheCommentFactory

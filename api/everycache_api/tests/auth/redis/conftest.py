@@ -1,5 +1,6 @@
 import pytest
 from fakeredis import FakeRedis
+
 import everycache_api.extensions
 
 

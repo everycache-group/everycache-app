@@ -1,12 +1,11 @@
+from collections import OrderedDict
 from datetime import datetime
+from types import SimpleNamespace
 
 import pytest
 from marshmallow import fields
 
 from everycache_api.common.filters import apply_query_filters
-from types import SimpleNamespace
-
-from collections import OrderedDict
 
 
 @pytest.fixture()

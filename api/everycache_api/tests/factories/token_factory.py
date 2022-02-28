@@ -1,6 +1,7 @@
-import factory
 import datetime
-from datetime import timezone, datetime
+from datetime import datetime, timezone
+
+import factory
 from factory.fuzzy import FuzzyDateTime
 
 from everycache_api.extensions import db

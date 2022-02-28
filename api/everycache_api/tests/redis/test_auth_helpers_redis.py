@@ -11,10 +11,9 @@ from everycache_api.auth.helpers import (
     revoke_token,
     save_encoded_token,
 )
+from everycache_api.auth.storage_helper import _format_token_key
 from everycache_api.models import Token
 from everycache_api.tests.factories.user_factory import AdminFactory, UserFactory
-from everycache_api.auth.storage_helper import _format_token_key
-
 
 TOKEN_TYPES = ("access", "refresh")
 

@@ -15,7 +15,6 @@ from everycache_api.models import Token
 from everycache_api.tests.factories.token_factory import TokenFactory
 from everycache_api.tests.factories.user_factory import AdminFactory, UserFactory
 
-
 TOKEN_TYPES = ("access", "refresh")
 
 

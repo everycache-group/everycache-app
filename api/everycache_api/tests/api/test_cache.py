@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from everycache_api.api.schemas.cache import CacheSchema, CachePublicSchema
+from everycache_api.api.schemas.cache import CachePublicSchema, CacheSchema
 from everycache_api.api.schemas.cache_comment import CacheCommentSchema
 from everycache_api.api.schemas.cache_visit import CacheVisitSchema
 from everycache_api.extensions import db

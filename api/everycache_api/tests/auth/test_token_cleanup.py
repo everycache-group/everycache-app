@@ -1,7 +1,11 @@
-from everycache_api.models import Token
-from everycache_api.auth.token_cleanup import cleanup_expired_tokens, add_token_cleanup_job
-from everycache_api.tests.factories.token_factory import TokenFactory
 from datetime import datetime, timedelta
+
+from everycache_api.auth.token_cleanup import (
+    add_token_cleanup_job,
+    cleanup_expired_tokens,
+)
+from everycache_api.models import Token
+from everycache_api.tests.factories.token_factory import TokenFactory
 
 
 def test_token_cleanup(app, mocker):
