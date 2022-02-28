@@ -21,11 +21,13 @@ def _format_token_key(user_id, token_type, jti):
     return f"jwt_token:user_id-{user_id}:{token_type}:jti-{jti}".encode()
 
 
-def _delete_key(key, pipeline=redis_client):
+def _delete_key(key, pipeline=None):
+    pipeline = pipeline or redis_client
     return pipeline.delete(key)
 
 
-def save_token(token: Token, pipeline=redis_client):
+def save_token(token: Token, pipeline=None):
+    pipeline = pipeline or redis_client
     token_key = _format_token_key(token.user.ext_id, token.token_type, token.jti)
 
     pipeline.set(token_key, "noop".encode())

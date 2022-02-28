@@ -18,7 +18,7 @@ SQLALCHEMY_DATABASE_URI = getenv("DATABASE_URI")
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 HASHIDS_ALPHABET = getenv("HASHIDS_ALPHABET", "abcdefghijklmnopqrstuvwxyz")
-HASHIDS_SALT = getenv("HASHIDS_SALT")
+HASHIDS_SALT = getenv("HASHIDS_SALT", "")
 
 # jwt access and refresh tokens validity times in minutes
 JWT_ACCESS_TOKEN_EXPIRES = int(getenv("JWT_ACCESS_TOKEN_EXPIRY_MINUTES", "15")) * 60
