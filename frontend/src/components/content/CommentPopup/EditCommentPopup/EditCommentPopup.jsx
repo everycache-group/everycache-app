@@ -2,11 +2,13 @@ import React, { useState, useEffect } from "react";
 import Popup from "./../../../shared/interaction/Popup/Popup";
 import CacheForm from "../../cacheForm/CacheForm";
 import { createCache } from "./../../../../redux/slices/cacheSlice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useSnackbar } from "notistack";
 import { alertFormErrors, alertGenericErrors } from "../../../../services/errorMessagesService"
+import CommentForm from "../../commentForm/CommentForm"
+import { updateComment } from "../../../../redux/slices/commentSlice"
 
-function AddCachePopup({ OnActionClose }) {
+function EditCommentPopup({ OnActionClose, Comment }) {
   const dispatch = useDispatch();
   const snackBar = useSnackbar();
   const [trigger, setTrigger] = useState(true);
@@ -20,17 +22,15 @@ function AddCachePopup({ OnActionClose }) {
   }, [trigger]);
 
   const OnFormSubmitHandler = (formData, setErrors) => {
-    const createCacheDto = {
-      description: formData.description,
-      lat: formData.lat,
-      lon: formData.lon,
-      name: formData.name,
+    const editCommentDto = {
+      id: Comment.id,
+      text: formData.text
     };
 
-    dispatch(createCache(createCacheDto))
+    dispatch(updateComment(editCommentDto))
       .unwrap()
       .then(() => {
-        snackBar.enqueueSnackbar("Cache Added Succesfully!,", {
+        snackBar.enqueueSnackbar("Comment Updated Succesfully!", {
           variant: "success",
         });
         setTrigger(false);
@@ -44,18 +44,13 @@ function AddCachePopup({ OnActionClose }) {
 
   return (
     <Popup trigger={trigger} setTrigger={setTrigger}>
-      <CacheForm
-        Cache={{
-          name: "",
-          lat: 0,
-          lon: 0,
-          description: "",
-        }}
+      <CommentForm
+        Comment={Comment}
         OnFormSubmit={OnFormSubmitHandler}
-        ButtonName="Create"
+        ButtonName="Update"
       />
     </Popup>
   );
 }
 
-export default AddCachePopup;
+export default EditCommentPopup;

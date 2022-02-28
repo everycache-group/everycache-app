@@ -4,60 +4,73 @@ import ResourceConnector from "../../services/resourceService";
 import { PrepareDataSourceTable } from "../../services/dataSourceMapperService";
 import { createDataRow } from "../../services/dataSourceMapperService";
 import { axiosInstance } from "../../api/api-connector";
+import {prepareErrorPayload} from "../../services/errorMessagesService"
+import { getComments } from "./commentSlice"
 
 const cache = new ResourceConnector(config.resources.cache);
 
 export const getCaches = createAsyncThunk(
   "cache/getCaches",
-  async (userId, { dispatch }) => {
-    const response = await cache.get(userId);
+  async (userId, { rejectWithValue }) => {
+    try{
+      const response = await cache.get(userId);
 
-    const { data } = response;
 
-    const datasource = PrepareDataSourceTable(data.results);
+      const { data } = response;
 
-    const { total, pages, next, prev } = data;
+      const datasource = PrepareDataSourceTable(data.results);
 
-    const payload = {
-      total,
-      pages,
-      next,
-      prev,
-      datasource,
-    };
+      const { total, pages, next, prev } = data;
 
-    return Promise.resolve(payload);
+      const payload = {
+        total,
+        pages,
+        next,
+        prev,
+        datasource,
+      };
+
+      return Promise.resolve(payload);
+    }
+    catch (e) {
+      return rejectWithValue(prepareErrorPayload(e, "Could not get caches!"))
+    }
   }
 );
 
 export const getMyCaches = createAsyncThunk(
   "cache/getMyCaches",
-  async (_, { getState }) => {
-    const userId = getState().auth.userId;
+  async (_, { getState, rejectWithValue }) => {
+    try {
+      const userId = getState().auth.userId;
 
-    const response = await axiosInstance.get(`/api/users/${userId}/caches`);
+      const response = await axiosInstance.get(`/api/users/${userId}/caches`);
 
-    const { data } = response;
+      const { data } = response;
 
-    const datasource = PrepareDataSourceTable(data.results);
+      const datasource = PrepareDataSourceTable(data.results);
 
-    const { total, pages, next, prev } = data;
+      const { total, pages, next, prev } = data;
 
-    const payload = {
-      total,
-      pages,
-      next,
-      prev,
-      datasource,
-    };
+      const payload = {
+        total,
+        pages,
+        next,
+        prev,
+        datasource,
+      };
 
-    return Promise.resolve(payload);
+      return Promise.resolve(payload);
+    }
+    catch (e) {
+      return rejectWithValue(prepareErrorPayload(e, "Could not get your caches!"))
+    }
   }
 );
 
 export const createCache = createAsyncThunk(
   "cache/createCache",
-  async (cacheData, { dispatch }) => {
+  async (cacheData, { rejectWithValue }) => {
     try {
       const response = await cache.create(cacheData);
 
@@ -76,15 +89,15 @@ export const createCache = createAsyncThunk(
       );
 
       return Promise.resolve(dataRow);
-    } catch (_error) {
-      return Promise.reject();
+    } catch (e) {
+      return rejectWithValue(prepareErrorPayload(e.response, "Could not create cache!"));
     }
   }
 );
 
 export const updateCache = createAsyncThunk(
-  "cache/updateCache",
-  async (cacheDto, thunkAPI) => {
+  "cache/update",
+  async (cacheDto, { rejectWithValue }) => {
     try {
       const response = await cache.update(cacheDto.id, {
         description: cacheDto.description,
@@ -108,21 +121,20 @@ export const updateCache = createAsyncThunk(
       );
 
       return Promise.resolve(dataRow);
-    } catch (_error) {
-      return Promise.reject();
+    } catch (e) {
+      return rejectWithValue(prepareErrorPayload(e.response, "Could not update cache!"))
     }
   }
 );
 
 export const deleteCache = createAsyncThunk(
-  "cache/delete",
-  async (id, thunkAPI) => {
-    const response = await cache.remove(id);
-
-    if (response.status == 200){
+  "cache/deleteCache",
+  async (id, { rejectWithValue }) => {
+    try {
+      const response = await cache.remove(id);
       return Promise.resolve(id);
-    } else {
-      return Promise.reject();
+    } catch (e) {
+      return rejectWithValue(prepareErrorPayload(e, "Could not delete cache!"))
     }
   }
 );

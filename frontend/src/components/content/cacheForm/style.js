@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-export const CacheFormWrapper = styled.div`
+export const CacheFormWrapper = styled.form`
   border: 1px solid #ccc;
   height: 600px;
   padding: 16px;

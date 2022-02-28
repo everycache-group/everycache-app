@@ -30,9 +30,9 @@ function Map() {
       </Style.CacheContent>
 
       <LeafletMap width={1200}>
-        {caches.map(({ id, lat, lng, description }) => {
+        {caches.map(({ id, lat, lon, description }) => {
           return (
-            <CacheMarker key={id} position={[lat, lng]} title={description} />
+            <CacheMarker key={id} position={[lat, lon]} title={description} />
           );
         })}
         <SettingsMapTracker
