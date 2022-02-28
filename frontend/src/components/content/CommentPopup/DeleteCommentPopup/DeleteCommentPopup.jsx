@@ -4,11 +4,11 @@ import Button from "@mui/material/Button";
 import { Typography } from "@mui/material";
 import * as Style from "./style";
 import { useDispatch, useSelector } from "react-redux";
-import { deleteUser } from "./../../../../redux/slices/userSlice";
+import { deleteComment } from "./../../../../redux/slices/commentSlice";
 import { useSnackbar } from "notistack";
 import { alertGenericErrors } from "../../../../services/errorMessagesService"
 
-function DeleteUserPopup({ OnActionClose }) {
+function DeleteCommentPopup({ OnActionClose, commentId }) {
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
@@ -24,10 +24,10 @@ function DeleteUserPopup({ OnActionClose }) {
   const selectedUser = useSelector((state) => state.user.selectedUser);
 
   const OnDeleteHandler = (e) => {
-    dispatch(deleteUser(selectedUser.id))
+    dispatch(deleteComment(commentId))
       .unwrap()
       .then(() => {
-        snackBar.enqueueSnackbar("User Deleted Succesfully!", {
+        snackBar.enqueueSnackbar("Comment Deleted Succesfully!", {
           variant: "success",
         });
         setTrigger(false);
@@ -38,11 +38,11 @@ function DeleteUserPopup({ OnActionClose }) {
   };
 
   return (
-    <Popup title="Delete User" trigger={trigger} setTrigger={setTrigger}>
+    <Popup title="Delete Comment" trigger={trigger} setTrigger={setTrigger}>
       <Style.PopupContainer>
         <Typography variant="h6" display="block">
           Are you sure you want to delete
-          <br /> this user?
+          <br /> this comment?
         </Typography>
         <Style.ButtonContainer>
           <Button variant="contained" onClick={OnDeleteHandler}>
@@ -55,4 +55,4 @@ function DeleteUserPopup({ OnActionClose }) {
   );
 }
 
-export default DeleteUserPopup;
+export default DeleteCommentPopup;

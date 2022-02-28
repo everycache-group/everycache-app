@@ -5,12 +5,14 @@ import { updateUser } from "./../../../../redux/slices/userSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { selector } from "react-redux";
 import { useSnackbar } from "notistack";
+import { alertGenericErrors, alertFormErrors } from "../../../../services/errorMessagesService"
 
 function EditUserPopup({ OnActionClose }) {
   const [trigger, setTrigger] = useState(true);
 
   const selectedUser = useSelector((state) => state.user.selectedUser);
   const currentUserRole = useSelector((state) => state.user.role)
+  const currentUserId = useSelector((state) => state.user.id)
 
   const snackBar = useSnackbar();
   const dispatch = useDispatch();
@@ -25,12 +27,16 @@ function EditUserPopup({ OnActionClose }) {
 
 
 
-  const OnFormSubmitHandler = (formData) => {
+  const OnFormSubmitHandler = (formData, setErrors) => {
     let updateUserDto = {
       id: selectedUser.id,
       username: formData.username,
       email: formData.email,
     };
+
+    if (formData.current_password) {
+      updateUserDto["current_password"] = formData.current_password
+    }
 
     if (currentUserRole == "Admin"){
       updateUserDto = {
@@ -44,21 +50,15 @@ function EditUserPopup({ OnActionClose }) {
       updateUserDto["password"] = formData.password;
     }
 
-    dispatch(updateUser(updateUserDto)).then(({ meta }) => {
-      const {requestStatus} = meta;
-      console.log(meta);
-      if (requestStatus == "fulfilled"){
-        snackBar.enqueueSnackbar("User Updated Succesfully!", {
-          variant: "success",
-        });
-      }
-      else {
-        snackBar.enqueueSnackbar("User Update has Failed!", {
-          variant: "error",
-        });
-      }
-      setTrigger(false);
+    dispatch(updateUser(updateUserDto)).unwrap().then((result) => {
+      snackBar.enqueueSnackbar("User Updated Succesfully!", {
+        variant: "success",
+      });
       OnActionClose();
+      setTrigger(false);
+    }).catch((payload) => {
+      alertFormErrors(payload, setErrors);
+      alertGenericErrors(payload, snackBar);
     });
   };
 

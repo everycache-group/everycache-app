@@ -9,15 +9,16 @@ import { MdMyLocation } from "react-icons/md/";
 import SettingsMapTracker from "./../map/SettingsMapTracker";
 import CacheMarker from "./../cacheMarker/CacheMarker";
 import { useSelector } from "react-redux";
+import { prepareErrors } from "../../../services/errorMessagesService"
 
 function CacheForm({ Cache, OnFormSubmit, ButtonName }) {
   const { zoom, center } = useSelector((state) => state.map.settings);
-  const { name, lng, lat, description } = Cache;
-  const [showMarker, setShowMarker] = useState(!!(lng && lat));
+  const { name, lon, lat, description } = Cache;
+  const [showMarker, setShowMarker] = useState(!!(lon && lat));
   const [loading, setLoading] = useState(false);
 
   const handleLocationClick = (e) => {
-    setFormValues({ ...formValues, lng: center[1], lat: center[0] });
+    setFormValues({ ...formValues, lon: center[1], lat: center[0] });
     setShowMarker(true);
   };
 
@@ -26,17 +27,18 @@ function CacheForm({ Cache, OnFormSubmit, ButtonName }) {
     handleUserInput,
     formValues,
     errors,
+    setErrors,
     setFormValues,
   } = useForm(
     {
       name: name ? name : "",
       description: description ? description : "",
-      lng,
+      lon,
       lat,
     },
     () => {
       if (OnFormSubmit instanceof Function) {
-        OnFormSubmit(formValues);
+        OnFormSubmit(formValues, setErrors);
       }
     }
   );
@@ -51,7 +53,7 @@ function CacheForm({ Cache, OnFormSubmit, ButtonName }) {
             onChange={handleUserInput}
             name="name"
             error={!!errors.name}
-            helperText={errors.name}
+            helperText={prepareErrors(errors.name)}
             placeholder="Enter Cache Name Here..."
             value={formValues.name}
           />
@@ -60,12 +62,12 @@ function CacheForm({ Cache, OnFormSubmit, ButtonName }) {
               label="Longitude"
               type="number"
               size="small"
-              id="lng"
-              name="lng"
-              error={!!errors.lng}
-              helperText={errors.lng}
+              id="lon"
+              name="lon"
+              error={!!errors.lon}
+              helperText={prepareErrors(errors.lon)}
               onChange={handleUserInput}
-              value={formValues.lng}
+              value={formValues.lon}
             />
             <TextField
               label="Latitude"
@@ -74,7 +76,7 @@ function CacheForm({ Cache, OnFormSubmit, ButtonName }) {
               id="lat"
               name="lat"
               error={!!errors.lat}
-              helperText={errors.lat}
+              helperText={prepareErrors(errors.lat)}
               onChange={handleUserInput}
               value={formValues.lat}
             />
@@ -87,7 +89,7 @@ function CacheForm({ Cache, OnFormSubmit, ButtonName }) {
             onChange={handleUserInput}
             name="description"
             error={!!errors.description}
-            helperText={errors.description}
+            helperText={prepareErrors(errors.description)}
             maxRows={10}
             value={formValues.description}
           />
@@ -101,6 +103,7 @@ function CacheForm({ Cache, OnFormSubmit, ButtonName }) {
           loading={loading}
           variant="contained"
           color="success"
+          type="submit"
         >
           {ButtonName}
         </LoadingButton>
@@ -115,14 +118,14 @@ function CacheForm({ Cache, OnFormSubmit, ButtonName }) {
         </Style.MarkerLocationWrapper>
         {showMarker && (
           <CacheMarker
-            position={[formValues.lat, formValues.lng]}
+            position={[formValues.lat || 0, formValues.lon || 0]}
             draggable={true}
             eventHandlers={{
               dragend: (e) => {
-                const position = e.target.getLatLng();
+                const position = e.target.getLatLon();
                 setFormValues({
                   ...formValues,
-                  lng: position.lng,
+                  lon: position.lon,
                   lat: position.lat,
                 });
               },

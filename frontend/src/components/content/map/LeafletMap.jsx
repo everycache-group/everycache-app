@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import { compose } from "react-recompose";
 import withError from "../../../hoc/withHandleError";
 import withLoading from "../../../hoc/withHandleLoading";
+import CommentList from "../CommentList/CommentList"
 
 const LeafletMap = (props) => {
   const [map, setMap] = useState(null);
@@ -15,8 +16,8 @@ const LeafletMap = (props) => {
   //jump to selected cache on map
   useEffect(() => {
     if (map && selectedCache) {
-      const { lat, lng } = selectedCache;
-      map.flyTo({ lat, lng });
+      const { lat, lon } = selectedCache;
+      map.flyTo({ lat, lon });
     }
   }, [selectedCache]);
 
@@ -35,6 +36,7 @@ const LeafletMap = (props) => {
 
         {props.children}
       </MapContainer>
+      <CommentList />
     </Style.LeafletMapWrapper>
   );
 };

@@ -7,6 +7,7 @@ import { loginUser } from "./../../../redux/slices/authSlice";
 import { getUser } from "./../../../redux/slices/userSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useSnackbar } from "notistack";
+import { alertGenericErrors, prepareErrors } from "../../../services/errorMessagesService"
 
 function Login() {
   const [registering, setRegistering] = useState(false);
@@ -25,13 +26,15 @@ function Login() {
         .unwrap()
         .then((result) => {
           const {userId} = result;
-          console.log(result, userId);
-          dispatch(getUser(userId));
+          dispatch(getUser(userId))
+            .unwrap()
+            .then((result) => {})
+            .catch((payload) => {
+              alertGenericErrors(payload, snackBar);
+            });
         })
-        .catch((rejectedResult) => {
-          snackBar.enqueueSnackbar("Invalid Email or Password. Try Again,", {
-            variant: "error",
-          });
+        .catch((payload) => {
+          alertGenericErrors(payload, snackBar);
         });
     }
   );
@@ -42,7 +45,7 @@ function Login() {
         size="small"
         id="email"
         error={!!errors.email}
-        helperText={errors.email}
+        helperText={prepareErrors(errors.email)}
         onChange={handleUserInput}
         type="email"
         name="email"
@@ -52,7 +55,7 @@ function Login() {
         size="small"
         id="password"
         error={!!errors.password}
-        helperText={errors.password}
+        helperText={prepareErrors(errors.password)}
         onChange={handleUserInput}
         type="password"
         name="password"
@@ -64,6 +67,7 @@ function Login() {
         loading={registering}
         variant="contained"
         color="success"
+        type="submit"
       >
         Log in
       </LoadingButton>

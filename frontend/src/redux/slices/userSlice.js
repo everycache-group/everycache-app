@@ -7,6 +7,7 @@ import {
   loginUser
 } from "./authSlice";
 import config from "./../../api/api-config.json";
+import {prepareErrorPayload} from "../../services/errorMessagesService"
 
 const initialState = {
   username: "",
@@ -23,99 +24,66 @@ const user = new ResourceConnector(config.resources.user);
 export const getUsers = createAsyncThunk(
   "user/getUsers",
   async (_, {
-    dispatch
+    rejectWithValue
   }) => {
-    const response = await user.get();
-
-    const {
-      data
-    } = response;
-
-    const results = data.results
-
-    const datasource = data.results;
-    //const datasource = JSON.parse(); //PrepareDataSourceTable(data.results);
-
-    const {
-      total,
-      pages,
-      next,
-      prev
-    } = data;
-
-    const payload = {
-      total,
-      pages,
-      next,
-      prev,
-      datasource,
+    try{
+      const response = await user.get();
+      return Promise.resolve(response.data);
+    }
+    catch(e) {
+      return rejectWithValue(prepareErrorPayload(e.response, "Could not get users!"));
     };
-
-    return Promise.resolve(data);
   }
 );
 
 export const createUser = createAsyncThunk(
   "user/createUser",
-  async (userData, {
-    dispatch
-  }) => {
-    const response = await user.create(userData);
+  async (userData, {rejectWithValue, dispatch}) => {
+    try{
+      const response = await user.create(userData);
+      dispatch(
+        loginUser({
+          email: userData.email,
+          password: userData.password,
+        }))
+          .unwrap()
+          .then((result) => {
+            const {userId} = result;
+            dispatch(getUser(userId))
+          });
 
-    if (response.status !== 200) {
-      return Promise.reject();
+      return Promise.resolve(response.data);
     }
-
-    const {
-      data
-    } = response;
-
-    dispatch(
-      loginUser({
-        email: userData.email,
-        password: userData.password,
-      })
-    );
-
-    return Promise.resolve(data);
+    catch(e) {
+      return rejectWithValue(prepareErrorPayload(e.response, "Could not create user!"));
+    };
   }
 );
 
 export const getUser = createAsyncThunk(
   "user/get",
-  async (userId, {
-    dispatch
-  }) => {
-    const response = await user.get(userId);
-
-    const {
-      data
-    } = response;
-
-
-    if (response.status !== 200) {
-      return Promise.reject();
+  async (userId, { rejectWithValue }) => {
+    try{
+      const response = await user.get(userId);
+      return Promise.resolve(response.data.user);
     }
-
-    return Promise.resolve(data.user);
+    catch(e) {
+      return rejectWithValue(prepareErrorPayload(e.response, "Could not get user data!"));
+    };
   }
 );
 
 export const updateUser = createAsyncThunk(
   "user/update",
-  async (userData, {
-    dispatch
-  }) => {
+  async (userData, {rejectWithValue}) => {
     const {id, ...data} = userData;
-    const response = await user.update(id, data);
-
-    const {data: outData} = response;
-
-    if (response.status !== 200) {
-      return Promise.reject();
+    try{
+      const response = await user.update(id, data);
+      return Promise.resolve(response.data.user);
     }
-
-    return Promise.resolve(outData.user);
+    catch(e) {
+      return rejectWithValue(prepareErrorPayload(e.response, "Could not update user!"));
+    };
   }
 );
 
@@ -123,16 +91,14 @@ export const updateUser = createAsyncThunk(
 
 export const deleteUser = createAsyncThunk(
   "user/delete",
-  async (userId, {
-    dispatch
-  }) => {
-    const response = await user.remove(userId);
-
-    if (response.status !== 200) {
-      return Promise.reject(userId);
+  async (userId, { rejectWithValue }) => {
+    try{
+      const response = await user.remove(userId);
+      return Promise.resolve(userId);
     }
-
-    return Promise.resolve(userId);
+    catch(e) {
+      return rejectWithValue(prepareErrorPayload(e.response, "Could not delete user!"));
+    };
   }
 );
 
@@ -151,8 +117,8 @@ const userSlice = createSlice({
       );
     },
     selectSelf: (state, action) => {
-      const {id, username, email, role} = state;
-      state.selectedUser = {id, username, email, role};
+      const {id, username, email, role, verified} = state;
+      state.selectedUser = {id, username, email, role, verified};
     },
   },
   extraReducers: {
@@ -161,12 +127,14 @@ const userSlice = createSlice({
         id,
         username,
         role,
-        email
+        email,
+        verified
       } = action.payload;
       state.id = id
       state.username = username;
       state.role = role;
       state.email = email;
+      state.verified = verified;
     },
     [getUsers.fulfilled]: (state, action) => {
       const {

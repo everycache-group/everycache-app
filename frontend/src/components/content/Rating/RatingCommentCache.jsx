@@ -1,5 +1,5 @@
 import * as Style from "./style";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Rating from "@mui/material/Rating";
 import Box from "@mui/material/Box";
 import StarIcon from "@mui/icons-material/Star";
@@ -10,11 +10,6 @@ import SendIcon from "@mui/icons-material/Send";
 import SettingsMapTracker from "./../map/SettingsMapTracker";
 import CacheMarker from "./../cacheMarker/CacheMarker";
 import { useSelector } from "react-redux";
-import { AddRating } from "../../../redux/slices/cacheSlice";
-import { useDispatch } from "react-redux";
-import { Typography } from "@mui/material";
-import { useSnackbar } from "notistack";
-import TextField from "@mui/material/TextField";
 
 const labels = {
   0.5: "Useless",
@@ -29,47 +24,14 @@ const labels = {
   5: "Excellent+",
 };
 
-function RatingCommentCache({ OnActionClose }) {
-  const { name, lng, lat, description } = Cache;
-  const [showMarker, setShowMarker] = useState(!!(lng && lat));
-  const [comment, setComment] = useState("");
+function RatingCommentCache({ ButtonName }) {
+  const { name, lon, lat, description } = Cache;
+  const [showMarker, setShowMarker] = useState(!!(lon && lat));
 
-  const dispatch = useDispatch();
-  const snackBar = useSnackbar();
-
-  const [rating, setRating] = useState(2);
+  const [value, setValue] = useState(2);
   const [hover, setHover] = useState(-1);
   const [trigger, setTrigger] = useState(true);
   const [loading, setLoading] = useState(false);
-
-  const currentCache = useSelector((state) => state.cache.selectedCache);
-
-  const OnRatingChange = (event, newValue) => {
-    dispatch(AddRating({ id: currentCache.id, rating: hover })).then(
-      ({ meta }) => {
-        if (meta.requestStatus === "fulfilled") {
-          setRating(hover);
-          snackBar.enqueueSnackbar("Cache Rated Succesfully!", {
-            variant: "success",
-          });
-        }
-      }
-    );
-  };
-
-  const OnCommentChange = (e) => {
-    setComment(e.target.value);
-  };
-
-  const OnCommentButtonClick = (e) => {};
-
-  useEffect(() => {
-    if (trigger === false) {
-      if (OnActionClose instanceof Function) {
-        OnActionClose();
-      }
-    }
-  }, [trigger]);
 
   const { zoom, center } = useSelector((state) => state.map.settings);
 
@@ -78,7 +40,7 @@ function RatingCommentCache({ OnActionClose }) {
       <Style.CacheFormWrapper>
         <Style.CacheFormContent>
           <Style.CacheInputWrapper>
-            <Typography variant="h6"> Rate cache</Typography>
+            {" "}
             <Style.RatingWrapper>
               <Box
                 sx={{
@@ -89,33 +51,26 @@ function RatingCommentCache({ OnActionClose }) {
               >
                 <Rating
                   name="hover-feedback"
-                  value={rating}
+                  value={value}
                   precision={0.5}
-                  onChange={OnRatingChange}
+                  onChange={(event, newValue) => {
+                    setValue(newValue);
+                  }}
                   onChangeActive={(event, newHover) => {
                     setHover(newHover);
+                    console.log("active change");
                   }}
                   emptyIcon={
                     <StarIcon style={{ opacity: 0.55 }} fontSize="inherit" />
                   }
                 />
+                {value !== null && (
+                  <Box sx={{ ml: 2 }}>
+                    {labels[hover !== -1 ? hover : value]}
+                  </Box>
+                )}
               </Box>
-
-              {rating !== null && (
-                <Typography variant="h6">
-                  {labels[hover !== -1 ? hover : rating]}
-                </Typography>
-              )}
             </Style.RatingWrapper>
-            <TextField
-              multiline
-              placeholder="Enter Comment Here..."
-              label="Comment"
-              id="comment"
-              onChange={OnCommentChange}
-              name="comment"
-              maxRows={10}
-            />
           </Style.CacheInputWrapper>
 
           <LoadingButton
@@ -127,7 +82,7 @@ function RatingCommentCache({ OnActionClose }) {
             variant="contained"
             color="success"
           >
-            Add Comment
+            {ButtonName}
           </LoadingButton>
         </Style.CacheFormContent>
         <LeafletMap width={500}>
@@ -137,7 +92,7 @@ function RatingCommentCache({ OnActionClose }) {
               draggable={true}
               eventHandlers={{
                 dragend: (e) => {
-                  const position = e.target.getLatLng();
+                  const position = e.target.getLatLon();
                 },
               }}
             />

@@ -2,10 +2,11 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import jwt_decode from "jwt-decode";
 import { login, logout } from "../../api/api-core";
 import { getUser, logout as userLogout } from "../slices/userSlice";
+import {prepareErrorPayload} from "../../services/errorMessagesService"
 
 export const loginUser = createAsyncThunk(
   "auth/loginUser",
-  async ({ email, password }, { dispatch }) => {
+  async ({ email, password }, { rejectWithValue }) => {
     try {
       const response = await login(email, password);
       const { data } = response;
@@ -13,22 +14,27 @@ export const loginUser = createAsyncThunk(
 
       data.userId = decodedToken.sub;
       return Promise.resolve(data);
-    } catch (_error) {
-      return Promise.reject();
+    } catch (e) {
+      return rejectWithValue(prepareErrorPayload(e.response, "Could not log in!"))
     }
   }
 );
 
 export const logoutUser = createAsyncThunk(
   "auth/logoutUser",
-  async (_, { getState, dispatch }) => {
-    const auth = getState().auth;
+  async (_, { getState, dispatch, rejectWithValue }) => {
+    try {
+      const auth = getState().auth;
 
-    if (auth.logged) {
-      const response = await logout(auth.access_token);
-      dispatch(userLogout());
+      if (auth.logged) {
+        const response = await logout(auth.access_token);
+        dispatch(userLogout());
+      }
+      return Promise.resolve();
     }
-    return Promise.resolve();
+    catch (e) {
+      return rejectWithValue(prepareErrorPayload(e.response, "Could not log out!"))
+    }
   }
 );
 

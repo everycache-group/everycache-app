@@ -17,7 +17,7 @@ export function createDataRow(
     description,
     owner,
     lat,
-    lng: lon,
+    lon,
     creationDate,
   };
 }
@@ -47,7 +47,7 @@ export function PrepareCacheColumns(myCache = false) {
       hideable: !myCache,
     },
     { field: "lat", headerName: "Lat", width: 70, type: "number" },
-    { field: "lng", headerName: "Lng", width: 70, type: "number" },
+    { field: "lon", headerName: "Lng", width: 70, type: "number" },
     {
       field: "creationDate",
       headerName: "Created at",

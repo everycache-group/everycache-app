@@ -12,7 +12,6 @@ function CacheTable({ title, data, hideOwner }) {
 
   const handleRowClick = (params) => {
     const { row } = params;
-
     dispatch(selectRow(row.id));
   };
 
