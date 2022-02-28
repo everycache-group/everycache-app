@@ -117,8 +117,8 @@ const userSlice = createSlice({
       );
     },
     selectSelf: (state, action) => {
-      const {id, username, email, role} = state;
-      state.selectedUser = {id, username, email, role};
+      const {id, username, email, role, verified} = state;
+      state.selectedUser = {id, username, email, role, verified};
     },
   },
   extraReducers: {
@@ -127,12 +127,14 @@ const userSlice = createSlice({
         id,
         username,
         role,
-        email
+        email,
+        verified
       } = action.payload;
       state.id = id
       state.username = username;
       state.role = role;
       state.email = email;
+      state.verified = verified;
     },
     [getUsers.fulfilled]: (state, action) => {
       const {
