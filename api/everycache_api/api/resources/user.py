@@ -1,5 +1,8 @@
+import uuid
+
 from flask import abort, request
 from flask_jwt_extended import current_user, jwt_required
+from flask_mail import Message
 from flask_restful import Resource
 from marshmallow import ValidationError
 
@@ -13,7 +16,8 @@ from everycache_api.api.schemas import (
 )
 from everycache_api.auth.helpers import revoke_all_user_tokens
 from everycache_api.common.pagination import paginate
-from everycache_api.extensions import db
+from everycache_api.config import FRONTEND_APP_URL
+from everycache_api.extensions import db, mail
 from everycache_api.models import Cache, CacheComment, CacheVisit, User
 
 
@@ -300,9 +304,74 @@ class UserListResource(Resource):
             raise ValidationError(errors)
 
         db.session.add(user)
+
+        token = uuid.uuid4()
+        user.verification_token = token
+        msg = Message("Everycache - Account Activation", sender="everycache@gmail.com", recipients=[user.email])
+        msg.body = f"{FRONTEND_APP_URL}/activate/{token}"
+        try:
+            mail.send(msg)
+        except:
+            db.session.rollback()
+            return {"message": "Could not send the activation email."}, 503
+
         db.session.commit()
 
         return {"message": "User created.", "user": schema.dump(user)}, 201
+
+
+class UserActivationResource(Resource):
+    """Single object resource
+
+    ---
+    post:
+      tags:
+        - api
+      parameters:
+        - in: path
+          name: token
+          schema:
+            type: string
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User activated.
+
+        400:
+          description: user already activated
+        401:
+          description: invalid activation token
+        403:
+          description: forbidden
+        404:
+          description: user not found
+    """
+
+    method_decorators = [jwt_required(optional=True)]
+
+    def post(self, token):
+        import uuid
+
+        try:
+            token = uuid.UUID(token)
+        except ValueError:
+            return {"message": "Invalid token provided."}, 401
+
+        user = User.query.filter_by(verification_token=token).first_or_404()
+
+        if user.verified:
+            return {"message": "User has already been activated."}, 400
+
+        user.verified = True
+        db.session.commit()
+
+        return {"message": "User activated."}, 200
 
 
 class UserCacheListResource(Resource):

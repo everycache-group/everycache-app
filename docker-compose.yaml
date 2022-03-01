@@ -25,6 +25,7 @@ services:
       JWT_REFRESH_TOKEN_EXPIRY_MINUTES:
       REDIS_URL: redis://redis:6379/0
       SECRET_KEY:
+      MAIL_PASSWORD:
 
   database:
     image: postgres:latest
