@@ -331,9 +331,12 @@ class UserActivationResource(Resource):
         except ValueError:
             return {"message": "Invalid token provided."}, 401
 
-        user = User.query.filter(User.verification_token == token, User.verified == False).first_or_404()
-        user.verified = True
+        user = User.query.filter_by(verification_token=token).first_or_404()
 
+        if user.verified:
+            return {"message": "User has already been activated."}, 400
+
+        user.verified = True
         db.session.commit()
 
         return {"message": "User activated."}, 200
