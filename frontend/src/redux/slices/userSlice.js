@@ -8,6 +8,7 @@ import {
 } from "./authSlice";
 import config from "./../../api/api-config.json";
 import {prepareErrorPayload} from "../../services/errorMessagesService"
+import { axiosInstance } from "../../api/api-connector";
 
 const initialState = {
   username: "",
@@ -20,6 +21,21 @@ const initialState = {
 };
 
 const user = new ResourceConnector(config.resources.user);
+
+export const activateUser = createAsyncThunk(
+  "user/activate",
+  async (token, {
+    rejectWithValue
+  }) => {
+    try{
+      const response = await axiosInstance.post(`/api/users/activate/${token}`);
+      return Promise.resolve(response.data);
+    }
+    catch(e) {
+      return rejectWithValue(prepareErrorPayload(e.response, "Could not activate user!"));
+    };
+  }
+);
 
 export const getUsers = createAsyncThunk(
   "user/getUsers",

@@ -26,3 +26,12 @@ JWT_REFRESH_TOKEN_EXPIRES = int(getenv("JWT_REFRESH_TOKEN_EXPIRY_MINUTES", "720"
 
 REDIS_URL = getenv("REDIS_URL")
 FRONTEND_APP_URL = getenv("FRONTEND_APP_URL", "http://localhost:3000")
+
+
+
+MAIL_SERVER = 'smtp.gmail.com'
+MAIL_PORT = 465
+MAIL_USERNAME = 'everycache@gmail.com'
+MAIL_PASSWORD = getenv("MAIL_PASSWORD", "")
+MAIL_USE_TLS = False
+MAIL_USE_SSL = True

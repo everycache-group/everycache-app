@@ -1,6 +1,8 @@
+import uuid
 from flask import abort, request
 from flask_jwt_extended import current_user, jwt_required
 from flask_restful import Resource
+from flask_mail import Message
 from marshmallow import ValidationError
 
 from everycache_api.api.schemas import (
@@ -13,7 +15,8 @@ from everycache_api.api.schemas import (
 )
 from everycache_api.auth.helpers import revoke_all_user_tokens
 from everycache_api.common.pagination import paginate
-from everycache_api.extensions import db
+from everycache_api.config import FRONTEND_APP_URL
+from everycache_api.extensions import db, mail
 from everycache_api.models import Cache, CacheComment, CacheVisit, User
 
 
@@ -104,7 +107,8 @@ class UserResource(Resource):
 
     def get(self, user_id: str):
         # find user
-        user = User.query_ext_id(user_id).filter_by(deleted=False).first_or_404()
+        user = User.query_ext_id(user_id).filter_by(
+            deleted=False).first_or_404()
 
         # decide which schema to use
         schema = None
@@ -181,7 +185,8 @@ class UserResource(Resource):
             abort(403, "Unauthorized to delete other users.")
 
         # find user
-        user = User.query_ext_id(user_id).filter_by(deleted=False).first_or_404()
+        user = User.query_ext_id(user_id).filter_by(
+            deleted=False).first_or_404()
 
         # mark user as deleted
         user.deleted = True
@@ -300,9 +305,41 @@ class UserListResource(Resource):
             raise ValidationError(errors)
 
         db.session.add(user)
+
+        token = uuid.uuid4()
+        user.verification_token = token
+        msg = Message("Everycache - Account Activation", sender="everycache@gmail.com", recipients=[user.email])
+        msg.body = f"{FRONTEND_APP_URL}/activate/{token}"
+        try:
+            mail.send(msg)
+        except:
+            db.session.rollback()
+            return {"message": "Could not send the activation email."}, 503
+
+
         db.session.commit()
 
+
         return {"message": "User created.", "user": schema.dump(user)}, 201
+
+
+class UserActivationResource(Resource):
+    method_decorators = [jwt_required(optional=True)]
+
+    def post(self, token):
+        import uuid
+
+        try:
+            token = uuid.UUID(token)
+        except ValueError:
+            return {"message": "Invalid token provided."}, 401
+
+        user = User.query.filter_by(verification_token=token).first_or_404()
+        user.verified = True
+
+        db.session.commit()
+
+        return {"message": "User activated."}, 200
 
 
 class UserCacheListResource(Resource):
@@ -356,7 +393,8 @@ class UserCacheListResource(Resource):
         # retrieve user's owned caches
 
         # find user
-        user = User.query_ext_id(user_id).filter_by(deleted=False).first_or_404()
+        user = User.query_ext_id(user_id).filter_by(
+            deleted=False).first_or_404()
 
         # decide which schema to use
         query = Cache.query.filter_by(owner=user, deleted=False)
@@ -483,7 +521,8 @@ class UserCacheCommentListResource(Resource):
         # retrieve user's cache comments
 
         # find user
-        user = User.query_ext_id(user_id).filter_by(deleted=False).first_or_404()
+        user = User.query_ext_id(user_id).filter_by(
+            deleted=False).first_or_404()
 
         query = CacheComment.query.filter_by(author=user, deleted=False).filter(
             CacheComment.cache.has(deleted=False)

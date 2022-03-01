@@ -15,6 +15,7 @@ from everycache_api.api.resources import (
     UserCacheVisitListResource,
     UserListResource,
     UserResource,
+    UserActivationResource
 )
 
 # from everycache_api.api.schemas import (
@@ -47,6 +48,7 @@ api = Api(blueprint)
 resources = [
     (UserListResource, "/users", "users_list"),
     (UserResource, "/users/<string:user_id>", "user_by_username"),
+    (UserActivationResource, "/users/activate/<string:token>", "user_activate"),
     (UserCacheListResource, "/users/<string:user_id>/caches", "user_caches_list"),
     (UserCacheVisitListResource, "/users/<string:user_id>/visits", "user_visits_list"),
     (

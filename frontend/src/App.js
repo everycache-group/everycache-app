@@ -16,6 +16,7 @@ function App() {
         {logged && <Sidebar />}
         <Switch>
           <Route path="/auth" exact component={Page.Auth} />
+          <Route path="/activate/:token" component={Page.Activation} />
           <ProtectedRoute path="/" exact component={Page.Home} />
           <ProtectedRoute path="/mymap" exact component={Page.MyMap} />
           <ProtectedRoute path="/map" component={Page.Map} />

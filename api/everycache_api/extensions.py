@@ -4,6 +4,7 @@ from flask_marshmallow import Marshmallow
 from flask_migrate import Migrate
 from flask_redis import FlaskRedis
 from flask_sqlalchemy import SQLAlchemy
+from flask_mail import Mail
 from hashids import Hashids
 from passlib.context import CryptContext
 
@@ -26,3 +27,5 @@ else:
     redis_client = False
 
 apscheduler = APScheduler()
+
+mail = Mail()

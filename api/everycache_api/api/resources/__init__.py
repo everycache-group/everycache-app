@@ -12,6 +12,7 @@ from everycache_api.api.resources.user import (
     UserCacheVisitListResource,
     UserListResource,
     UserResource,
+    UserActivationResource,
 )
 
 __all__ = [
@@ -26,4 +27,5 @@ __all__ = [
     "UserCacheVisitListResource",
     "UserListResource",
     "UserResource",
+    "UserActivationResource"
 ]

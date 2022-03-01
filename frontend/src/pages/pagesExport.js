@@ -4,6 +4,7 @@ import MapPage from "./Map/Map";
 import NodFoundPage from "./NotFound/NotFound";
 import MyMapPage from "./MyMap/MyMap";
 import UsersList from "./Users/Users"
+import ActivationPage from "./Activation/Activation"
 
 export const Home = HomePage;
 
@@ -16,3 +17,5 @@ export const NotFound = NodFoundPage;
 export const MyMap = MyMapPage;
 
 export const Users = UsersList;
+
+export const Activation = ActivationPage;

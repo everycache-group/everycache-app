@@ -6,6 +6,8 @@ from sqlalchemy_utils.types.choice import ChoiceType
 from everycache_api.extensions import db, pwd_context
 
 from .base import BaseMixin
+import uuid
+from sqlalchemy_utils import UUIDType
 
 
 class User(BaseMixin, db.Model):
@@ -25,6 +27,7 @@ class User(BaseMixin, db.Model):
         default=Role.Default.value,
     )
     verified = db.Column(db.Boolean, nullable=False, default=False)
+    verification_token = db.Column(UUIDType(binary=False), default=uuid.uuid4)
 
     @hybrid_property
     def password(self):

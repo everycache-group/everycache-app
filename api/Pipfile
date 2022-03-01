@@ -32,6 +32,7 @@ psycopg2-binary = "*"
 python-dotenv = "*"
 sqlalchemy-utils = "*"
 waitress = "*"
+flask-mail = "*"
 
 [requires]
 python_version = "3.9"
