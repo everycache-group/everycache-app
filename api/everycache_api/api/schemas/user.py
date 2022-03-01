@@ -51,7 +51,7 @@ class UserSchema(BaseSchema):
 
     class Meta(BaseSchema.Meta):
         model = User
-        exclude = BaseSchema.Meta.exclude + ["_password"]
+        exclude = BaseSchema.Meta.exclude + ["_password", "verification_token"]
 
 
 class UserUpdateSchema(UserSchema):

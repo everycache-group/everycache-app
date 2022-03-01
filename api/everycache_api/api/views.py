@@ -10,7 +10,6 @@ from everycache_api.api.resources import (
     CacheResource,
     CacheVisitListResource,
     CacheVisitResource,
-    UserActivationResource,
     UserCacheCommentListResource,
     UserCacheListResource,
     UserCacheVisitListResource,
@@ -48,7 +47,6 @@ api = Api(blueprint)
 resources = [
     (UserListResource, "/users", "users_list"),
     (UserResource, "/users/<string:user_id>", "user_by_username"),
-    (UserActivationResource, "/activate/<string:token>", "user_activate"),
     (UserCacheListResource, "/users/<string:user_id>/caches", "user_caches_list"),
     (UserCacheVisitListResource, "/users/<string:user_id>/visits", "user_visits_list"),
     (
@@ -96,7 +94,6 @@ def register_views():
     # apispec.spec.components.schema("UserPublicSchema", schema=UserPublicSchema)
     # apispec.spec.components.schema("UserAdminSchema", schema=UserSchema)
     apispec.spec.path(view=UserResource, app=current_app)
-    apispec.spec.path(view=UserActivationResource, app=current_app)
     apispec.spec.path(view=UserListResource, app=current_app)
     apispec.spec.path(view=UserCacheListResource, app=current_app)
     apispec.spec.path(view=UserCacheVisitListResource, app=current_app)
