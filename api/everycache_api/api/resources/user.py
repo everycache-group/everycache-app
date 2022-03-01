@@ -321,6 +321,38 @@ class UserListResource(Resource):
 
 
 class UserActivationResource(Resource):
+    """Single object resource
+
+    ---
+    post:
+      tags:
+        - api
+      parameters:
+        - in: path
+          name: token
+          schema:
+            type: string
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User activated.
+
+        400:
+          description: user already activated
+        401:
+          description: invalid activation token
+        403:
+          description: forbidden
+        404:
+          description: user not found
+    """
+
     method_decorators = [jwt_required(optional=True)]
 
     def post(self, token):

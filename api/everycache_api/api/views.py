@@ -96,6 +96,7 @@ def register_views():
     # apispec.spec.components.schema("UserPublicSchema", schema=UserPublicSchema)
     # apispec.spec.components.schema("UserAdminSchema", schema=UserSchema)
     apispec.spec.path(view=UserResource, app=current_app)
+    apispec.spec.path(view=UserActivationResource, app=current_app)
     apispec.spec.path(view=UserListResource, app=current_app)
     apispec.spec.path(view=UserCacheListResource, app=current_app)
     apispec.spec.path(view=UserCacheVisitListResource, app=current_app)
