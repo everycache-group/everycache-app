@@ -4,8 +4,7 @@ import ResourceConnector from "../../services/resourceService";
 import { PrepareDataSourceTable } from "../../services/dataSourceMapperService";
 import { createDataRow } from "../../services/dataSourceMapperService";
 import { axiosInstance } from "../../api/api-connector";
-import {prepareErrorPayload} from "../../services/errorMessagesService"
-import { getComments } from "./commentSlice"
+import { prepareErrorPayload } from "../../services/errorMessagesService";
 
 const cache = new ResourceConnector(config.resources.cache);
 
@@ -24,29 +23,11 @@ export const AddRating = createAsyncThunk(
   }
 );
 
-export const AddComment = createAsyncThunk(
-  "cache/addComment",
-  async ({ id, comment, deleted }, thunkApi) => {
-    try {
-      const response = axiosInstance.post(`/api/caches/${id}/visits`, {
-        id_: id,
-        deleted,
-        text: comment,
-      });
-
-      return Promise.resolve();
-    } catch (_error) {
-      return Promise.reject();
-    }
-  }
-);
-
 export const getCaches = createAsyncThunk(
   "cache/getCaches",
   async (userId, { rejectWithValue }) => {
-    try{
+    try {
       const response = await cache.get(userId);
-
 
       const { data } = response;
 
@@ -63,9 +44,8 @@ export const getCaches = createAsyncThunk(
       };
 
       return Promise.resolve(payload);
-    }
-    catch (e) {
-      return rejectWithValue(prepareErrorPayload(e, "Could not get caches!"))
+    } catch (e) {
+      return rejectWithValue(prepareErrorPayload(e, "Could not get caches!"));
     }
   }
 );
@@ -93,9 +73,10 @@ export const getMyCaches = createAsyncThunk(
       };
 
       return Promise.resolve(payload);
-    }
-    catch (e) {
-      return rejectWithValue(prepareErrorPayload(e, "Could not get your caches!"))
+    } catch (e) {
+      return rejectWithValue(
+        prepareErrorPayload(e, "Could not get your caches!")
+      );
     }
   }
 );
@@ -122,7 +103,9 @@ export const createCache = createAsyncThunk(
 
       return Promise.resolve(dataRow);
     } catch (e) {
-      return rejectWithValue(prepareErrorPayload(e.response, "Could not create cache!"));
+      return rejectWithValue(
+        prepareErrorPayload(e.response, "Could not create cache!")
+      );
     }
   }
 );
@@ -154,7 +137,9 @@ export const updateCache = createAsyncThunk(
 
       return Promise.resolve(dataRow);
     } catch (e) {
-      return rejectWithValue(prepareErrorPayload(e.response, "Could not update cache!"))
+      return rejectWithValue(
+        prepareErrorPayload(e.response, "Could not update cache!")
+      );
     }
   }
 );
@@ -166,7 +151,7 @@ export const deleteCache = createAsyncThunk(
       const response = await cache.remove(id);
       return Promise.resolve(id);
     } catch (e) {
-      return rejectWithValue(prepareErrorPayload(e, "Could not delete cache!"))
+      return rejectWithValue(prepareErrorPayload(e, "Could not delete cache!"));
     }
   }
 );
@@ -239,9 +224,7 @@ const cacheSlice = createSlice({
     },
     [deleteCache.fulfilled]: (state, action) => {
       const id = action.payload;
-      const index = state.caches.findIndex(
-        (item) => item.id == id
-      );
+      const index = state.caches.findIndex((item) => item.id == id);
       const caches = state.caches.slice();
       caches.splice(index, 1);
       state.caches = caches;
