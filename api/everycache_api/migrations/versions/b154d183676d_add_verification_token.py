@@ -1,4 +1,4 @@
-"""empty message
+"""Add the field storing verification token for user
 
 Revision ID: b154d183676d
 Revises: 3b01865de320
