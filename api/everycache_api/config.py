@@ -29,9 +29,9 @@ FRONTEND_APP_URL = getenv("FRONTEND_APP_URL", "http://localhost:3000")
 
 
 
-MAIL_SERVER = 'smtp.gmail.com'
-MAIL_PORT = 465
-MAIL_USERNAME = 'everycache@gmail.com'
+MAIL_SERVER = getenv("MAIL_SERVER", 'smtp.gmail.com')
+MAIL_PORT = getenv("MAIL_PORT", 465)
+MAIL_USERNAME = getenv("MAIL_USERNAME", 'everycache@gmail.com')
 MAIL_PASSWORD = getenv("MAIL_PASSWORD", "")
-MAIL_USE_TLS = False
-MAIL_USE_SSL = True
+MAIL_USE_TLS = getenv("MAIL_USE_TLS", "false").lower() in ("1", "true")
+MAIL_USE_SSL = getenv("MAIL_USE_SSL", "true").lower() in ("1", "true")
