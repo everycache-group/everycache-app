@@ -108,8 +108,7 @@ class UserResource(Resource):
 
     def get(self, user_id: str):
         # find user
-        user = User.query_ext_id(user_id).filter_by(
-            deleted=False).first_or_404()
+        user = User.query_ext_id(user_id).filter_by(deleted=False).first_or_404()
 
         # decide which schema to use
         schema = None
@@ -186,8 +185,7 @@ class UserResource(Resource):
             abort(403, "Unauthorized to delete other users.")
 
         # find user
-        user = User.query_ext_id(user_id).filter_by(
-            deleted=False).first_or_404()
+        user = User.query_ext_id(user_id).filter_by(deleted=False).first_or_404()
 
         # mark user as deleted
         user.deleted = True
@@ -317,9 +315,7 @@ class UserListResource(Resource):
             db.session.rollback()
             return {"message": "Could not send the activation email."}, 503
 
-
         db.session.commit()
-
 
         return {"message": "User created.", "user": schema.dump(user)}, 201
 
@@ -335,7 +331,7 @@ class UserActivationResource(Resource):
         except ValueError:
             return {"message": "Invalid token provided."}, 401
 
-        user = User.query.filter_by(verification_token=token).first_or_404()
+        user = User.query.filter(User.verification_token == token, User.verified == False).first_or_404()
         user.verified = True
 
         db.session.commit()
@@ -394,8 +390,7 @@ class UserCacheListResource(Resource):
         # retrieve user's owned caches
 
         # find user
-        user = User.query_ext_id(user_id).filter_by(
-            deleted=False).first_or_404()
+        user = User.query_ext_id(user_id).filter_by(deleted=False).first_or_404()
 
         # decide which schema to use
         query = Cache.query.filter_by(owner=user, deleted=False)
@@ -522,8 +517,7 @@ class UserCacheCommentListResource(Resource):
         # retrieve user's cache comments
 
         # find user
-        user = User.query_ext_id(user_id).filter_by(
-            deleted=False).first_or_404()
+        user = User.query_ext_id(user_id).filter_by(deleted=False).first_or_404()
 
         query = CacheComment.query.filter_by(author=user, deleted=False).filter(
             CacheComment.cache.has(deleted=False)
