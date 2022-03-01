@@ -1,13 +1,13 @@
+import uuid
 from enum import Enum
 
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy_utils import UUIDType
 from sqlalchemy_utils.types.choice import ChoiceType
 
 from everycache_api.extensions import db, pwd_context
 
 from .base import BaseMixin
-import uuid
-from sqlalchemy_utils import UUIDType
 
 
 class User(BaseMixin, db.Model):

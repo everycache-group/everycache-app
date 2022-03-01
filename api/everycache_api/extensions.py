@@ -1,10 +1,10 @@
 from flask_apscheduler import APScheduler
 from flask_jwt_extended import JWTManager
+from flask_mail import Mail
 from flask_marshmallow import Marshmallow
 from flask_migrate import Migrate
 from flask_redis import FlaskRedis
 from flask_sqlalchemy import SQLAlchemy
-from flask_mail import Mail
 from hashids import Hashids
 from passlib.context import CryptContext
 

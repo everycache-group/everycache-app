@@ -1,8 +1,9 @@
 import uuid
+
 from flask import abort, request
 from flask_jwt_extended import current_user, jwt_required
-from flask_restful import Resource
 from flask_mail import Message
+from flask_restful import Resource
 from marshmallow import ValidationError
 
 from everycache_api.api.schemas import (

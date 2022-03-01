@@ -9,8 +9,8 @@ from everycache_api.extensions import (
     apscheduler,
     db,
     jwt,
-    migrate,
     mail,
+    migrate,
     redis_client,
 )
 

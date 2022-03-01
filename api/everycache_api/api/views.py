@@ -10,12 +10,12 @@ from everycache_api.api.resources import (
     CacheResource,
     CacheVisitListResource,
     CacheVisitResource,
+    UserActivationResource,
     UserCacheCommentListResource,
     UserCacheListResource,
     UserCacheVisitListResource,
     UserListResource,
     UserResource,
-    UserActivationResource
 )
 
 # from everycache_api.api.schemas import (
