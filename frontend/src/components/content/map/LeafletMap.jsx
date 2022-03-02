@@ -22,7 +22,7 @@ const LeafletMap = (props) => {
   }, [selectedCache]);
 
   return (
-    <Style.LeafletMapWrapper width={props.width}>
+    <Style.LeafletMapWrapper>
       <MapContainer
         style={{ height: "100%", borderRadius: 20 }}
         center={mapSettings.center}

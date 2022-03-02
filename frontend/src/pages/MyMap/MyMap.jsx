@@ -30,7 +30,7 @@ function MyMap() {
         <CacheTable data={caches} hideOwner={true} />
       </Style.CacheContent>
 
-      <LeafletMap width={1200}>
+      <LeafletMap>
         {caches.map(({ id, lat, lon, description }) => {
           return (
             <CacheMarker key={id} position={[lat, lon]} title={description} />

@@ -2,7 +2,8 @@ import styled from "styled-components";
 
 export const LeafletMapWrapper = styled.div`
   height: 100%;
-  width: ${(props) => props.width}px;
+  width: 100%;
   position: relative;
   display: grid;
+  min-width: 400px;
 `;
