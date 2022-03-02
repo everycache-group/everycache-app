@@ -28,7 +28,7 @@ export const activateUser = createAsyncThunk(
     rejectWithValue
   }) => {
     try{
-      const response = await axiosInstance.post(`/api/activate/${token}`);
+      const response = await axiosInstance.post(`/auth/activate/${token}`);
       return Promise.resolve(response.data);
     }
     catch(e) {
