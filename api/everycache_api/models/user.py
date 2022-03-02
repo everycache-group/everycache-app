@@ -1,7 +1,8 @@
+import uuid
 from enum import Enum
 
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy_utils.types.choice import ChoiceType
+from sqlalchemy_utils import ChoiceType, UUIDType
 
 from everycache_api.extensions import db, pwd_context
 
@@ -25,6 +26,7 @@ class User(BaseMixin, db.Model):
         default=Role.Default.value,
     )
     verified = db.Column(db.Boolean, nullable=False, default=False)
+    verification_token = db.Column(UUIDType(binary=False), default=uuid.uuid4)
 
     @hybrid_property
     def password(self):

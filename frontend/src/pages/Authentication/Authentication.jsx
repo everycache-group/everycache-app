@@ -1,17 +1,17 @@
 import React, { useState } from "react";
 import * as Style from "./style";
-import Box from "@mui/material/Box";
-import Tabs from "@mui/material/Tabs";
-import Tab from "@mui/material/Tab";
 import { Redirect } from "react-router";
 import { useSelector } from "react-redux";
-import Login from "./../../components/auth/login/Login";
+import Tab from "@mui/material/Tab";
+import Tabs from "@mui/material/Tabs";
+import Register from "../../components/auth/register/Register";
+import Login from "../../components/auth/login/Login";
 
 function AuthenticationPage() {
-  const [tabIndex, setTabIndex] = useState(1);
+  const [selectedTab, setSelectedTab] = useState(0);
 
-  const handleTabChange = (e, newValue) => {
-    setTabIndex(newValue);
+  const handleChange = (event, newValue) => {
+    setSelectedTab(newValue);
   };
 
   const logged = useSelector((state) => state.auth.logged);
@@ -21,7 +21,12 @@ function AuthenticationPage() {
   return (
     <Style.AuthWrapper>
       <Style.AuthContainer>
-        <Login />
+        <Tabs value={selectedTab} onChange={handleChange}>
+          <Tab label="LOGIN" />
+          <Tab label="REGISTER" />
+        </Tabs>
+        {selectedTab === 0 && <Login />}
+        {selectedTab === 1 && <Register />}
       </Style.AuthContainer>
     </Style.AuthWrapper>
   );

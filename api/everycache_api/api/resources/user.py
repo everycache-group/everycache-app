@@ -1,5 +1,9 @@
+import uuid
+from smtplib import SMTPException, SMTPRecipientsRefused
+
 from flask import abort, request
 from flask_jwt_extended import current_user, jwt_required
+from flask_mail import Message
 from flask_restful import Resource
 from marshmallow import ValidationError
 
@@ -14,7 +18,8 @@ from everycache_api.api.schemas import (
 )
 from everycache_api.auth.helpers import revoke_all_user_tokens
 from everycache_api.common.pagination import paginate
-from everycache_api.extensions import db
+from everycache_api.config import FRONTEND_APP_URL
+from everycache_api.extensions import db, mail
 from everycache_api.models import Cache, CacheComment, CacheVisit, User
 
 
@@ -301,6 +306,27 @@ class UserListResource(Resource):
             raise ValidationError(errors)
 
         db.session.add(user)
+
+        # send verification email
+        verification_token = uuid.uuid4()
+        user.verification_token = verification_token
+
+        email_message = Message(
+            subject="Everycache - Account Activation",
+            sender="everycache@gmail.com",
+            recipients=[user.email],
+            body=f"{FRONTEND_APP_URL}/activate/{verification_token}",
+        )
+
+        try:
+            mail.send(email_message)
+        except SMTPRecipientsRefused:
+            db.session.rollback()
+            raise ValidationError({"email": ["SMTP server refused email address."]})
+        except SMTPException:
+            db.session.rollback()
+            return {"message": "Could not send the activation email."}, 503
+
         db.session.commit()
 
         return {"message": "User created.", "user": schema.dump(user)}, 201

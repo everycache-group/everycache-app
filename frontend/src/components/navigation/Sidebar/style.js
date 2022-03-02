@@ -9,11 +9,12 @@ export const Nav = styled.div`
   background: #15171c;
   height: 80px;
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: center;
   width: 100%;
   position: fixed;
-  //poprawic to
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.32);
+  z-index: 999;
 `;
 
 export const SidebarNav = styled.nav`
@@ -26,7 +27,7 @@ export const SidebarNav = styled.nav`
   top: 0;
   left: ${({ sidebar }) => (sidebar ? "0" : "-100%")};
   transition: 300ms ease-in-out;
-  z-index: 10;
+  z-index: 999;
 `;
 
 export const NavIcon = styled(Link)`
@@ -37,4 +38,5 @@ export const NavIcon = styled(Link)`
   justify-content: flex-start;
   align-items: center;
   cursor: pointer;
+  color: #fff;
 `;

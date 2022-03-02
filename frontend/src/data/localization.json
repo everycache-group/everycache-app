@@ -1,0 +1,10 @@
+{
+  "cachetable": {
+    "owner": "Owner",
+    "name": "Name",
+    "lon": "Lon",
+    "lat": "Lat",
+    "createdTime": "Creation Time",
+    "description": "Description"
+  }
+}

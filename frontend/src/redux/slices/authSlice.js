@@ -1,42 +1,40 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import * as authService from "./../../services/authService";
-import { getUser } from "../slices/userSlice";
 import jwt_decode from "jwt-decode";
+import { login, logout } from "../../api/api-core";
+import { getUser, logout as userLogout } from "../slices/userSlice";
+import {prepareErrorPayload} from "../../services/errorMessagesService"
 
-//obsluzyc prommisy w state
 export const loginUser = createAsyncThunk(
   "auth/loginUser",
-  async ({ email, password }, { dispatch }) => {
-    const response = await authService.loginUser(email, password);
-    const json = await response.json();
+  async ({ email, password }, { rejectWithValue }) => {
+    try {
+      const response = await login(email, password);
+      const { data } = response;
+      const decodedToken = jwt_decode(data.access_token);
 
-    if (!response.ok) {
-      return Promise.reject(json);
+      data.userId = decodedToken.sub;
+      return Promise.resolve(data);
+    } catch (e) {
+      return rejectWithValue(prepareErrorPayload(e.response, "Could not log in!"))
     }
-
-    const decodedToken = jwt_decode(json.access_token);
-
-    dispatch(getUser(decodedToken.sub));
-
-    json.userId = decodedToken.sub;
-    return Promise.resolve(json);
   }
 );
 
 export const logoutUser = createAsyncThunk(
   "auth/logoutUser",
-  async (_, { getState }) => {
-    //auth.logoutUser();
+  async (_, { getState, dispatch, rejectWithValue }) => {
+    try {
+      const auth = getState().auth;
 
-    const auth = getState().auth;
-
-    if (auth.logged) {
-      console.log("logout start");
-      const response = await authService.logoutUser(auth.access_token);
-      console.log(response);
+      if (auth.logged) {
+        const response = await logout(auth.access_token);
+        dispatch(userLogout());
+      }
+      return Promise.resolve();
     }
-
-    return Promise.resolve();
+    catch (e) {
+      return rejectWithValue(prepareErrorPayload(e.response, "Could not log out!"))
+    }
   }
 );
 
@@ -51,11 +49,8 @@ const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    logout(state, action) {
-      state.logged = false;
-      state.access_token = "";
-      state.refresh_token = "";
-      state.userId = "";
+    refreshToken: (state, action) => {
+      state.access_token = action.payload;
     },
   },
   extraReducers: {
@@ -64,6 +59,12 @@ const authSlice = createSlice({
       state.access_token = action.payload.access_token;
       state.refresh_token = action.payload.refresh_token;
       state.userId = action.payload.userId;
+    },
+    [logoutUser.rejected]: (state, action) => {
+      state.logged = false;
+      state.access_token = "";
+      state.refresh_token = "";
+      state.userId = "";
     },
     [logoutUser.fulfilled]: (state, action) => {
       state.logged = false;
@@ -74,6 +75,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { login, logout } = authSlice.actions;
+export const { refreshToken } = authSlice.actions;
 
 export default authSlice.reducer;

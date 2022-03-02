@@ -5,24 +5,26 @@ import * as FaIcons from "react-icons/fa";
 import * as AiIcons from "react-icons/ai";
 import SubMenu from "../Submenu/Submenu.jsx";
 import { IconContext } from "react-icons/lib";
+import UserBar from "../UserBar/UserBar.jsx";
+import { toggleSidebar } from "../../../redux/slices/navigationSlice";
+import { useDispatch, useSelector } from "react-redux";
 
 function Sidebar(props) {
-  const [sidebar, setSidebar] = useState(true);
-  const [token, setToken] = useState("");
-  const showSidebar = () => setSidebar(!sidebar);
+  const sidebar = useSelector((state) => state.navigation.sidebarVisible);
+  const dispatch = useDispatch();
 
-  useEffect(() => {
-    //api.create(api.resources.user, { email: 'a@b.com', password: 'qwerty123', role: 'Admin', username: 'bamer', verified: true });
-  }, []);
+  const showSidebar = () => {
+    dispatch(toggleSidebar(!sidebar));
+  };
 
   return (
     <>
-      <IconContext.Provider value={{ color: "#fff" }}>
+      <IconContext.Provider value={{ }}>
         <Style.Nav>
           <Style.NavIcon to="#">
             <FaIcons.FaBars onClick={showSidebar} />
-            <p style={{ color: "white" }}>{token}</p>
           </Style.NavIcon>
+          <UserBar />
         </Style.Nav>
 
         <Style.SidebarNav sidebar={sidebar}>

@@ -1,4 +1,4 @@
-import config from "./api-config";
+import config from "./api-config.json";
 import { sendRequest } from "./api-connector";
 
 export const resources = config.resources;
@@ -14,11 +14,11 @@ export async function create(resource, params) {
 }
 
 export async function update(resource, id, params) {
-  return await sendRequest(methods.put, id, params);
+  return await sendRequest(methods.put, resource, id, params);
 }
 
 export async function remove(resource, id) {
-  return await sendRequest(methods.delete, id);
+  return await sendRequest(methods.delete, resource, id);
 }
 
 export async function login(email, password) {
@@ -28,6 +28,10 @@ export async function login(email, password) {
   });
 }
 
-export async function logout(token) {
-  return await sendRequest(methods.delete, resources.logout, null, {}, token);
+export async function logout() {
+  return await sendRequest(methods.delete, resources.logout, null);
+}
+
+export async function refresh() {
+  return await sendRequest(methods.post, resources.refresh);
 }

@@ -1,0 +1,32 @@
+{
+  "total": 2,
+  "pages": 1,
+  "next": "/api/caches?page=1&per_page=50",
+  "prev": "/api/caches?page=1&per_page=50",
+  "results": [
+    {
+      "id": "zxoqrubp",
+      "created_on": "2022-01-04T11:00:06.744218",
+      "lon": 100,
+      "lat": 50,
+      "owner": {
+        "id": "jgpmkukp",
+        "username": "Tamasa94"
+      },
+      "name": "testcache",
+      "description": "testcachedesc"
+    },
+    {
+      "id": "xdpegczp",
+      "created_on": "2022-01-05T21:30:41.221201",
+      "lon": 150,
+      "lat": 50,
+      "owner": {
+        "id": "jgpmkukp",
+        "username": "Tamasa94"
+      },
+      "name": "cach2",
+      "description": "cache2 desc"
+    }
+  ]
+}

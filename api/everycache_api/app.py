@@ -9,6 +9,7 @@ from everycache_api.extensions import (
     apscheduler,
     db,
     jwt,
+    mail,
     migrate,
     redis_client,
 )
@@ -31,6 +32,7 @@ def create_app(config_object="everycache_api.config"):
 
 def configure_extensions(app):
     """Configure flask extensions"""
+    mail.init_app(app)
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
