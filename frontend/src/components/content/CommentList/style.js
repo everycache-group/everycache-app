@@ -35,7 +35,6 @@ export const CommentMenuWrapper = styled.div`
   bottom: 30px;
   right: 0;
   margin 10px 0;
-  pointer-events: initial;
   display: grid;
   width:100%;
   grid-template-columns: 50% 50%;
@@ -47,6 +46,7 @@ export const ListCommentIcon = styled(CommentIcon)`
 `
 
 export const CommentIconAvatar = styled(Avatar)`
+  pointer-events: initial;
   transition: 0.1s;
   :hover{
     transform: scale(1.1);
