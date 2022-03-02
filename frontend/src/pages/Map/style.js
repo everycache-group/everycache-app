@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 export const CacheContent = styled.div`
-  min-width: 800px;
+  flex-basis: 40%;
   margin-right: 20px;
   height: 100%;
   display: flex;

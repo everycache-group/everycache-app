@@ -9,7 +9,7 @@ export const CommentListWrapper = styled.div`
   height: 100%;
   right: 0;
   margin 10px 10px;
-  width: 35%;
+  width: 25%;
   z-index: 999;
   pointer-events: none;
 `
