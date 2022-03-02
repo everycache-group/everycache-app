@@ -190,7 +190,6 @@ const cacheSlice = createSlice({
       state.prev = prev;
       state.caches = datasource;
       state.loading = false;
-      state.selectedCache = initialState.selectedCache;
     },
     [getMyCaches.fulfilled]: (state, action) => {
       const { total, pages, next, prev, datasource } = action.payload;
@@ -200,7 +199,10 @@ const cacheSlice = createSlice({
       state.prev = prev;
       state.caches = datasource;
       state.loading = false;
-      state.selectedCache = initialState.selectedCache;
+      if (state.selectedCache &&
+          datasource.findIndex((item) => state.selectedCache.id === item.id) == -1){
+        state.selectedCache = initialState.selectedCache;
+      }
     },
     [getCaches.rejected]: (state, action) => {
       state = initialState;
