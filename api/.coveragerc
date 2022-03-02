@@ -1,0 +1,10 @@
+[run]
+omit =
+	everycache_api/tests/*
+	everycache_api/migrations/*
+	everycache_api/api/schemas/*
+	everycache_api/models/*
+	everycache_api/manage.py
+	everycache_api/config.py
+	everycache_api/common/apispec.py
+	__init__.py

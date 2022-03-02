@@ -48,6 +48,7 @@ def apply_query_filters(query: Query, schema: Schema) -> Query:
         db_model_field = getattr(schema.Meta.model, field_name)
 
         for filter_string in filters:
+
             if ":" in filter_string:
                 # pattern: <field>=<operation>:<value>
                 operation_str, value = filter_string.split(":")

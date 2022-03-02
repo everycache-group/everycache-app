@@ -5,9 +5,14 @@ verify_ssl = true
 
 [dev-packages]
 black = "*"
+factory-boy = "*"
+fakeredis = "*"
 flake8 = "*"
 flake8-isort = "*"
 isort = "*"
+pytest = "*"
+pytest-cov = "*"
+pytest-freezegun = "*"
 
 [packages]
 apispec = "*"

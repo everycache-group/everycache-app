@@ -338,7 +338,7 @@ class CacheVisitListResource(Resource):
             abort(403, "Creating a visit to own cache is forbidden.")
 
         # create new visit
-        schema = CacheVisitSchema(exclude=["visited"])
+        schema = CacheVisitSchema()
         visit = schema.load(request.json)
 
         # append cache and user to the visit
