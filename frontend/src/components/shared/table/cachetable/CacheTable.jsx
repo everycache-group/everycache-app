@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { PrepareCacheColumns } from "../../../../services/dataSourceMapperService";
 import * as Style from "./style";
 import { selectRow } from "./../../../../redux/slices/cacheSlice";
+import { changeCenter } from "./../../../../redux/slices/mapSlice";
 
 function CacheTable({ title, data, hideOwner }) {
   const columns = PrepareCacheColumns(hideOwner);
@@ -15,8 +16,11 @@ function CacheTable({ title, data, hideOwner }) {
 
   const handleRowClick = (params) => {
     const { row } = params;
-    setSelectionModel([row.id]);
-    dispatch(selectRow(row.id));
+    if (!(selectionModel.includes(row.id))){
+      setSelectionModel([row.id]);
+      dispatch(selectRow(row.id));
+      dispatch(changeCenter([row.lat, row.lon]))
+    }
   };
 
   const rowId = selectionModel[0];
