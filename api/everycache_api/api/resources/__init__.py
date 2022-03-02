@@ -7,7 +7,6 @@ from everycache_api.api.resources.cache import (
 from everycache_api.api.resources.cache_comment import CacheCommentResource
 from everycache_api.api.resources.cache_visit import CacheVisitResource
 from everycache_api.api.resources.user import (
-    UserActivationResource,
     UserCacheCommentListResource,
     UserCacheListResource,
     UserCacheVisitListResource,
@@ -27,5 +26,4 @@ __all__ = [
     "UserCacheVisitListResource",
     "UserListResource",
     "UserResource",
-    "UserActivationResource"
 ]

@@ -1,3 +1,5 @@
+import uuid
+
 from flask import Blueprint, abort, current_app, jsonify, request
 from flask_jwt_extended import current_user, get_jwt, jwt_required
 
@@ -9,10 +11,58 @@ from everycache_api.auth.helpers import (
     revoke_token,
     save_encoded_token,
 )
-from everycache_api.extensions import apispec, jwt
+from everycache_api.extensions import apispec, db, jwt
 from everycache_api.models import User
 
 blueprint = Blueprint("auth", __name__, url_prefix="/auth")
+
+
+@blueprint.route("/activate/<string:token>", methods=["POST"])
+def activate_account(token: str):
+    """Activate user account using activation token
+
+    ---
+    post:
+      tags:
+        - auth
+      parameters:
+        - in: path
+          name: token
+          schema:
+            type: string
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User activated.
+        400:
+          description: user already activated
+        401:
+          description: invalid activation token
+      security: []
+    """
+    try:
+        token = uuid.UUID(token)
+    except ValueError:
+        return {"message": "Invalid token provided."}, 401
+
+    user = User.query.filter_by(verification_token=token).first()
+
+    if not user:
+        return {"message": "Invalid token provided."}, 401
+
+    if user.verified:
+        return {"message": "User has already been activated."}, 400
+
+    user.verified = True
+    db.session.commit()
+
+    return {"message": "User activated."}, 200
 
 
 @blueprint.route("/login", methods=["POST"])
@@ -256,6 +306,7 @@ def expired_token_callback(jwt_headers, jwt_payload):
 
 @blueprint.before_app_first_request
 def register_views():
+    apispec.spec.path(view=activate_account, app=current_app)
     apispec.spec.path(view=login, app=current_app)
     apispec.spec.path(view=refresh, app=current_app)
     apispec.spec.path(view=revoke_access_token, app=current_app)
