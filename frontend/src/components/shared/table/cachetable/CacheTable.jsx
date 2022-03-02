@@ -20,6 +20,11 @@ function CacheTable({ title, data, hideOwner }) {
   };
 
   const rowId = selectionModel[0];
+
+  if (!selectedCache && selectionModel.length) {
+    setSelectionModel([]);
+  }
+
   if (selectedCache && selectedCache.id != rowId) {
     setSelectionModel([selectedCache.id]);
   }

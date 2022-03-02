@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import Popup from "./../../../shared/interaction/Popup/Popup";
 import CacheForm from "../../cacheForm/CacheForm";
-import { createCache } from "./../../../../redux/slices/cacheSlice";
-import { useDispatch } from "react-redux";
+import { createCache, clearSelection } from "./../../../../redux/slices/cacheSlice";
+import { useDispatch, useSelector } from "react-redux";
 import { useSnackbar } from "notistack";
 import { alertFormErrors, alertGenericErrors } from "../../../../services/errorMessagesService"
 
@@ -10,8 +10,12 @@ function AddCachePopup({ OnActionClose }) {
   const dispatch = useDispatch();
   const snackBar = useSnackbar();
   const [trigger, setTrigger] = useState(true);
+  const selectedCache = useSelector((state) => state.cache.selectedCache);
 
   useEffect(() => {
+    if (selectedCache) {
+        dispatch(clearSelection());
+    }
     if (trigger === false) {
       if (OnActionClose instanceof Function) {
         OnActionClose();

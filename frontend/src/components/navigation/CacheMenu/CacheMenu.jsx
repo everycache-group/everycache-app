@@ -2,7 +2,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import EditIcon from "@mui/icons-material/Edit";
 import React, { useState } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useSnackbar } from "notistack";
 import * as Style from "./style";
 import AddCachePopup from "./../../content/CachePopup/AddCachePopup/AddCachePopup";

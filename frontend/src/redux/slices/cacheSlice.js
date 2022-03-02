@@ -177,6 +177,9 @@ const cacheSlice = createSlice({
         (cache) => cache.id === action.payload
       );
     },
+    clearSelection: (state, action) => {
+      state.selectedCache = initialState.selectedCache;
+    }
   },
   extraReducers: {
     [getCaches.fulfilled]: (state, action) => {
@@ -233,6 +236,6 @@ const cacheSlice = createSlice({
   },
 });
 
-export const { selectRow } = cacheSlice.actions;
+export const { selectRow, clearSelection } = cacheSlice.actions;
 
 export default cacheSlice.reducer;
