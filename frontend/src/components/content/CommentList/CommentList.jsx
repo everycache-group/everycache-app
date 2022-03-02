@@ -11,13 +11,14 @@ import Typography from '@mui/material/Typography';
 import * as Style from "./style.js"
 import { useDispatch, useSelector } from "react-redux";
 import { getComments } from "../../../redux/slices/commentSlice"
+import { changeCommentListOpen } from "../../../redux/slices/mapSlice"
 import Chip from '@mui/material/Chip';
 import AddCommentPopup from "../CommentPopup/AddCommentPopup/AddCommentPopup"
 import EditCommentPopup from "../CommentPopup/EditCommentPopup/EditCommentPopup"
 import DeleteCommentPopup from "../CommentPopup/DeleteCommentPopup/DeleteCommentPopup"
 
 export default function CommentList() {
-  const [open, setOpen] = useState(false);
+  const open = useSelector((state) => state.map.commentList.open);
   const [action, setAction] = useState("");
   const [selectedComment, setSelectedComment] = useState(null);
   const [cacheId, setCacheId] = useState(null);
@@ -29,21 +30,21 @@ export default function CommentList() {
 
   const handleToggleOpen = () => {
     if (open) {
-      setOpen(false);
+      dispatch(changeCommentListOpen(false));
     }
     else {
-      setOpen(true);
+      dispatch(changeCommentListOpen(true));
       dispatch(getComments(selectedCache.id));
     }
   }
 
   useEffect(() => {
     if (!selectedCache && open) {
-      setOpen(false);
+      dispatch(changeCommentListOpen(false));
     }
     if( selectedCache && selectedCache?.id != cacheId ){
-        dispatch(getComments(selectedCache.id));
-        setCacheId(selectedCache.id);
+      dispatch(getComments(selectedCache.id));
+      setCacheId(selectedCache.id);
     }
   })
 
