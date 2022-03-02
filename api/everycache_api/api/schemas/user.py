@@ -68,7 +68,7 @@ class UserPublicSchema(UserSchema):
 
     class Meta(UserSchema.Meta):
         exclude = []
-        fields = ["id", "username"]  # whitelist
+        fields = ["id", "username", "role"]  # whitelist
 
 
 class UserAdminSchema(UserSchema):
