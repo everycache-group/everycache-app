@@ -339,11 +339,15 @@ class TestUserListPost:
             "email": "testowy@example.com",
         }
 
+    @pytest.fixture
+    def mail_mock(self, mocker):
+        return mocker.patch("everycache_api.api.resources.user.mail")
+
     @pytest.fixture()
     def user_to_create_data(self, user_to_create_data_dict):
         return json.dumps(user_to_create_data_dict)
 
-    def test_post(self, client, user_to_create_data):
+    def test_post(self, client, user_to_create_data, mail_mock):
         assert User.query.count() == 0
 
         response = client.post(
@@ -359,6 +363,7 @@ class TestUserListPost:
         assert user
         assert user.email == "testowy@example.com"
         assert user.role.name == "Default"
+        mail_mock.send.assert_called_once()
 
     def test_post_logged_in(self, client, user_to_create_data, logged_in_user):
         user, access_token, _ = logged_in_user
@@ -373,7 +378,7 @@ class TestUserListPost:
         assert response.status_code == 403
         assert "User already logged in." in response.data.decode()
 
-    def test_post_logged_in_as_admin(self, client, user_to_create_data, logged_in_user):
+    def test_post_logged_in_as_admin(self, client, user_to_create_data, logged_in_user, mail_mock):
         user, access_token, _ = logged_in_user
         user.role = User.Role.Admin
 
@@ -387,6 +392,7 @@ class TestUserListPost:
         assert response.status_code == 201
         assert "User created." in response.data.decode()
         assert User.query.count() == 2
+        mail_mock.send.assert_called_once()
 
     @pytest.mark.parametrize("is_issued_by_admin", (True, False))
     @pytest.mark.parametrize("unique_field_name", ("username", "email"))
