@@ -3,6 +3,7 @@ import { Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import { useDispatch } from "react-redux";
 import { selectRow } from "../../../redux/slices/cacheSlice";
+import { changeCenter } from "../../../redux/slices/mapSlice"
 
 const CacheMarker = ({ position, title, cacheId, ...props }) => {
   const dispatch = useDispatch();
@@ -15,6 +16,7 @@ const CacheMarker = ({ position, title, cacheId, ...props }) => {
 
   const onOpen = () => {
     dispatch(selectRow(cacheId));
+    dispatch(changeCenter(position))
   }
 
   return (
