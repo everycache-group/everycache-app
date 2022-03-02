@@ -41,6 +41,7 @@ const UserBar = () => {
 
   return (
     <>
+      {editUserPopup && <EditUserPopup OnActionClose={()=>{setEditUserPopup(false)}} />}
       <Style.UserBarWrapper>
         <Box sx={{ display: "flex", alignItems: "center", textAlign: "center" }}>
           <Tooltip title="Account settings">
@@ -108,7 +109,6 @@ const UserBar = () => {
           </MenuItem>
         </Menu>
       </Style.UserBarWrapper>
-      {editUserPopup && <EditUserPopup OnActionClose={()=>{setEditUserPopup(false)}} />}
     </>
   );
 };

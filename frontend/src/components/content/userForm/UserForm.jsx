@@ -1,5 +1,5 @@
 import * as Style from "./style";
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import useForm from "./../../../hooks/useForm";
 import Box from '@mui/material/Box';
@@ -17,9 +17,15 @@ function UserForm({ User, OnFormSubmit, ButtonName }) {
   const { username, role, email, verified } = User;
   const [loading, setLoading] = useState(false);
 
+  const usernameRef = useRef(null);
+
   const selectedUser = useSelector((state) => state.user.selectedUser);
   const currentUserRole = useSelector((state) => state.user.role);
   const currentUserId = useSelector((state) => state.user.id);
+
+  useEffect(() => {
+    usernameRef.current.focus();
+  }, []);
 
   const {
     handleFormSubmit,
@@ -53,6 +59,7 @@ function UserForm({ User, OnFormSubmit, ButtonName }) {
               helperText={prepareErrors(errors.username)}
               placeholder="Enter Username Here..."
               value={formValues.username}
+              inputRef={usernameRef}
             />
             <Style.UserTextField
               id="email"
