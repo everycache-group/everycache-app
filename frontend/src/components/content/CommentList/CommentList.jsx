@@ -38,7 +38,7 @@ export default function CommentList() {
   }
 
   useEffect(() => {
-    if( selectedCache?.id != cacheId ){
+    if((selectedCache?.id ?? cacheId) != cacheId ){
         dispatch(getComments(selectedCache.id));
         setCacheId(selectedCache.id);
     }
