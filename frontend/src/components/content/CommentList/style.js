@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import Avatar from '@mui/material/Avatar';
 import CommentIcon from '@mui/icons-material/Comment';
@@ -16,6 +17,13 @@ export const CommentListWrapper = styled.div`
 export const CommentListContent = styled.div`
   position: relative;
   height: 100%;
+`
+
+export const CommentList = styled(List)`
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: clip;
+  height: 85%;
   pointer-events: initial;
 `
 

@@ -38,7 +38,10 @@ export default function CommentList() {
   }
 
   useEffect(() => {
-    if( selectedCache?.id != cacheId ){
+    if (!selectedCache && open) {
+      setOpen(false);
+    }
+    if( selectedCache && selectedCache?.id != cacheId ){
         dispatch(getComments(selectedCache.id));
         setCacheId(selectedCache.id);
     }
@@ -70,7 +73,7 @@ export default function CommentList() {
       <Style.CommentListWrapper>
         <Style.CommentListContent key={selectedCache?.id}>
         {open &&
-          <List sx={{ width: '100%', bgcolor: 'background.paper', "overflowY": "auto", "overflowX": "clip", height: "85%" }}>
+          <Style.CommentList sx={{bgcolor: 'background.paper'}}>
               {!comments.length &&
                 <ListItemText key="comments-not-found"
                   primary={
@@ -137,7 +140,7 @@ export default function CommentList() {
                   {i < (comments.length - 1) && <Divider key={`divider{comment.id}`} variant="inset" component="li" />}
                 </React.Fragment>
               })}
-          </List>
+          </Style.CommentList>
         }
           {selectedCache && <Style.CommentMenuWrapper>
 

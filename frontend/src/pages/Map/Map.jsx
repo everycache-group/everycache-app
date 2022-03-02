@@ -21,6 +21,7 @@ function Map() {
 
   const caches = useSelector((state) => state.cache.caches);
 
+
   return (
     <>
       <Style.CacheContent>
@@ -33,7 +34,7 @@ function Map() {
       <LeafletMap width={1200}>
         {caches.map(({ id, lat, lon, description }) => {
           return (
-            <CacheMarker key={id} position={[lat, lon]} title={description} />
+            <CacheMarker key={id} position={[lat, lon]} title={description} cacheId={id}/>
           );
         })}
         <SettingsMapTracker
