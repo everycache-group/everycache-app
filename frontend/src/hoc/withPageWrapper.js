@@ -11,7 +11,7 @@ export const PageWrapper = styled.div`
   transition: padding-left 300ms ease-in-out;
   padding: 15px;
   padding-top: 93px;
-  padding-left: ${({ sidebar }) => (sidebar ? "265px" : "0")};
+  padding-left: ${({ sidebar }) => (sidebar ? "265px" : "15px")};
 `;
 
 const withPageWrapper =
