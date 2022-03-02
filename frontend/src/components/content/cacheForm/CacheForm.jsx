@@ -118,14 +118,15 @@ function CacheForm({ Cache, OnFormSubmit, ButtonName }) {
         </Style.MarkerLocationWrapper>
         {showMarker && (
           <CacheMarker
+            cacheId={Cache.id}
             position={[formValues.lat || 0, formValues.lon || 0]}
             draggable={true}
             eventHandlers={{
               dragend: (e) => {
-                const position = e.target.getLatLon();
+                const position = e.target.getLatLng();
                 setFormValues({
                   ...formValues,
-                  lon: position.lon,
+                  lon: position.lng,
                   lat: position.lat,
                 });
               },

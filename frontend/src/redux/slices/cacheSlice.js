@@ -122,7 +122,7 @@ export const updateCache = createAsyncThunk(
       });
 
       const { id, created_on, lon, lat, owner, name, description } =
-        response.data.result;
+        response.data.cache;
       const { username } = owner;
 
       const dataRow = createDataRow(

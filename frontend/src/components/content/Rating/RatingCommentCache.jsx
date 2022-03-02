@@ -92,7 +92,7 @@ function RatingCommentCache({ ButtonName }) {
               draggable={true}
               eventHandlers={{
                 dragend: (e) => {
-                  const position = e.target.getLatLon();
+                  const position = e.target.getLatLng();
                 },
               }}
             />
