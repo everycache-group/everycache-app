@@ -1,4 +1,4 @@
-"""add cache.rating
+"""Add cache.rating
 
 Revision ID: 3b01865de320
 Revises: a0ebc6df70c4
