@@ -31,7 +31,7 @@ function Map() {
         <CacheTable data={caches} hideOwner={false} />
       </Style.CacheContent>
 
-      <LeafletMap>
+      <LeafletMap showCommentList={true}>
         {caches.map(({ id, lat, lon, description }) => {
           return (
             <CacheMarker key={id} position={[lat, lon]} title={description} cacheId={id}/>

@@ -13,9 +13,6 @@ function AddCachePopup({ OnActionClose }) {
   const selectedCache = useSelector((state) => state.cache.selectedCache);
 
   useEffect(() => {
-    if (selectedCache) {
-        dispatch(clearSelection());
-    }
     if (trigger === false) {
       if (OnActionClose instanceof Function) {
         OnActionClose();

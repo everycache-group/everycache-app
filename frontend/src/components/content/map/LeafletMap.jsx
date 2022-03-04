@@ -36,7 +36,7 @@ const LeafletMap = (props) => {
 
         {props.children}
       </MapContainer>
-      <CommentList />
+      {props.showCommentList && <CommentList />}
     </Style.LeafletMapWrapper>
   );
 };
