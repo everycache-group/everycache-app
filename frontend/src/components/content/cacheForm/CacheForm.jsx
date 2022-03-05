@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import * as Style from "./style";
 import LeafletMap from "../map/LeafletMap";
 import useForm from "./../../../hooks/useForm";
@@ -16,6 +16,12 @@ function CacheForm({ Cache, OnFormSubmit, ButtonName }) {
   const { name, lon, lat, description } = Cache;
   const [showMarker, setShowMarker] = useState(!!(lon && lat));
   const [loading, setLoading] = useState(false);
+
+  const nameRef = useRef(null);
+
+  useEffect(() => {
+    nameRef.current.focus();
+  }, []);
 
   const handleLocationClick = (e) => {
     setFormValues({ ...formValues, lon: center[1], lat: center[0] });
@@ -56,6 +62,7 @@ function CacheForm({ Cache, OnFormSubmit, ButtonName }) {
             helperText={prepareErrors(errors.name)}
             placeholder="Enter Cache Name Here..."
             value={formValues.name}
+            inputRef={nameRef}
           />
           <Style.CacheCoordsWrapper>
             <TextField

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import * as Style from "./style";
 import TextField from "@mui/material/TextField";
 import LoadingButton from "@mui/lab/LoadingButton";
@@ -14,6 +14,12 @@ function Login() {
 
   const dispatch = useDispatch();
   const snackBar = useSnackbar();
+
+  const emailRef = useRef(null);
+
+  useEffect(() => {
+    emailRef.current.focus();
+  }, []);
 
   const { handleFormSubmit, handleUserInput, formValues, errors } = useForm(
     {
@@ -50,6 +56,7 @@ function Login() {
         type="email"
         name="email"
         label="Email"
+        inputRef={emailRef}
       />
       <TextField
         size="small"

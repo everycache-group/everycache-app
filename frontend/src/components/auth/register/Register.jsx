@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import * as Style from "./style";
 import TextField from "@mui/material/TextField";
 import LoadingButton from "@mui/lab/LoadingButton";
@@ -14,6 +14,12 @@ function Register() {
 
   const dispatch = useDispatch();
   const snackBar = useSnackbar();
+
+  const usernameRef = useRef(null);
+
+  useEffect(() => {
+    usernameRef.current.focus();
+  }, []);
 
   const { handleFormSubmit, handleUserInput, formValues, errors, setErrors } = useForm(
     {
@@ -58,6 +64,7 @@ function Register() {
           type="username"
           name="username"
           label="Username"
+          inputRef={usernameRef}
         />
         <TextField
           size="small"
