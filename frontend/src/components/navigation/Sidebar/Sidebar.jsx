@@ -1,5 +1,4 @@
 import * as Style from "./style.js";
-import { SideBarData } from "./../../../data/sidebarData";
 import React, { useState, useEffect } from "react";
 import * as FaIcons from "react-icons/fa";
 import * as AiIcons from "react-icons/ai";
@@ -17,6 +16,8 @@ function Sidebar(props) {
     dispatch(toggleSidebar(!sidebar));
   };
 
+  const {verified: isVerified, role: userRole} = useSelector((state) => state.user);
+
   return (
     <>
       <IconContext.Provider value={{ }}>
@@ -32,9 +33,29 @@ function Sidebar(props) {
             <Style.NavIcon to="#">
               <AiIcons.AiOutlineClose onClick={showSidebar} />
             </Style.NavIcon>
-            {SideBarData.map((item, index) => {
-              return <SubMenu item={item} key={index} />;
-            })}
+            <SubMenu item={{
+              title: "Home",
+              path: "/",
+              icon: <AiIcons.AiFillHome />,
+            }}/>
+
+            <SubMenu item={{
+              title: "Caches",
+              path: "/map",
+              icon: <FaIcons.FaMap />,
+            }}/>
+
+            <SubMenu item={{
+              title: "My Caches",
+              path: "/mymap",
+              icon: <FaIcons.FaMapMarkedAlt />,
+            }}/>
+
+            {(isVerified || userRole == "Admin") && <SubMenu item={{
+              title: "Users",
+              path: "/users",
+              icon: <FaIcons.FaUsers />,
+            }}/>}
           </Style.SidebarWrap>
         </Style.SidebarNav>
       </IconContext.Provider>

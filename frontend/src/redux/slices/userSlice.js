@@ -15,6 +15,7 @@ const initialState = {
   role: "",
   id: "",
   email: "",
+  verified: false,
   users: [],
   loading: false,
   selectedUser: null
@@ -183,6 +184,7 @@ const userSlice = createSlice({
         state.role = action.payload.role;
         state.email = action.payload.email;
         state.id = action.payload.id;
+        state.verified = action.payload.verified;
       }
 
       users.splice(index, 1, action.payload);
