@@ -115,7 +115,7 @@ function CacheForm({ Cache, OnFormSubmit, ButtonName }) {
           {ButtonName}
         </LoadingButton>
       </Style.CacheFormContent>
-      <LeafletMap width={500}>
+      <LeafletMap width={500} showCommentList={false}>
         <Style.MarkerLocationWrapper>
           <MdMyLocation
             onClick={handleLocationClick}
