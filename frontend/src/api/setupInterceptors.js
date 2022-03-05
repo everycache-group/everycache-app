@@ -27,8 +27,8 @@ const setup = (store) => {
     (response) => response,
     async (error) => {
       const originalConfig = error.config;
-
-      if (originalConfig.url !== config.resources.login && error.response) {
+      const loginEndpoint = `/${config.resources.login}`
+      if (originalConfig.url !== loginEndpoint && error.response) {
         if (error.response.status === 401 && !originalConfig._retry) {
           originalConfig._retry = true;
           try {
