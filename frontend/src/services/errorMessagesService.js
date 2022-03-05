@@ -16,7 +16,9 @@ export function prepareErrors(errors_field) {
       }
 
       export function alertGenericErrors(payload, snackBar) {
-        snackBar.enqueueSnackbar(payload?.message ?? "Unknown error.", {
-          variant: "error"
-        });
+        if (payload?.message !== undefined){
+          snackBar.enqueueSnackbar(payload?.message, {
+            variant: "error"
+          });
+        }
       }
