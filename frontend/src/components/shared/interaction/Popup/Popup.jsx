@@ -1,10 +1,23 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback} from "react";
 import * as Style from "./style";
 
 const Popup = ({ title, children, trigger, setTrigger }) => {
   const handlePopupClick = (e) => {
     e.stopPropagation();
   };
+
+  const handleESC = useCallback((event) => {
+    if (event.key === "Escape") {
+      setTrigger(false);
+    }
+  }, []);
+
+  useEffect(() => {
+      document.addEventListener("keydown", handleESC, false);
+      return () => {
+        document.removeEventListener("keydown", handleESC, false);
+      };
+  }, []);
 
   return trigger ? (
     <Style.Popup onClick={handlePopupClick}>
