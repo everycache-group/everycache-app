@@ -31,9 +31,9 @@ function MyMap() {
       </Style.CacheContent>
 
       <LeafletMap showCommentList={true}>
-        {caches.map(({ id, lat, lon, description }) => {
+        {caches.map(({ id, lat, lon, name, owner}) => {
           return (
-            <CacheMarker key={id} position={[lat, lon]} title={description} cacheId={id}/>
+            <CacheMarker key={id} position={[lat, lon]} title={name} owner={owner} cacheId={id}/>
           );
         })}
         <SettingsMapTracker
