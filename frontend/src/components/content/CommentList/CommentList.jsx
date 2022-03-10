@@ -5,9 +5,9 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import Divider from '@mui/material/Divider';
 import ListItemText from '@mui/material/ListItemText';
-import CommentsDisabledIcon from '@mui/icons-material/CommentsDisabled';
 import AddCommentIcon from '@mui/icons-material/AddComment';
 import Typography from '@mui/material/Typography';
+import { green } from '@mui/material/colors';
 import * as Style from "./style.js"
 import { useDispatch, useSelector } from "react-redux";
 import { getComments } from "../../../redux/slices/commentSlice"
@@ -145,12 +145,12 @@ export default function CommentList() {
         }
           {selectedCache && <Style.CommentMenuWrapper>
 
-            <Style.CommentIconAvatar style={{visibility: !open && "hidden"}} onClick={handleAddComment}>
+            <Style.CommentIconAvatar style={{visibility: !open && "hidden"}} sx={{ bgcolor: green[500] }} onClick={handleAddComment}>
               <AddCommentIcon />
             </Style.CommentIconAvatar>
-            <Style.CommentIconAvatar onClick={handleToggleOpen}>
+            <Style.CommentIconAvatar sx={{ bgcolor: "#222222"}} onClick={handleToggleOpen}>
               {!open &&<Style.ListCommentIcon/>}
-              {open &&<CommentsDisabledIcon/>}
+              {open &&<Style.ListCommentDisabledIcon/>}
             </Style.CommentIconAvatar>
 
           </Style.CommentMenuWrapper>}

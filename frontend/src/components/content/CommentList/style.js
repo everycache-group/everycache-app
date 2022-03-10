@@ -3,6 +3,7 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import Avatar from '@mui/material/Avatar';
 import CommentIcon from '@mui/icons-material/Comment';
+import CommentsDisabledIcon from '@mui/icons-material/CommentsDisabled';
 
 export const CommentListWrapper = styled.div`
   position: absolute;
@@ -45,9 +46,15 @@ export const CommentMenuWrapper = styled.div`
 export const ListCommentIcon = styled(CommentIcon)`
 `
 
+export const ListCommentDisabledIcon = styled(CommentsDisabledIcon)`
+
+`
+
 export const CommentIconAvatar = styled(Avatar)`
   pointer-events: initial;
   transition: 0.1s;
+  color: #222222;
+  bgcolor: #222222;
   :hover{
     transform: scale(1.1);
   }
