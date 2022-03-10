@@ -1,22 +1,61 @@
 import React from "react";
 import { Marker, Popup } from "react-leaflet";
 import L from "leaflet";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { selectRow } from "../../../redux/slices/cacheSlice";
 import { changeCenter } from "../../../redux/slices/mapSlice"
 
-const CacheMarker = ({ position, title, cacheId, ...props }) => {
+const CacheMarker = ({ position, title, cacheId, owner, visited, ...props }) => {
   const dispatch = useDispatch();
-  const icon = L.icon({
-    iconUrl: "/icons/active_marker.svg",
-    iconSize: [50, 115],
-    iconAnchor: [22, 94],
-    popupAnchor: [-3, -76],
-  });
+
+  const selectedCache = useSelector((state) => state.cache.selectedCache);
+  const currentUsername = useSelector((state) => state.user.username);
+
+  let icon = L.icon({
+      iconUrl: "/icons/disabled_marker.svg",
+      iconSize: [50, 115],
+    });
+
+  if (currentUsername == owner) {
+    icon = L.icon({
+      iconUrl: "/icons/user_marker.svg",
+      iconSize: [50, 115],
+    });
+  }
+
+  if (visited) {
+    icon = L.icon({
+      iconUrl: "/icons/visited_marker.svg",
+      iconSize: [50, 115],
+    });
+  }
+
+  if (selectedCache && selectedCache.id == cacheId) {
+    icon = L.icon({
+      iconUrl: "/icons/active_marker.svg",
+      iconSize: [50, 115],
+    });
+  }
+
+  if (selectedCache && selectedCache.id == cacheId && currentUsername == owner) {
+    icon = L.icon({
+      iconUrl: "/icons/active_user_marker.svg",
+      iconSize: [50, 115],
+    });
+  }
+
+  if (selectedCache && selectedCache.id == cacheId && visited) {
+    icon = L.icon({
+      iconUrl: "/icons/active_visited_marker.svg",
+      iconSize: [50, 115],
+    });
+  }
+
+
+
 
   const onOpen = () => {
     dispatch(selectRow(cacheId));
-    dispatch(changeCenter(position))
   }
 
   return (
@@ -25,9 +64,12 @@ const CacheMarker = ({ position, title, cacheId, ...props }) => {
       icon={icon}
       riseOnHover={true}
       zIndexOffset={10}
+      eventHandlers={{
+        click: onOpen
+      }}
       {...props}
     >
-      <Popup onOpen={onOpen}>
+      <Popup>
         <p>{title}</p>
       </Popup>
     </Marker>

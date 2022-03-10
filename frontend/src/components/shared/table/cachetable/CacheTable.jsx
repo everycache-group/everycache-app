@@ -18,7 +18,6 @@ function CacheTable({ title, data, hideOwner }) {
     const { row } = params;
     setSelectionModel([row.id]);
     dispatch(selectRow(row.id));
-    dispatch(changeCenter([row.lat, row.lon]))
   };
 
   const rowId = selectionModel[0];

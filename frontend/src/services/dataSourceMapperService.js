@@ -9,7 +9,8 @@ export function createDataRow(
   lat,
   owner,
   description,
-  creationDate
+  creationDate,
+  visited
 ) {
   return {
     id: cacheId,
@@ -19,6 +20,7 @@ export function createDataRow(
     lat,
     lon,
     creationDate,
+    visited
   };
 }
 
@@ -93,10 +95,11 @@ export const PrepareDataSourceTable = (cachesDto) => {
       owner: { username },
       name,
       description,
+      visited
     } = cache;
 
     dataSource.push(
-      createDataRow(id, name, lon, lat, username, description, created_on)
+      createDataRow(id, name, lon, lat, username, description, created_on, visited)
     );
   });
 
