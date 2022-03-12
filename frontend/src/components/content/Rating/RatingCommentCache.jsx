@@ -1,39 +1,74 @@
 import * as Style from "./style";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Rating from "@mui/material/Rating";
 import Box from "@mui/material/Box";
 import StarIcon from "@mui/icons-material/Star";
 import Popup from "../../shared/interaction/Popup/Popup";
-import LeafletMap from "../map/LeafletMap";
 import LoadingButton from "@mui/lab/LoadingButton";
 import SendIcon from "@mui/icons-material/Send";
-import SettingsMapTracker from "./../map/SettingsMapTracker";
 import CacheMarker from "./../cacheMarker/CacheMarker";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { addRating, updateRating } from "../../../redux/slices/userSlice";
+import { useSnackbar } from "notistack";
+import { alertGenericErrors } from "../../../services/errorMessagesService"
 
 const labels = {
-  0.5: "Useless",
-  1: "Useless+",
-  1.5: "Poor",
-  2: "Poor+",
-  2.5: "Ok",
-  3: "Ok+",
-  3.5: "Good",
-  4: "Good+",
-  4.5: "Excellent",
-  5: "Excellent+",
+  1: "Useless",
+  2: "Poor",
+  3: "Ok",
+  4: "Good",
+  5: "Excellent",
 };
 
-function RatingCommentCache({ ButtonName }) {
-  const { name, lon, lat, description } = Cache;
-  const [showMarker, setShowMarker] = useState(!!(lon && lat));
-
-  const [value, setValue] = useState(2);
+function RatingCommentCache({ ButtonName, OnActionClose, cacheId }) {
+  const userRatings = useSelector((state) => state.user.ratings);
+  const existingRating = userRatings.find(x => cacheId == x.cache_id);
+  const snackBar = useSnackbar();
+  const [value, setValue] = useState(existingRating?.rating ?? 2);
   const [hover, setHover] = useState(-1);
   const [trigger, setTrigger] = useState(true);
   const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
 
-  const { zoom, center } = useSelector((state) => state.map.settings);
+
+  const onVisitSubmit = () => {
+    if (existingRating){
+      dispatch(updateRating({visit_id: existingRating.id, rating: value ?? 0}))
+        .unwrap()
+        .then(() => {
+          snackBar.enqueueSnackbar("Cache Rating Updated Succesfully!", {
+            variant: "info",
+          });
+          setTrigger(false);
+          OnActionClose();
+        })
+        .catch((payload) => {
+          alertGenericErrors(payload, snackBar);
+        });
+    }
+    else{
+      dispatch(addRating({cache_id: cacheId, rating: value ?? 0}))
+        .unwrap()
+        .then(() => {
+          snackBar.enqueueSnackbar("Cache Rated Succesfully!", {
+            variant: "info",
+          });
+          setTrigger(false);
+          OnActionClose();
+        })
+        .catch((payload) => {
+          alertGenericErrors(payload, snackBar);
+        });
+    }
+  }
+
+  useEffect(() => {
+    if (trigger === false) {
+      if (OnActionClose instanceof Function) {
+        OnActionClose();
+      }
+    }
+  }, [trigger]);
 
   return (
     <Popup trigger={trigger} setTrigger={setTrigger}>
@@ -52,13 +87,11 @@ function RatingCommentCache({ ButtonName }) {
                 <Rating
                   name="hover-feedback"
                   value={value}
-                  precision={0.5}
                   onChange={(event, newValue) => {
                     setValue(newValue);
                   }}
                   onChangeActive={(event, newHover) => {
                     setHover(newHover);
-                    console.log("active change");
                   }}
                   emptyIcon={
                     <StarIcon style={{ opacity: 0.55 }} fontSize="inherit" />
@@ -74,31 +107,17 @@ function RatingCommentCache({ ButtonName }) {
           </Style.CacheInputWrapper>
 
           <LoadingButton
-            sx={{ width: 120 }}
-            onClick={() => {}}
+            onClick={onVisitSubmit}
             endIcon={<SendIcon />}
             loadingPosition="end"
             loading={loading}
             variant="contained"
             color="success"
+            type="submit"
           >
             {ButtonName}
           </LoadingButton>
         </Style.CacheFormContent>
-        <LeafletMap width={500}>
-          {showMarker && (
-            <CacheMarker
-              position={[1, 1]}
-              draggable={true}
-              eventHandlers={{
-                dragend: (e) => {
-                  const position = e.target.getLatLng();
-                },
-              }}
-            />
-          )}
-          <SettingsMapTracker zoom={zoom} center={center} />
-        </LeafletMap>
       </Style.CacheFormWrapper>
     </Popup>
   );

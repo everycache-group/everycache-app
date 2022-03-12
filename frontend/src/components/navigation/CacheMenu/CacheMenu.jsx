@@ -14,9 +14,15 @@ import RatingCommentCache from "../../content/Rating/RatingCommentCache";
 function CacheMenu({ personal }) {
   const [action, setAction] = useState("");
   const selectedCache = useSelector((state) => state.cache.selectedCache);
+  const currentUsername = useSelector((state) => state.user.username);
   const snackBar = useSnackbar();
 
   const OnClickHandler = (e) => {
+    if(!personal && selectedCache.owner == currentUsername){
+      snackBar.enqueueSnackbar("Can't visit own cache!", {variant: "error"});
+      return;
+    }
+
     let newAction = e.currentTarget.id;
     if (newAction === "add" || selectedCache){
       setAction(newAction);
@@ -64,7 +70,7 @@ function CacheMenu({ personal }) {
             <ReviewsIcon fontSize="medium" color="primary" />
           </Style.TransformIconButton>
           {action === "review" && (
-            <RatingCommentCache OnActionClose={OnActionClose} />
+            <RatingCommentCache OnActionClose={OnActionClose} ButtonName="Mark as visited" cacheId={selectedCache.id} />
           )}
         </div>
       )}

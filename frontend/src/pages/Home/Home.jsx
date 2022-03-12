@@ -7,7 +7,6 @@ import DeleteCachePopup from "./../../components/content/CachePopup/DeleteCacheP
 const Home = () => {
   return (
     <>
-      <RatingCommentCache />
       <p>Home Page Construction</p>
     </>
   );

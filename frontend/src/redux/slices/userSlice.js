@@ -18,7 +18,8 @@ const initialState = {
   verified: false,
   users: [],
   loading: false,
-  selectedUser: null
+  selectedUser: null,
+  ratings: {}
 };
 
 const user = new ResourceConnector(config.resources.user);
@@ -37,6 +38,56 @@ export const activateUser = createAsyncThunk(
     };
   }
 );
+
+
+export const getRatings = createAsyncThunk(
+  "user/getRatings",
+  async (_, {
+    rejectWithValue, getState
+  }) => {
+    try{
+      const userId = getState().user.id;
+      const response = axiosInstance.get(`/api/users/${userId}/visits`);
+      return Promise.resolve(response);
+    }
+    catch(e) {
+      console.log(e);
+      return rejectWithValue(prepareErrorPayload(e.response, "Could not get user ratings!"));
+    };
+  }
+);
+
+
+export const addRating = createAsyncThunk(
+  "user/addRating",
+  async ({ cache_id, rating }, { rejectWithValue }) => {
+    try {
+      const response = axiosInstance.post(`/api/caches/${cache_id}/visits`, {
+        rating: JSON.stringify(rating),
+      });
+
+      return Promise.resolve(response);
+    } catch (e) {
+      return rejectWithValue(prepareErrorPayload(e, "Could not rate given cache!"));
+    }
+  }
+);
+
+export const updateRating = createAsyncThunk(
+  "user/updateRating",
+  async ({ visit_id, rating }, { rejectWithValue }) => {
+    try {
+      const response = axiosInstance.put(`/api/cache_visits/${visit_id}`, {
+        rating: JSON.stringify(rating),
+      });
+
+      return Promise.resolve(response);
+    } catch (e) {
+      return rejectWithValue(prepareErrorPayload(e, "Could not change rating!"));
+    }
+  }
+);
+
 
 export const getUsers = createAsyncThunk(
   "user/getUsers",
@@ -200,7 +251,22 @@ const userSlice = createSlice({
       state.users = users;
       state.selectedUser = initialState.selectedUser;
     },
+    [getRatings.fulfilled]: (state, action) => {
+      state.ratings = action.payload.data.results;
+    },
+    [addRating.fulfilled]: (state, action) => {
+      state.ratings.push(action.payload.data.cache_visit);
+    },
+    [updateRating.fulfilled]: (state, action) => {
+      const cacheVisit = action.payload.data.cache_visit;
+      const index = state.ratings.findIndex(
+        (item) => item.id === cacheVisit.id
+      )
+      const newRatings = state.ratings.slice();
+      newRatings[index] = cacheVisit;
 
+      state.ratings = newRatings;
+    }
   },
 });
 
