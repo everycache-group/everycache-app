@@ -47,11 +47,10 @@ export const getRatings = createAsyncThunk(
   }) => {
     try{
       const userId = getState().user.id;
-      const response = axiosInstance.get(`/api/users/${userId}/visits`);
-      return Promise.resolve(response);
+      const response = await axiosInstance.get(`/api/users/${userId}/visits`);
+      return Promise.resolve(response.data);
     }
     catch(e) {
-      console.log(e);
       return rejectWithValue(prepareErrorPayload(e.response, "Could not get user ratings!"));
     };
   }
@@ -62,11 +61,11 @@ export const addRating = createAsyncThunk(
   "user/addRating",
   async ({ cache_id, rating }, { rejectWithValue }) => {
     try {
-      const response = axiosInstance.post(`/api/caches/${cache_id}/visits`, {
+      const response = await axiosInstance.post(`/api/caches/${cache_id}/visits`, {
         rating: JSON.stringify(rating),
       });
 
-      return Promise.resolve(response);
+      return Promise.resolve(response.data);
     } catch (e) {
       return rejectWithValue(prepareErrorPayload(e, "Could not rate given cache!"));
     }
@@ -77,11 +76,11 @@ export const updateRating = createAsyncThunk(
   "user/updateRating",
   async ({ visit_id, rating }, { rejectWithValue }) => {
     try {
-      const response = axiosInstance.put(`/api/cache_visits/${visit_id}`, {
+      const response = await axiosInstance.put(`/api/cache_visits/${visit_id}`, {
         rating: JSON.stringify(rating),
       });
 
-      return Promise.resolve(response);
+      return Promise.resolve(response.data);
     } catch (e) {
       return rejectWithValue(prepareErrorPayload(e, "Could not change rating!"));
     }
@@ -252,13 +251,13 @@ const userSlice = createSlice({
       state.selectedUser = initialState.selectedUser;
     },
     [getRatings.fulfilled]: (state, action) => {
-      state.ratings = action.payload.data.results;
+      state.ratings = action.payload.results;
     },
     [addRating.fulfilled]: (state, action) => {
-      state.ratings.push(action.payload.data.cache_visit);
+      state.ratings.push(action.payload.cache_visit);
     },
     [updateRating.fulfilled]: (state, action) => {
-      const cacheVisit = action.payload.data.cache_visit;
+      const cacheVisit = action.payload.cache_visit;
       const index = state.ratings.findIndex(
         (item) => item.id === cacheVisit.id
       )

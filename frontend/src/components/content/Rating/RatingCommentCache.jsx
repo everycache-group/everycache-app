@@ -20,11 +20,11 @@ const labels = {
   5: "Excellent",
 };
 
-function RatingCommentCache({ ButtonName, OnActionClose, cacheId }) {
+function RatingCommentCache({ OnActionClose, cacheId }) {
   const userRatings = useSelector((state) => state.user.ratings);
   const existingRating = userRatings.find(x => cacheId == x.cache_id);
   const snackBar = useSnackbar();
-  const [value, setValue] = useState(existingRating?.rating ?? 2);
+  const [value, setValue] = useState(existingRating?.rating || 3);
   const [hover, setHover] = useState(-1);
   const [trigger, setTrigger] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -69,6 +69,7 @@ function RatingCommentCache({ ButtonName, OnActionClose, cacheId }) {
       }
     }
   }, [trigger]);
+
 
   return (
     <Popup trigger={trigger} setTrigger={setTrigger}>
@@ -115,7 +116,7 @@ function RatingCommentCache({ ButtonName, OnActionClose, cacheId }) {
             color="success"
             type="submit"
           >
-            {ButtonName}
+            {(!!existingRating && existingRating.rating > 0) ? "Update rating" : "Mark as Visited"}
           </LoadingButton>
         </Style.CacheFormContent>
       </Style.CacheFormWrapper>
