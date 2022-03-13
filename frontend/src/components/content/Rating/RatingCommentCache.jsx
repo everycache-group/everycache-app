@@ -37,7 +37,7 @@ function RatingCommentCache({ ButtonName, OnActionClose, cacheId }) {
         .unwrap()
         .then(() => {
           snackBar.enqueueSnackbar("Cache Rating Updated Succesfully!", {
-            variant: "info",
+            variant: "success",
           });
           setTrigger(false);
           OnActionClose();
@@ -51,7 +51,7 @@ function RatingCommentCache({ ButtonName, OnActionClose, cacheId }) {
         .unwrap()
         .then(() => {
           snackBar.enqueueSnackbar("Cache Rated Succesfully!", {
-            variant: "info",
+            variant: "success",
           });
           setTrigger(false);
           OnActionClose();

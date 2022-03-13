@@ -36,8 +36,8 @@ function EditCachePopup({ OnActionClose }) {
     dispatch(updateCache(updateCacheDto))
       .unwrap()
       .then(() => {
-        snackBar.enqueueSnackbar("Cache Updated Succesfully!,", {
-          variant: "info",
+        snackBar.enqueueSnackbar("Cache Updated Succesfully!", {
+          variant: "success",
         });
         setTrigger(false);
         OnActionClose();
