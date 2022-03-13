@@ -2,6 +2,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import EditIcon from "@mui/icons-material/Edit";
 import React, { useState } from "react";
+import { getCaches } from "../../../redux/slices/cacheSlice";
 import { useSelector, useDispatch } from "react-redux";
 import { useSnackbar } from "notistack";
 import * as Style from "./style";
@@ -14,9 +15,16 @@ import RatingCommentCache from "../../content/Rating/RatingCommentCache";
 function CacheMenu({ personal }) {
   const [action, setAction] = useState("");
   const selectedCache = useSelector((state) => state.cache.selectedCache);
+  const currentUsername = useSelector((state) => state.user.username);
   const snackBar = useSnackbar();
+  const dispatch = useDispatch();
 
   const OnClickHandler = (e) => {
+    if(!personal && selectedCache.owner == currentUsername){
+      snackBar.enqueueSnackbar("Can't visit own cache!", {variant: "error"});
+      return;
+    }
+
     let newAction = e.currentTarget.id;
     if (newAction === "add" || selectedCache){
       setAction(newAction);
@@ -26,6 +34,9 @@ function CacheMenu({ personal }) {
   };
 
   const OnActionClose = () => {
+    if (action == "review") {
+      dispatch(getCaches());
+    }
     setAction("");
   };
 
@@ -64,7 +75,7 @@ function CacheMenu({ personal }) {
             <ReviewsIcon fontSize="medium" color="primary" />
           </Style.TransformIconButton>
           {action === "review" && (
-            <RatingCommentCache OnActionClose={OnActionClose} />
+            <RatingCommentCache OnActionClose={OnActionClose} ButtonName="Mark as visited" cacheId={selectedCache.id} />
           )}
         </div>
       )}

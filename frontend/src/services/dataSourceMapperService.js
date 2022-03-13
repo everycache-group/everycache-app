@@ -10,7 +10,8 @@ export function createDataRow(
   owner,
   description,
   creationDate,
-  visited
+  visited,
+  rating
 ) {
   return {
     id: cacheId,
@@ -20,7 +21,8 @@ export function createDataRow(
     lat,
     lon,
     creationDate,
-    visited
+    visited,
+    rating
   };
 }
 
@@ -60,6 +62,7 @@ export function PrepareCacheColumns(myCache = false) {
         return `${date.toLocaleString()}`;
       },
     },
+    { field: "rating", headerName: "Rating", width: 80, type: "number" },
   ];
   return coulmns;
 }
@@ -95,11 +98,12 @@ export const PrepareDataSourceTable = (cachesDto) => {
       owner: { username },
       name,
       description,
-      visited
+      visited,
+      rating
     } = cache;
 
     dataSource.push(
-      createDataRow(id, name, lon, lat, username, description, created_on, visited)
+      createDataRow(id, name, lon, lat, username, description, created_on, visited, rating)
     );
   });
 

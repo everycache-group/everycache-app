@@ -24,7 +24,6 @@ function EditCachePopup({ OnActionClose }) {
   }, [trigger]);
 
   const OnFormSubmitHandler = (formData, setErrors) => {
-    console.log(selectedCache.id);
     const updateCacheDto = {
       id: selectedCache.id,
       description: formData.description,
@@ -36,8 +35,8 @@ function EditCachePopup({ OnActionClose }) {
     dispatch(updateCache(updateCacheDto))
       .unwrap()
       .then(() => {
-        snackBar.enqueueSnackbar("Cache Updated Succesfully!,", {
-          variant: "info",
+        snackBar.enqueueSnackbar("Cache Updated Succesfully!", {
+          variant: "success",
         });
         setTrigger(false);
         OnActionClose();

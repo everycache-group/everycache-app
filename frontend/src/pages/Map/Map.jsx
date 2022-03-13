@@ -5,6 +5,7 @@ import SettingsMapTracker from "../../components/content/map/SettingsMapTracker"
 import { useSelector, useDispatch } from "react-redux";
 import withPageWrapper from "../../hoc/withPageWrapper";
 import { getCaches } from "../../redux/slices/cacheSlice";
+import { getRatings } from "../../redux/slices/userSlice";
 import CacheMarker from "../../components/content/cacheMarker/CacheMarker";
 import CacheTable from "../../components/shared/table/cachetable/CacheTable";
 import * as Style from "./style";
@@ -17,6 +18,7 @@ function Map() {
 
   useEffect(() => {
     dispatch(getCaches());
+    dispatch(getRatings());
   }, []);
 
   const caches = useSelector((state) => state.cache.caches);
@@ -34,7 +36,7 @@ function Map() {
       <LeafletMap showCommentList={true}>
         {caches.map(({ id, lat, lon, name, owner, visited}) => {
           return (
-            <CacheMarker key={id} position={[lat, lon]} title={name} owner={owner} visited={visited} cacheId={id}/>
+            <CacheMarker key={id} position={[lat, lon]} title={name} owner={owner} cacheId={id}/>
           );
         })}
         <SettingsMapTracker

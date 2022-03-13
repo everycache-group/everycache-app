@@ -5,11 +5,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { selectRow } from "../../../redux/slices/cacheSlice";
 import { changeCenter } from "../../../redux/slices/mapSlice"
 
-const CacheMarker = ({ position, title, cacheId, owner, visited, ...props }) => {
+const CacheMarker = ({ position, title, cacheId, owner, ...props }) => {
   const dispatch = useDispatch();
 
   const selectedCache = useSelector((state) => state.cache.selectedCache);
   const currentUsername = useSelector((state) => state.user.username);
+  const userRatings = useSelector((state) => state.user.ratings);
+  const existingRating = userRatings.find(x => x.cache_id == cacheId);
+  const visited = !!existingRating && existingRating.rating > 0;
 
   let icon = L.icon({
       iconUrl: "/icons/disabled_marker.svg",

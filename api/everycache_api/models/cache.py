@@ -22,7 +22,9 @@ class Cache(BaseMixin, db.Model):
 
     @aggregated("visits", db.Column(db.Float))
     def rating(self):
-        return cast(func.sum(CacheVisit.rating), Float) / func.count(CacheVisit.id_)
+        sum = func.sum(CacheVisit.rating).filter(CacheVisit.deleted == False)
+        count = func.count(CacheVisit.id_).filter(CacheVisit.deleted == False)
+        return cast(sum, Float) / count
 
     # foreign keys
     owner_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)

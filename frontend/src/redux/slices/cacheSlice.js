@@ -8,20 +8,6 @@ import { prepareErrorPayload } from "../../services/errorMessagesService";
 
 const cache = new ResourceConnector(config.resources.cache);
 
-export const AddRating = createAsyncThunk(
-  "cache/addrating",
-  async ({ id, rating }, thunkApi) => {
-    try {
-      const response = axiosInstance.post(`/api/caches/${id}/visits`, {
-        rating: JSON.stringify(rating),
-      });
-
-      return Promise.resolve();
-    } catch (_error) {
-      return Promise.reject();
-    }
-  }
-);
 
 export const getCaches = createAsyncThunk(
   "cache/getCaches",
