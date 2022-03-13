@@ -12,7 +12,7 @@ const CacheMarker = ({ position, title, cacheId, owner, ...props }) => {
   const currentUsername = useSelector((state) => state.user.username);
   const userRatings = useSelector((state) => state.user.ratings);
   const existingRating = userRatings.find(x => x.cache_id == cacheId);
-  const visited = !!existingRating;
+  const visited = !!existingRating && existingRating.rating > 0;
 
   let icon = L.icon({
       iconUrl: "/icons/disabled_marker.svg",

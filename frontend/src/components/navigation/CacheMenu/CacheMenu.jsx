@@ -2,6 +2,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import EditIcon from "@mui/icons-material/Edit";
 import React, { useState } from "react";
+import { getCaches } from "../../../redux/slices/cacheSlice";
 import { useSelector, useDispatch } from "react-redux";
 import { useSnackbar } from "notistack";
 import * as Style from "./style";
@@ -16,6 +17,7 @@ function CacheMenu({ personal }) {
   const selectedCache = useSelector((state) => state.cache.selectedCache);
   const currentUsername = useSelector((state) => state.user.username);
   const snackBar = useSnackbar();
+  const dispatch = useDispatch();
 
   const OnClickHandler = (e) => {
     if(!personal && selectedCache.owner == currentUsername){
@@ -32,6 +34,9 @@ function CacheMenu({ personal }) {
   };
 
   const OnActionClose = () => {
+    if (action == "review") {
+      dispatch(getCaches());
+    }
     setAction("");
   };
 
