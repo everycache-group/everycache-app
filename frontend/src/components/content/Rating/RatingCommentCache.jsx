@@ -8,7 +8,7 @@ import LoadingButton from "@mui/lab/LoadingButton";
 import SendIcon from "@mui/icons-material/Send";
 import CacheMarker from "./../cacheMarker/CacheMarker";
 import { useSelector, useDispatch } from "react-redux";
-import { addRating, updateRating } from "../../../redux/slices/userSlice";
+import { addRating, updateRating, deleteRating } from "../../../redux/slices/userSlice";
 import { useSnackbar } from "notistack";
 import { alertGenericErrors } from "../../../services/errorMessagesService"
 
@@ -33,20 +33,41 @@ function RatingCommentCache({ OnActionClose, cacheId }) {
 
   const onVisitSubmit = () => {
     if (existingRating){
-      dispatch(updateRating({visit_id: existingRating.id, rating: value ?? 0}))
-        .unwrap()
-        .then(() => {
-          snackBar.enqueueSnackbar("Cache Rating Updated Succesfully!", {
-            variant: "success",
+      if (value ?? 0) {
+        dispatch(updateRating({visit_id: existingRating.id, rating: value}))
+          .unwrap()
+          .then(() => {
+            snackBar.enqueueSnackbar("Cache Rating Updated Succesfully!", {
+              variant: "success",
+            });
+            setTrigger(false);
+            OnActionClose();
+          })
+          .catch((payload) => {
+            alertGenericErrors(payload, snackBar);
           });
-          setTrigger(false);
-          OnActionClose();
-        })
-        .catch((payload) => {
-          alertGenericErrors(payload, snackBar);
-        });
+      } else {
+        dispatch(deleteRating({visit_id: existingRating.id}))
+          .unwrap()
+          .then(() => {
+            snackBar.enqueueSnackbar("Cache Rating Deleted Succesfully!", {
+              variant: "success",
+            });
+            setTrigger(false);
+            OnActionClose();
+          })
+          .catch((payload) => {
+            alertGenericErrors(payload, snackBar);
+          });
+      }
     }
     else{
+      if(!value) {
+          snackBar.enqueueSnackbar("Can't add the visit with an empty rating!", {
+            variant: "error",
+          });
+          return;
+      }
       dispatch(addRating({cache_id: cacheId, rating: value ?? 0}))
         .unwrap()
         .then(() => {

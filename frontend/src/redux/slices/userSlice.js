@@ -88,6 +88,20 @@ export const updateRating = createAsyncThunk(
 );
 
 
+export const deleteRating = createAsyncThunk(
+  "user/deleteRating",
+  async ({ visit_id }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.delete(`/api/cache_visits/${visit_id}`);
+
+      return Promise.resolve(visit_id);
+    } catch (e) {
+      return rejectWithValue(prepareErrorPayload(e, "Could not delete rating!"));
+    }
+  }
+);
+
+
 export const getUsers = createAsyncThunk(
   "user/getUsers",
   async (_, {
@@ -263,6 +277,16 @@ const userSlice = createSlice({
       )
       const newRatings = state.ratings.slice();
       newRatings[index] = cacheVisit;
+
+      state.ratings = newRatings;
+    },
+    [deleteRating.fulfilled]: (state, action) => {
+      const cacheVisitId = action.payload;
+      const index = state.ratings.findIndex(
+        (item) => item.id === cacheVisitId
+      )
+      const newRatings = state.ratings.slice();
+      newRatings.splice(index, 1);
 
       state.ratings = newRatings;
     }
