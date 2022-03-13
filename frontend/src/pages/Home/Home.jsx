@@ -5,22 +5,18 @@ import * as Style from "./style.js";
 
 const Home = () => {
   return (
-    <div>
-      <h2>Welcome on Gocache App!</h2>
-      <img src="/images/HomeImage.jpg" />
-      <p>
-        Lorem, ipsum dolor sit amet consectetur adipisicing elit. Possimus
-        incidunt, ex praesentium explicabo quaerat blanditiis, porro quae nobis
-        expedita maiores qui laborum non rem. Magnam laudantium quidem eveniet
-        rerum dignissimos! Lorem ipsum dolor sit, amet consectetur adipisicing
-        elit. Placeat inventore veniam suscipit molestiae fugit esse ea ullam
-        modi dolore sequi deleniti animi distinctio iusto, vitae, non, iste
-        blanditiis asperiores maxime? Lorem ipsum dolor sit, amet consectetur
-        adipisicing elit. Quae sequi distinctio eaque? Quidem in similique
-        facere inventore hic, iste a numquam nihil non porro quas quod saepe est
-        at sequi!
-      </p>
-    </div>
+    <Style.HomeContainer>
+      <Style.Header>Welcome on Gocache App!</Style.Header>
+      <Style.HomeContent>
+        <Style.CacheImage src="/images/HomeImage.jpg" />
+        <Style.WelcomeText>
+          Geocaching is a real-world, outdoor adventure that is happening all
+          the time, all around the world. To play, participants use the
+          Geocaching app and/or a GPS device to navigate to cleverly hidden
+          containers called geocaches.
+        </Style.WelcomeText>
+      </Style.HomeContent>
+    </Style.HomeContainer>
   );
 };
 
