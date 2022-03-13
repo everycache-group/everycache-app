@@ -23,7 +23,6 @@ const UserBar = () => {
   const open = Boolean(anchorEl);
   const dispatch = useDispatch();
 
-
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -34,16 +33,24 @@ const UserBar = () => {
   const editUserSettings = () => {
     dispatch(selectSelf());
     setEditUserPopup(true);
-  }
+  };
 
   const logoutCommand = useCommand(commands.logout);
   const username = useSelector((state) => state.user.username);
 
   return (
     <>
-      {editUserPopup && <EditUserPopup OnActionClose={()=>{setEditUserPopup(false)}} />}
+      {editUserPopup && (
+        <EditUserPopup
+          OnActionClose={() => {
+            setEditUserPopup(false);
+          }}
+        />
+      )}
       <Style.UserBarWrapper>
-        <Box sx={{ display: "flex", alignItems: "center", textAlign: "center" }}>
+        <Box
+          sx={{ display: "flex", alignItems: "center", textAlign: "center" }}
+        >
           <Tooltip title="Account settings">
             <IconButton onClick={handleClick} size="small" sx={{ ml: 2 }}>
               <Avatar sx={{ width: 32, height: 32 }}>M</Avatar>
@@ -89,12 +96,7 @@ const UserBar = () => {
             <Typography>{username}</Typography>
           </MenuItem>
           <Divider />
-          <MenuItem>
-            <ListItemIcon>
-              <PersonAdd fontSize="small" />
-            </ListItemIcon>
-            Add another account
-          </MenuItem>
+
           <MenuItem>
             <ListItemIcon>
               <Settings fontSize="small" />
