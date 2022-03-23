@@ -1,10 +1,4 @@
 {
-  "connection": {
-    "protocol": "http",
-    "machine": "localhost",
-    "port": "5000"
-  },
-
   "resources": {
     "cache": "api/caches",
     "user": "api/users",

@@ -25,6 +25,16 @@ const createEndpoint = (resource, id = null) =>
   id ? `/${resource}/${id}` : `/${resource}`;
 
 function getBaseUrl() {
-  const { protocol, machine, port } = config.connection;
-  return `${protocol}://${machine}:${port}`;
+  const {
+    REACT_APP_BACKEND_API_SCHEME: scheme,
+    REACT_APP_BACKEND_API_HOST: host,
+    REACT_APP_BACKEND_API_PORT: port
+  } = process.env;
+
+  const url = `${scheme ?? "http"}://${host ?? "localhost"}`;
+  if (port !== undefined || host === "localhost"){
+    url += `:${port ?? 5000}`;
+  }
+  
+  return url;
 }
